@@ -10,6 +10,11 @@
 ;; specified in the argument of main function.
 (defparameter *outdir* "output/")
 
+;; <style>エレメントをcssファイルに書き出し．
+;; idデータベース（idをキー，章番号を値とするハッシュテーブル）構築
+;; 章ごとにファイルの書き出し．
+;; 章ごとに<a href="#"で始まるリンクのsect1外への参照をファイル名付きに書き換える．
+;; 章内にfootnoteへの参照がなければ章末のfootnoteを削除する．
 (defun main (filename &optional outdir)
   (let* ((doc (new-dom filename))
          (out (if (null outdir) *outdir* outdir))
@@ -30,20 +35,14 @@
 
 ;; private
 (defun process-css (root-node)
-  "Writes out the style elements to style0.css, style1.css and so on and inserts the link to the css file."
-  (let* ((style (lquery:$ root-node "style"))
-         (texts (lquery-funcs:contents style))
-         (len (fill-pointer style))) ; nodes are in a vector with fill-pointer
-    (labels ((%print-style (index)
-               (if (= len index) nil
-                   (let ((fname (format nil "style~a.css" index))
-                         (node (aref style index))
-                         (css  (lquery-funcs:text (aref texts index))))
-                     ;; unless text, the html entities will be escaped as &gt;
-                     (print-text css (make-path fname))
-                     (lquery-funcs:replace-with node (make-css-link fname))
-                     (%print-style (1+ index))))))
-      (%print-style 0))))
+  (loop with styles = (lquery:$ root-node "style")
+     and fname = nil
+     for node across styles
+     for i = 0 then (1+ i)
+     do
+       (setf fname (format nil "style~a.css" i))
+       (print-text (lquery-funcs:text node))
+       (lquery-funcs:replace-with node (make-css-link fname))))
 
 ;; private
 (defun make-css-link (filename)
@@ -75,13 +74,8 @@
   "Returns the pathname prefixed with the output directory."
     (concatenate 'string *outdir* filename))
 
-       
-;; idデータベース（idをキー，章番号を値とするハッシュテーブル）構築
-;; 章ごとにファイルの書き出し．
-;; 章ごとに<a href="#"で始まるリンクのsect1外への参照をファイル名付きに書き換える．
-;; 章内にfootnoteへの参照がなければ章末のfootnoteを削除する．
-
 (defun create-id-database (doc)
+  "Returns the hashtable of (key, val)=(id, chap-num)."
   (loop with ht = (make-hash-table :test #'equal)
      for ch across (get-chapters doc)
      for n = 0 then (1+ n)
@@ -132,14 +126,12 @@
                               (if (zerop num)
                                   (format nil "index.html~a" url)
                                   (format nil "chap~a.html~a" num url)))))))
-
 ;;;;; How to rewrite href link
 ;; (let* ((doc (lquery:parse-html
 ;;              "<html><a href='http://dummy.com'>Dummy</a></html>"))
 ;;        (a (lquery:$ doc "a")))
 ;;   (lquery-funcs:attr a :href "#abc")
 ;;   (lquery-funcs:serialize doc *standard-output*))
-
 
 
 (defun get-node-with-id (node ele-name id)
@@ -162,14 +154,10 @@
                                    "sect1")))))
 
 (defun get-links (node)
-  "Returns the vector of the hrefs under the given node.  Only the hrefs starting with # pointing to inside of the document are returned."
+  "Returns the vector of anchors <a> under the given node.  Only the anchors whose href is starting with # pointing to inside of the document are returned."
   (lquery:$ node "a"
             (filter (lambda (ele)
                       (string= #\# (char (lquery-funcs:attr ele "href") 0))))))
-
-;   (lquery:$ node "a" (attr "href")
-;             (filter (lambda (ele)
-;                       (string= #\# (char ele 0))))))
     
 (defun get-ids (node &optional res)
   "Returns the list of all the ids under the given node."
