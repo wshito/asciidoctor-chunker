@@ -25,7 +25,6 @@
     (process-chapters filename
                       (fill-pointer (get-chapters doc))
                       (create-id-database doc))))
-;    (print-node doc (make-path "index.html"))))
 
 ;; private
 (defun new-dom (filename)
@@ -41,7 +40,7 @@
      for i = 0 then (1+ i)
      do
        (setf fname (format nil "style~a.css" i))
-       (print-text (lquery-funcs:text node))
+       (print-text (lquery-funcs:text node) fname)
        (lquery-funcs:replace-with node (make-css-link fname))))
 
 ;; private
@@ -72,7 +71,7 @@
 ;; private
 (defun make-path (filename)
   "Returns the pathname prefixed with the output directory."
-    (concatenate 'string *outdir* filename))
+  (concatenate 'string *outdir* filename))
 
 (defun create-id-database (doc)
   "Returns the hashtable of (key, val)=(id, chap-num)."
@@ -105,6 +104,7 @@
     (lquery-funcs:remove rems "div") ; remove all the chapters
     (lquery-funcs:append (get-chap-container doc) chap-node) ; append this chap
     (rewrite-links (get-links doc) num ids)
+    (remove-footnotes doc num ids)
     (print-node doc fname)))
 
 ;;;;; How to append a child node
@@ -112,6 +112,38 @@
 ;;       (child (lquery:parse-html "<p>child node</p>")))
 ;;   (lquery-funcs:append container child)
 ;;   (lquery-funcs:serialize container *standard-output*))
+
+(defun remove-footnotes (doc chap-num ids)
+  "Removes the footnotes at the bottom of the page if the referer is not in this page."
+  (let* ((fnotes (get-footnotes doc))
+         (len (fill-pointer fnotes))
+         (rems (get-removing-footnotes fnotes chap-num ids))
+         (rem-len (fill-pointer rems)))
+    (if (= len rem-len)
+        (lquery-funcs:remove (get-node-with-id doc "div" "footnotes"))
+        (when (> rem-len 0) (lquery-funcs:remove rems)))))
+
+;; fnotes: the vector of <div class="footnote" id="_footnote_xx"> nodes.
+;; ids: the hashtable of (key, val)=(id, chap-num)
+(defun get-removing-footnotes (fnotes chap-num ids)
+  "Returns the footnote nodes that does not belong the the chapter."
+  (lquery:$ fnotes
+            (filter (lambda (ele)
+                      (let ((href (aref (lquery:$ ele "a" (attr "href")) 0)))
+                        (or
+                         ;; Refering other pages such as
+                         ;;   chap1.html#_footnoteref1_
+                         (not (equal #\# (char href 0)))
+                         ;; the rest is not used if links are properly
+                         ;; re-written 
+                         (not (= chap-num
+                                 (gethash (subseq href 1) ids)))))))))
+
+(defun get-footnotes (node)
+  "Returns the vector of <div class='footnote' id='_foonote_xx'> that contains the anchor to the referer."
+  (lquery:$ node "div" (filter (lambda (ele)
+                                 (equal (lquery-funcs:attr ele "class")
+                                        "footnote")))))
 
 (defun rewrite-links (nodes chap-num ids)
   "Re-write the links that points outside of the chapter."
@@ -167,6 +199,7 @@
         (if id (cons id res) res)
         (%get-ids2 chlds res))))
 
+;; TODO without append
 (defun %get-ids2 (nodes res)
   (if (= (fill-pointer nodes) 0) res
       (append (get-ids (vector-pop nodes) res)
