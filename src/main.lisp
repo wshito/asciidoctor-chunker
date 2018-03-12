@@ -1,6 +1,6 @@
 (in-package :cl-user)
 
-(defpackage :adoc-chunker
+(defpackage :asciidoc-chunker
   (:use :cl)
   (:export :main))
 
@@ -10,11 +10,13 @@
 ;; specified in the argument of main function.
 (defparameter *outdir* "output/")
 
-;; <style>エレメントをcssファイルに書き出し．
-;; idデータベース（idをキー，章番号を値とするハッシュテーブル）構築
-;; 章ごとにファイルの書き出し．
-;; 章ごとに<a href="#"で始まるリンクのsect1外への参照をファイル名付きに書き換える．
-;; 章内にfootnoteへの参照がなければ章末のfootnoteを削除する．
+;; 1. setup (new dom and output directory)
+:; 2. Write out <style> elements to css files.
+;; 3. Create a hastable of id (key) and chapter number (value).
+;; 4. Write out each chapter
+;;    (1) Re-write the links that starts with <a href="#" and
+;;        referring outside of the current chapter (sect1).
+;;    (2) Delete footnotes if there are no referer in the current chapter.
 (defun main (filename &optional outdir)
   (let* ((doc (new-dom filename))
          (out (if (null outdir) *outdir* outdir))
@@ -40,7 +42,7 @@
      for i = 0 then (1+ i)
      do
        (setf fname (format nil "style~a.css" i))
-       (print-text (lquery-funcs:text node) fname)
+       (print-text (lquery-funcs:text node) (make-path fname))
        (lquery-funcs:replace-with node (make-css-link fname))))
 
 ;; private
@@ -189,7 +191,8 @@
   "Returns the vector of anchors <a> under the given node.  Only the anchors whose href is starting with # pointing to inside of the document are returned."
   (lquery:$ node "a"
             (filter (lambda (ele)
-                      (string= #\# (char (lquery-funcs:attr ele "href") 0))))))
+                      (string= #\#
+                               (char (lquery-funcs:attr ele "href") 0))))))
     
 (defun get-ids (node &optional res)
   "Returns the list of all the ids under the given node."
@@ -207,6 +210,5 @@
             
 
 
-(defparameter *adoc* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
-(defparameter *test* (asdf:system-relative-pathname :lquery "test.html"))
-(main *adoc*)
+; (defparameter *adoc* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
+; (main *adoc*)
