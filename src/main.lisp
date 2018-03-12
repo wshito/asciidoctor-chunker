@@ -4,14 +4,14 @@
   (:use :cl)
   (:export :main))
 
-(in-package :adoc-chunker)
+(in-package :asciidoc-chunker)
 
 ;; Default output directory.  This is overwritten if outdir is
 ;; specified in the argument of main function.
-(defparameter *outdir* "output/")
+(defparameter *outdir* "html_chunks/")
 
 ;; 1. setup (new dom and output directory)
-:; 2. Write out <style> elements to css files.
+;; 2. Write out <style> elements to css files.
 ;; 3. Create a hastable of id (key) and chapter number (value).
 ;; 4. Write out each chapter
 ;;    (1) Re-write the links that starts with <a href="#" and
@@ -207,8 +207,6 @@
   (if (= (fill-pointer nodes) 0) res
       (append (get-ids (vector-pop nodes) res)
               (%get-ids2 nodes nil))))
-            
-
 
 ; (defparameter *adoc* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
 ; (main *adoc*)
