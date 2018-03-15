@@ -196,17 +196,18 @@
     
 (defun get-ids (node &optional res)
   "Returns the list of all the ids under the given node."
-  (let* ((id (lquery-funcs:attr node "id"))
-         (chlds (lquery:$ node (children))))
-    (if (= (fill-pointer chlds) 0)
-        (if id (cons id res) res)
-        (%get-ids2 chlds res))))
+  (if (null node) res
+      (let* ((id (lquery-funcs:attr node "id"))
+             (chlds (lquery:$ node (children)))
+             (res2 (if id (cons id res) res)))
+        (if (= (fill-pointer chlds) 0) res2 ; no children
+            (append res2                    ; with children
+                    (loop for child across chlds
+                       append
+                         (get-ids child)))))))
 
-;; TODO without append
-(defun %get-ids2 (nodes res)
-  (if (= (fill-pointer nodes) 0) res
-      (append (get-ids (vector-pop nodes) res)
-              (%get-ids2 nodes nil))))
+;; test for get-ids
+; (get-ids (aref (get-chapters (new-dom *adoc*)) 4))
 
 ; (defparameter *adoc* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
 ; (main *adoc*)
