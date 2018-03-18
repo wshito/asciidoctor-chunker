@@ -21,20 +21,28 @@
   (let* ((doc (new-dom filename))
          (out (if (null outdir) *outdir* outdir))
          (*outdir* (if (alexandria:ends-with-subseq "/" out) out
-                       (concatenate 'string out "/"))))
+                       (concatenate 'string out "/")))
+         (srcdir (uiop/pathname:pathname-directory-pathname filename)))
     (ensure-directories-exist *outdir*)
     (process-css doc)
+    (copy-images doc srcdir)
     (process-chapters filename
                       (fill-pointer (get-chapters doc))
                       (create-id-database doc))))
 
-;; private
+;;; ==========================================
+;;;         Initialization Process
+;;; ==========================================
+
 (defun new-dom (filename)
   "Returns the DOM root of the given file."
   (with-open-file (stream filename :direction :input)
     (lquery:$ (initialize stream))))
 
-;; private
+;;; ==========================================
+;;;         CSS extraction
+;;; ==========================================
+
 (defun process-css (root-node)
   (loop with styles = (lquery:$ root-node "style")
      and fname = nil
@@ -49,31 +57,34 @@
 (defun make-css-link (filename)
   (format nil "<link rel='stylesheet' href='~a' type='text/css' />" filename))
 
-;; private
-(defun print-node (node &optional filename)
-  "Prints a node to either standard output for to the file."
-  (if (null filename)
-      (lquery-funcs:serialize node *standard-output*)
-      (with-open-file (stream
-                       filename
-                       :direction :output
-                       :if-exists :supersede)
-        (lquery-funcs:serialize node stream))))
 
-(defun print-text (str &optional filename)
-  "Prints strings to either standard output for to the file."
-  (if (null filename)
-      (format *standard-output* "~a" str)
-      (with-open-file (stream
-                       filename
-                       :direction :output
-                       :if-exists :supersede)
-        (format stream "~a" str))))
+;;; ===================================================
+;;;        Copying Images
+;;; ===================================================
 
-;; private
-(defun make-path (filename)
-  "Returns the pathname prefixed with the output directory."
-  (concatenate 'string *outdir* filename))
+(defun copy-images (doc index-dir)
+  "Copy only the newer image files than the destination."
+  (mapcar (lambda (x)
+            (let* ((dest (make-path x)) ; path to the output dir
+                   (src-path (concatenate 'string
+                                          (namestring index-dir) x)))
+              (ensure-directories-exist dest)
+              (if (> (file-write-date src-path)
+                     (if (uiop/filesystem:file-exists-p dest)
+                         (file-write-date dest) 0))
+                  (cl-fad:copy-file src-path dest)))) ; copy to the dest
+          (get-local-images doc)))
+
+(defun get-local-images (node)
+  "Returns a list of paths of local images.  The path is relative to the document root adoc file."
+  (let ((imgs (lquery:$ node "img" (attr "src"))))
+    (loop for path across imgs
+       when (uiop/pathname:relative-pathname-p path)
+       collect path)))
+
+;;; ==========================================
+;;;       Chapter extraction
+;;; ==========================================
 
 (defun create-id-database (doc)
   "Returns the hashtable of (key, val)=(id, chap-num)."
@@ -168,12 +179,6 @@
 ;;   (lquery-funcs:serialize doc *standard-output*))
 
 
-(defun get-node-with-id (node ele-name id)
-  "Returns a vector of a node with the element name and id."
-  (lquery:$ node ele-name
-            (filter (lambda (ele) (string=
-                                   (lquery-funcs:attr ele "id")
-                                   id)))))
 (defun get-chap-container (doc)
   (get-node-with-id doc "div" "content"))
 
@@ -205,6 +210,44 @@
                     (loop for child across chlds
                        append
                          (get-ids child)))))))
+
+
+;;; ==================================================
+;;;           Utilities
+;;; ==================================================
+
+;; private
+(defun print-node (node &optional filename)
+  "Prints a node to either standard output for to the file."
+  (if (null filename)
+      (lquery-funcs:serialize node *standard-output*)
+      (with-open-file (stream
+                       filename
+                       :direction :output
+                       :if-exists :supersede)
+        (lquery-funcs:serialize node stream))))
+
+(defun print-text (str &optional filename)
+  "Prints strings to either standard output for to the file."
+  (if (null filename)
+      (format *standard-output* "~a" str)
+      (with-open-file (stream
+                       filename
+                       :direction :output
+                       :if-exists :supersede)
+        (format stream "~a" str))))
+
+;; private
+(defun make-path (filename)
+  "Returns the pathname prefixed with the output directory."
+  (concatenate 'string *outdir* filename))
+
+(defun get-node-with-id (node ele-name id)
+  "Returns a vector of a node with the element name and id."
+  (lquery:$ node ele-name
+            (filter (lambda (ele) (string=
+                                   (lquery-funcs:attr ele "id")
+                                   id)))))
 
 ;; test for get-ids
 ; (get-ids (aref (get-chapters (new-dom *adoc*)) 4))
