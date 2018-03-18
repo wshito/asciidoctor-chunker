@@ -12,8 +12,9 @@
 
 ;; 1. setup (new dom and output directory)
 ;; 2. Write out <style> elements to css files.
-;; 3. Create a hastable of id (key) and chapter number (value).
-;; 4. Write out each chapter
+;; 3. Copy local image files if modified.
+;; 4. Create a hastable of id (key) and chapter number (value).
+;; 5. Write out each chapter
 ;;    (1) Re-write the links that starts with <a href="#" and
 ;;        referring outside of the current chapter (sect1).
 ;;    (2) Delete footnotes if there are no referer in the current chapter.
@@ -63,7 +64,7 @@
 ;;; ===================================================
 
 (defun copy-images (doc index-dir)
-  "Copy only the newer image files than the destination."
+  "Copy local image files if modified or new."
   (mapcar (lambda (x)
             (let* ((dest (make-path x)) ; path to the output dir
                    (src-path (concatenate 'string
