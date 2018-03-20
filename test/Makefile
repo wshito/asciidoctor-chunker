@@ -22,3 +22,5 @@ output/single/user-manual.html: output/images
 	asciidoctor -D ../../output/single user-manual.adoc;\
 	cd -
 
+clean:
+	rm -rf output
