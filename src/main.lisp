@@ -27,9 +27,8 @@
     (ensure-directories-exist *outdir*)
     (process-css doc)
     (copy-images doc srcdir)
-    (process-chapters filename
-                      (fill-pointer (get-chapters doc))
-                      (create-id-database doc))))
+    (multiple-value-bind (ht chap-num chap-index) (create-id-database doc)
+      (process-chapters filename chap-num ht chap-index))))
 
 ;;; ==========================================
 ;;;         Initialization Process
@@ -80,7 +79,8 @@
   "Returns a list of paths of local images.  The path is relative to the document root adoc file."
   (let ((imgs (lquery:$ node "img" (attr "src"))))
     (loop for path across imgs
-       when (uiop/pathname:relative-pathname-p path)
+       when (and (not (string= (subseq path 0 4) "http"))
+                 (uiop/pathname:relative-pathname-p path))
        collect path)))
 
 ;;; ==========================================
@@ -88,35 +88,54 @@
 ;;; ==========================================
 
 (defun create-id-database (doc)
-  "Returns the hashtable of (key, val)=(id, chap-num)."
+  "Returns the hashtable of (key, val)=(id, chap-num), the number of chapters, and the list of chapter indeces."
   (loop with ht = (make-hash-table :test #'equal)
+     with chap-index = nil
+     with with-prev-chap = nil ; this ele belongs to the prev chap if true
      for ch across (get-chapters doc)
-     for n = 0 then (1+ n)
+     for index = 0 then (1+ index) ; index of chap vector
+     for n = 0 then (1+ n)         ; chapter number
      do
        ;; (format t "~a~%~%" (get-ids ch))
        (mapcar (lambda (x) ; key=id, value=chapter number
                  (setf (gethash x ht) n))
                (get-ids ch))
-     finally (return ht)))
+       (if with-prev-chap ; create a list of chapter range
+           (setf (car chap-index) (append (car chap-index) (list index)))
+           (setf chap-index (cons (list index) chap-index)))
+       (if (lquery-funcs:is ch "h1") ; set the flag for iteration
+           (progn (decf n) (setf with-prev-chap t))
+           (setf with-prev-chap nil))
+     finally (return (values ht (1+ n) (reverse chap-index)))))
 
 ;; test create-id-database
 ; (let ((ht (create-id-database (new-dom *adoc*))))
 ;   (maphash #'(lambda (k v) (format t "Ch.~a: ~a~%" v k)) ht))
 
-(defun process-chapters (filename chap-nums ids)
+(defun process-chapters (filename chap-nums ids chap-index)
+  ;; (format t "~a~%" chap-index)
   (loop
      for i from 0 below chap-nums
-     do (write-chapter (new-dom filename) i ids)))
+     for index = chap-index then (cdr index)
+     do (write-chapter (new-dom filename) i ids index)))
 
 ;; num: chapter number to be written out
 ;; ids: hashtable (key, val)=(id, chapnum)
-(defun write-chapter (doc num ids)
-  (let* ((rems (get-chapters doc))
-         (chap-node (aref rems num))
+;; index: the car of index is the chapter range list,
+;;        e.g. if the current chapter consists of 2nd, 3rd, 4th nodes
+;;        of chapter nodes vector, then index = ((3 4 5) ....)
+(defun write-chapter (doc num ids index)
+  (let* ((chaps (get-chapters doc))
+         (chap-range (car index))
          (fname (make-path (if (zerop num) "index.html"
-                               (format nil "chap~a.html" num)))))
-    (lquery-funcs:remove rems "div") ; remove all the chapters
-    (lquery-funcs:append (get-chap-container doc) chap-node) ; append this chap
+                               (format nil "chap~a.html" num))))
+         (div (lquery-funcs:append
+               (lquery:parse-html "<div id='content'></div>")
+               (lquery-funcs:slice chaps ; extract current chaps
+                                   (first chap-range)
+                                   (1+ (car (last chap-range)))))))
+    ;; (format t "~a~%" chap-range)
+    (lquery-funcs:replace-with (get-chap-container doc) div)
     (rewrite-links (get-links doc) num ids)
     (remove-footnotes doc num ids)
     (print-node doc fname)))
@@ -167,11 +186,12 @@
        (setf url (lquery-funcs:attr link "href"))
        (unless (alexandria:starts-with-subseq "#_footnote_" url) ;skip footnotes
          (setf num (gethash (subseq url 1) ids)) ; url starts with #
-         (unless (= chap-num num)
-           (lquery-funcs:attr link :href
-                              (if (zerop num)
-                                  (format nil "index.html~a" url)
-                                  (format nil "chap~a.html~a" num url)))))))
+         (when num
+           (unless (= chap-num num)
+             (lquery-funcs:attr link :href
+                                (if (zerop num)
+                                    (format nil "index.html~a" url)
+                                    (format nil "chap~a.html~a" num url))))))))
 ;;;;; How to rewrite href link
 ;; (let* ((doc (lquery:parse-html
 ;;              "<html><a href='http://dummy.com'>Dummy</a></html>"))
@@ -186,19 +206,18 @@
 (defun get-header (doc)
   (get-node-with-id doc "div" "header"))
 
-(defun get-chapters (node)
-  "Returns the vector of chapter nodes which is the <div class='sect1'>"
-  (lquery:$ node "div"
-            (filter (lambda (ele) (string=
-                                   (lquery-funcs:attr ele "class")
-                                   "sect1")))))
+(defun get-chapters (doc)
+  "Returns the vector of chapter nodes under the <div id='content'>"
+  (lquery-funcs:children (get-chap-container doc)))
+  
 
 (defun get-links (node)
   "Returns the vector of anchors <a> under the given node.  Only the anchors whose href is starting with # pointing to inside of the document are returned."
   (lquery:$ node "a"
             (filter (lambda (ele)
-                      (string= #\#
-                               (char (lquery-funcs:attr ele "href") 0))))))
+                      (let ((url (lquery-funcs:attr ele "href")))
+                        (when url ; in case <a> has no href attr
+                          (string= #\# (char url 0))))))))
     
 (defun get-ids (node &optional res)
   "Returns the list of all the ids under the given node."
@@ -253,5 +272,7 @@
 ;; test for get-ids
 ; (get-ids (aref (get-chapters (new-dom *adoc*)) 4))
 
-; (defparameter *adoc* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
-; (main *adoc*)
+;; (defparameter *adoc1* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
+;; (defparameter *adoc2* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/test/output/single/user-manual.html")
+(defparameter *adoc3* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/issue/chap22.html")
+;; (main *adoc*)
