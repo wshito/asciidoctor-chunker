@@ -1,3 +1,8 @@
+#|
+  This file is a part of Asciidoc Chunker project.
+  Copyright (c) 2018 wshito (@waterloo_jp)
+|#
+
 (in-package :cl-user)
 
 (defpackage :asciidoc-chunker
@@ -274,5 +279,5 @@
 
 ;; (defparameter *adoc1* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
 ;; (defparameter *adoc2* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/test/output/single/user-manual.html")
-(defparameter *adoc3* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/issue/chap22.html")
+;; (defparameter *adoc3* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/issue/chap22.html")
 ;; (main *adoc*)

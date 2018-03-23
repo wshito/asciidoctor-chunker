@@ -6,4 +6,5 @@
                  :uiop
                  :cl-fad)
     :components ((:module "src"
-                          :components ((:file "main")))))
+                          :components ((:file "main" :depends-on ("plump"))
+                                       (:file "plump")))))
