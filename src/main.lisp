@@ -15,6 +15,13 @@
 ;; specified in the argument of main function.
 (defparameter *outdir* "html_chunks/")
 
+;; Simple condition handler which catches any signals
+;; and print the condition object.
+(defmacro try (try-expr &key return-from)
+  `(handler-case ,try-expr
+     (t (err) (format t "~a" err)
+       ,(if return-from `(return-from ,return-from)))))
+
 ;; 1. setup (new dom and output directory)
 ;; 2. Write out <style> elements to css files.
 ;; 3. Copy local image files if modified.
@@ -25,11 +32,12 @@
 ;;    (2) Delete footnotes if there are no referer in the current chapter.
 (defun main (filename &optional outdir)
   (let* ((doc (new-dom filename))
-         (out (if (null outdir) *outdir* outdir))
+         (out (if (null doc) (return-from main)
+                  (if (null outdir) *outdir* outdir)))
          (*outdir* (if (alexandria:ends-with-subseq "/" out) out
                        (concatenate 'string out "/")))
          (srcdir (uiop/pathname:pathname-directory-pathname filename)))
-    (ensure-directories-exist *outdir*)
+    (try (ensure-directories-exist *outdir*) :return-from main)
     (process-css doc)
     (copy-images doc srcdir)
     (multiple-value-bind (ht chap-num chap-index) (create-id-database doc)
@@ -41,14 +49,18 @@
 
 (defun new-dom (filename)
   "Returns the DOM root of the given file."
-  (with-open-file (stream filename :direction :input)
-    (lquery:$ (initialize stream))))
+  (try
+   (with-open-file (stream filename :direction :input)
+     (lquery:$ (initialize stream)))))
+
+    
 
 ;;; ==========================================
 ;;;         CSS extraction
 ;;; ==========================================
 
 (defun process-css (root-node)
+  (format t "ASCIIDOCTOR-CHUNKER: Extracting style elements....~%")
   (loop with styles = (lquery:$ root-node "style")
      and fname = nil
      for node across styles
@@ -69,15 +81,16 @@
 
 (defun copy-images (doc index-dir)
   "Copy local image files if modified or new."
+  (format t "ASCIIDOCTOR-CHUNKER: Copying local images....~%")
   (mapcar (lambda (x)
             (let* ((dest (make-path x)) ; path to the output dir
                    (src-path (concatenate 'string
                                           (namestring index-dir) x)))
-              (ensure-directories-exist dest)
-              (if (> (file-write-date src-path)
-                     (if (uiop/filesystem:file-exists-p dest)
-                         (file-write-date dest) 0))
-                  (cl-fad:copy-file src-path dest)))) ; copy to the dest
+              (try (ensure-directories-exist dest))
+              (try (if (> (file-write-date src-path)
+                          (if (uiop/filesystem:file-exists-p dest)
+                              (file-write-date dest) 0))
+                       (cl-fad:copy-file src-path dest))))) ; copy to dest
           (get-local-images doc)))
 
 (defun get-local-images (node)
@@ -130,6 +143,7 @@
 ;;        e.g. if the current chapter consists of 2nd, 3rd, 4th nodes
 ;;        of chapter nodes vector, then index = ((3 4 5) ....)
 (defun write-chapter (doc num ids index)
+  (format t "ASCIIDOCTOR-CHUNKER: Processing Chap ~a ....~%" num)
   (let* ((chaps (get-chapters doc))
          (chap-range (car index))
          (fname (make-path (if (zerop num) "index.html"
