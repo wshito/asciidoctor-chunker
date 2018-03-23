@@ -32,14 +32,10 @@ If output directory is not specified, the default is `output` under the current 
 
 ## Example
 
-You can generate the chunked html for the Asciidoctor User Manual
-under `test/output/html_chunk/` directory.
+The project contains the `test` directory where you can generate the chunked html for the (https://asciidoctor.org/docs/user-manual/)[Asciidoctor User Manual] by invoking `make`.  Simply go into the `test` directory and invoke `make`.  This will clone the asciidoctor project from the github for the first time.  Then the chunked html will be generated under `test/output/html_chunk/` directory.  The `index.html` is the first page.
 
 ```
 $ cd test
 $ make
 ```
-
-Simply open `test/output/html_chunk/index.html` after generation with your browser.
-
 
