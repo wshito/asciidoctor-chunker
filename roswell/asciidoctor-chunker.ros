@@ -8,14 +8,14 @@ exec ros -Q -- $0 "$@"
   ;;#+quicklisp (ql:quickload '() :silent t)
   )
 
-(defpackage :ros.script.asciidoc-chunker.3729823724
+(defpackage :ros.script.asciidoctor-chunker.3729823724
   (:use :cl))
-(in-package :ros.script.asciidoc-chunker.3729823724)
+(in-package :ros.script.asciidoctor-chunker.3729823724)
 
-(require :asciidoc-chunker)
+(require :asciidoctor-chunker)
 
 (defun help ()
-  (format t "Usage: asciidoc-chunker input.html -o \"output_dir\"
+  (format t "Usage: asciidoctor-chunker input.html -o \"output_dir\"
        (the default output directory is \"html_chunks\" in current directory)~%"))
 
 (defun make-arg-alist (argv &optional alist)
@@ -32,7 +32,7 @@ exec ros -Q -- $0 "$@"
     (cond
       ((and (= len 1)
             (= 1 (length (car alist))))
-       (asciidoc-chunker:main (caar alist)))
+       (asciidoctor-chunker:main (caar alist)))
       ((= len 2)
        (let ((fname (if (= 1 (length (car alist)))
                         (caar alist)
@@ -40,7 +40,7 @@ exec ros -Q -- $0 "$@"
                             (caadr alist))))
              (outdir (second (assoc "-o" alist :test #'equal))))
          (if (or (null fname) (null outdir)) (help)
-             (asciidoc-chunker:main fname outdir))))
+             (asciidoctor-chunker:main fname outdir))))
       (t (help)))))
       
 

@@ -1,9 +1,9 @@
 #
-# This file is a part of Asciidoc Chunker project.
+# This file is a part of Asciidoctor Chunker project.
 # Copyright (c) 2018 wshito (@waterloo_jp)
 #
 
-ASCIIDOC_CHUNKER_SCRIPT = ../roswell/asciidoc-chunker.ros
+ASCIIDOCTOR_CHUNKER_SCRIPT = ../roswell/asciidoctor-chunker.ros
 
 SINGLE_DIR = output/single
 CHUNK_DIR  = output/html_chunk
@@ -15,13 +15,13 @@ chunk: $(CHUNK)
 
 single: $(SINGLE)
 
-# fetch the asciidoc.org site
+# fetch the asciidoctor.org site
 asciidoctor.org:
 	git clone https://github.com/asciidoctor/asciidoctor.org.git
 
 # generate chunked html
 $(CHUNK): $(SINGLE)
-	$(ASCIIDOC_CHUNKER_SCRIPT) $@  -o $(CHUNK_DIR)
+	$(ASCIIDOCTOR_CHUNKER_SCRIPT) $<  -o $(CHUNK_DIR)
 
 # prepare images
 output/images: asciidoctor.org

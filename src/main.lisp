@@ -1,15 +1,15 @@
 #|
-  This file is a part of Asciidoc Chunker project.
+  This file is a part of Asciidoctor Chunker project.
   Copyright (c) 2018 wshito (@waterloo_jp)
 |#
 
 (in-package :cl-user)
 
-(defpackage :asciidoc-chunker
+(defpackage :asciidoctor-chunker
   (:use :cl)
   (:export :main))
 
-(in-package :asciidoc-chunker)
+(in-package :asciidoctor-chunker)
 
 ;; Default output directory.  This is overwritten if outdir is
 ;; specified in the argument of main function.
@@ -278,6 +278,6 @@
 ; (get-ids (aref (get-chapters (new-dom *adoc*)) 4))
 
 ;; (defparameter *adoc1* "/Users/shito/Documents/git-repositories/intro-lisp/output/index.html")
-;; (defparameter *adoc2* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/test/output/single/user-manual.html")
-;; (defparameter *adoc3* "/Users/shito/Documents/git-repositories/lisp/asciidoc-chunker/issue/chap22.html")
+;; (defparameter *adoc2* "/Users/shito/Documents/git-repositories/lisp/asciidoctor-chunker/test/output/single/user-manual.html")
+;; (defparameter *adoc3* "/Users/shito/Documents/git-repositories/lisp/asciidoctor-chunker/issue/chap22.html")
 ;; (main *adoc*)

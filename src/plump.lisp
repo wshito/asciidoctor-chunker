@@ -1,5 +1,5 @@
 #|
-  This file is a part of Asciidoc Chunker project.
+  This file is a part of Asciidoctor Chunker project.
   
   Copyright (c) 2018 wshito (@waterloo_jp)
 |#
