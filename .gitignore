@@ -1,4 +1,5 @@
 *~
-output
+output-chunk
+output-single
 *.fasl
 asciidoctor.org
