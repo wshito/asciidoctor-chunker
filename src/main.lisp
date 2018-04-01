@@ -90,7 +90,7 @@
               (try (if (> (file-write-date src-path)
                           (if (uiop/filesystem:file-exists-p dest)
                               (file-write-date dest) 0))
-                       (cl-fad:copy-file src-path dest))))) ; copy to dest
+                       (cl-fad:copy-file src-path dest :overwrite t))))) ; copy to dest
           (get-local-images doc)))
 
 (defun get-local-images (node)
