@@ -22,6 +22,12 @@ Asciidoctor-Chunker is written in Common Lisp.  The easiest way to install Lisp 
 
 1. Follow [the instruction here](https://github.com/roswell/roswell/wiki/Installation) to install Roswell.
 1. Invoke `ros setup` after installation.  This will install Lisp compiler automatically and sets things up.
+1. Install the dependent packages as follows.
+```
+$ ros install alexandria
+$ ros install lquery
+$ ros install cl-fad
+```
 1. Place `asciidoctor-chunker` folder under `~/common-lisp` directory.
 1. Run the script `~/common-lisp/asciidoctor-chunker/roswell/asciidoctor-chunker.ros` as follows.
 
