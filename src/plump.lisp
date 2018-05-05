@@ -6,7 +6,7 @@
 
 (in-package #:org.shirakumo.plump.dom)
 
-;; Overwride the seralizer for an element node to print
+;; Override the seralizer for an element node to print
 ;; the empty node with <tag></tag>
 (defmethod plump:serialize-object ((node element))
     (or (plump-parser:do-tag-printers (test printer)
