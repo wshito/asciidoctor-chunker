@@ -23,10 +23,12 @@
        ,(if return-from `(return-from ,return-from)))))
 
 ;; 1. setup (new dom and output directory)
-;; 2. Write out <style> elements to css files.
-;; 3. Copy local image files if modified.
-;; 4. Create a hastable of id (key) and chapter number (value).
-;; 5. Write out each chapter
+;; 2. Copy <link href=...> and <script src=...>
+;;    if ... is relative path and the file is modifed.
+;; 3. Write out <style> elements to css files and insert links to them.
+;; 4. Copy local image files if modified.
+;; 5. Create a hastable of id (key) and chapter number (value).
+;; 6. Write out each chapter
 ;;    (1) Re-write the links that starts with <a href="#" and
 ;;        referring outside of the current chapter (sect1).
 ;;    (2) Delete footnotes if there are no referer in the current chapter.
@@ -38,6 +40,7 @@
                        (concatenate 'string out "/")))
          (srcdir (uiop/pathname:pathname-directory-pathname filename)))
     (try (ensure-directories-exist *outdir*) :return-from main)
+    (copy-relative-files doc srcdir)
     (process-css doc)
     (copy-images doc srcdir)
     (multiple-value-bind (ht chap-num chap-index) (create-id-database doc)
@@ -53,7 +56,15 @@
    (with-open-file (stream filename :direction :input)
      (lquery:$ (initialize stream)))))
 
-    
+;;; =========================================================
+;;;         Copy link and script files with relative paths
+;;; =========================================================
+
+(defun copy-relative-files (doc index-dir)
+  "Copy locally linked files if modified or new."
+  (format t "ASCIIDOCTOR-CHUNKER: Copying locally linked files....~%")
+  (copy-local-files doc index-dir (get-local-files doc "link" "href"))
+  (copy-local-files doc index-dir (get-local-files doc "script" "src")))
 
 ;;; ==========================================
 ;;;         CSS extraction
@@ -82,24 +93,7 @@
 (defun copy-images (doc index-dir)
   "Copy local image files if modified or new."
   (format t "ASCIIDOCTOR-CHUNKER: Copying local images....~%")
-  (mapcar (lambda (x)
-            (let* ((dest (make-path x)) ; path to the output dir
-                   (src-path (concatenate 'string
-                                          (namestring index-dir) x)))
-              (try (ensure-directories-exist dest))
-              (try (if (> (file-write-date src-path)
-                          (if (uiop/filesystem:file-exists-p dest)
-                              (file-write-date dest) 0))
-                       (cl-fad:copy-file src-path dest :overwrite t))))) ; copy to dest
-          (get-local-images doc)))
-
-(defun get-local-images (node)
-  "Returns a list of paths of local images.  The path is relative to the document root adoc file."
-  (let ((imgs (lquery:$ node "img" (attr "src"))))
-    (loop for path across imgs
-       when (and (not (string= (subseq path 0 4) "http"))
-                 (uiop/pathname:relative-pathname-p path))
-       collect path)))
+  (copy-local-files doc index-dir (get-local-files doc "img" "src")))
 
 ;;; ==========================================
 ;;;       Chapter extraction
@@ -287,6 +281,31 @@
             (filter (lambda (ele) (string=
                                    (lquery-funcs:attr ele "id")
                                    id)))))
+
+;;;  private utilities to copy local files
+(defun copy-local-files (doc index-dir files)
+  "Copy local files if modified or new."
+  (mapcar (lambda (x)
+            (let* ((dest (make-path x)) ; path to the output dir
+                   (src-path (concatenate 'string
+                                          (namestring index-dir) x)))
+              (try (ensure-directories-exist dest))
+              (try (if (> (file-write-date src-path)
+                          (if (uiop/filesystem:file-exists-p dest)
+                              (file-write-date dest) 0))
+                       (cl-fad:copy-file src-path dest :overwrite t))))) ; copy to dest
+          files))
+
+(defun get-local-files (parent-node tag-name attr-name)
+  "Returns a list of paths of locally linked files.  The path is relative to the document root adoc file."
+  (let ((imgs (lquery:$ parent-node tag-name (attr attr-name))))
+    (loop for path across imgs
+       when (and (not (null path))
+                 (not (string= (subseq path 0 4) "http"))
+                 (uiop/pathname:relative-pathname-p path))
+       collect path)))
+
+
 
 ;; test for get-ids
 ; (get-ids (aref (get-chapters (new-dom *adoc*)) 4))
