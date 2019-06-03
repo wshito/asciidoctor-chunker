@@ -53,7 +53,7 @@
 (defun new-dom (filename)
   "Returns the DOM root of the given file."
   (try
-   (with-open-file (stream filename :direction :input)
+   (with-open-file (stream filename :direction :input :external-format :utf-8)
      (lquery:$ (initialize stream)))))
 
 ;;; =========================================================
@@ -257,7 +257,8 @@
       (with-open-file (stream
                        filename
                        :direction :output
-                       :if-exists :supersede)
+                       :if-exists :supersede
+					   :external-format :utf-8)
         (lquery-funcs:serialize node stream))))
 
 (defun print-text (str &optional filename)
@@ -267,7 +268,8 @@
       (with-open-file (stream
                        filename
                        :direction :output
-                       :if-exists :supersede)
+                       :if-exists :supersede
+					   :external-format :utf-8)
         (format stream "~a" str))))
 
 ;; private
