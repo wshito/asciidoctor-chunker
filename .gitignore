@@ -3,3 +3,4 @@ output-chunk
 output-single
 *.fasl
 asciidoctor.org
+node_modules
