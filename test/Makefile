@@ -25,7 +25,7 @@ single: $(SINGLE)
 
 # fetch the asciidoctor.org site
 asciidoctor.org:
-	git clone https://github.com/asciidoctor/asciidoctor.org.git
+	git clone https://github.com/asciidoctor/asciidoctor.org.git -b docs-archive
 
 # generate chunked html
 $(CHUNK): $(SINGLE)
