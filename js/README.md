@@ -53,5 +53,6 @@ MIT
 
 ## Developer's Memo
 
+- Invoke `make single` in `example` directory before you run `npm run test`.  It generates the single html for asciidoc manual under `example/output-single`.
 - `npm install cheerio`
 - `npm install --save-dev ava`
