@@ -5,6 +5,7 @@
 'use strict';
 
 import fs from 'fs';
+import path from 'path';
 import cheerio from 'cheerio';
 
 /**
@@ -40,12 +41,14 @@ const childClassName = className => {}
 */
 
 /**
- * Extracts the node with 'sect*' classname recursively.
+ * Extracts the node with 'sectN' classname where N >= 1
+ * recursively.  This function does not return anything.
+ * This takes printer function for side effect.
  * 
- * @param {(fnamePrefix: string, dom: object) => void} printer The callback which takes the filename prefix and html string maily to print or write out to the file.
+ * @param {(fnamePrefix: string, dom: Cheerio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to the file.
  * @param {number} maxLevel The maximum secLevel to extract.
- * @param {Object} container jQuery object of container DOM which has the appending point: `#content`.
- * @param {Object} node The current section node extracted from DOM.
+ * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
+ * @param {Cheerio} node The current section node extracted from DOM.
  * @param {number} thisSecLevel the current node's section level where chapter is level 1, section is level 2, and so on.
  * @param {string} fnamePrefix The filename prefix.
  * @param {number} sectionNumber The section number in the current section level.
@@ -81,21 +84,73 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
  */
 export const makeContainer = $ => cheerio($.root().clone().find('#content').empty().end());
 
-// const processPreamble
+/**
+ * 
+ * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
+ * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
+ * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
+ */
+export const extractPreamble = (printer, container, preambleNode) => {
+  printer('0', container.clone().find('#content').append(preambleNode.clone()).end());
+}
 
 /**
- * Make chunked html
+ * 
+ * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
+ * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
+ * @param {Cheerio} partTitleNode The part title node that is 'h1.sect0'.
+ * @param {number} partNum The part number.
+ */
+export const extractPart = (printer, container, partTitleNode, partNum) => {
+  printer(`${partNum}`,
+    container.clone()
+    .find('#content')
+    .append(partTitleNode.clone())
+    // TODO test if the part has next content and then append
+    // if (node.next().hasClass('partintro'))
+    .append(partTitleNode.next().clone())
+    .end());
+}
+
+export const printer = outDir => (fnamePrefix, dom) => {
+  const fname = path.format({
+    dir: outDir,
+    base: fnamePrefix,
+    ext: '.html'
+  });
+  fs.writeFile(fname, dom.html(), err => {
+    if (err)
+      console.log("File write error:", fname);
+    console.log(fname);
+  });
+}
+/**
+ * Make chunked html.  This is the main function to extract
+ * whole book of adoc html file.
+ * This function does not return anything.  This takes
+ * a printer function for side effect.
  *
- * @param {(fnamePrefix: string, html: string) => void} printer The callback which takes the filename prefix and html string maily to print or write out to the file.
+ * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
  * @param {Cheerio} $ The instance of Cheerio.
  * @param {number} maxLevel The maximum secLevel to extract.
  *  The default is 1 which extracts parts and chapters.
  *
  */
-export const chunker = (printer, $, maxLevel) => {
+export const makeChunks = (printer, $, maxLevel) => {
   const container = makeContainer($);
-  $('#content').children().each((i, node) => {
-    const ele = cheerio(node);
-    // if ()
+  let chap = 0;
+  let part = 0;
+  $('#content').children().each((i, ele) => {
+    const node = cheerio(ele);
+    if (node.hasClass('partintro'))
+      return; // ignore. this is taken care by part extraction
+    if (node.hasClass('sect1'))
+      return extract(printer, maxLevel, container, node, 1, `${part}-`, ++chap); // recursive extraction of chapters
+    if (node.hasClass('sect0'))
+      return extractPart(printer, container, node, ++part); // part extraction
+    if (node.attr('id') === 'preamble')
+      return extractPreamble(printer, container, node);
+
+    console.log('Woops, unknown contents here to be processed.')
   });
 };

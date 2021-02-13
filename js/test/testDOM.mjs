@@ -11,8 +11,10 @@ import {
   newDOM,
   extract,
   makeContainer,
+  extractPreamble,
 } from '../src/DOM.mjs';
 import cheerio from 'cheerio';
+import { extractPart } from '../src/DOM.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -100,9 +102,15 @@ test('extract sections', t => {
   t.pass();
 });
 
-test.skip('preamble extraction', t => {
+test('preamble extraction', t => {
   const $ = newDOM(sampleHTML);
   const container = makeContainer($);
+
+  const printer = (fnamePrefix, dom) => {
+    // console.log(dom.find('body').html());
+    t.is(dom.find('div#preamble').siblings().length, 0);
+    t.true(dom.find('div#preamble').children().first().hasClass('sectionbody'));
+  }
 
   $('#content').children().each((i, ele) => {
     if (i !== 0)
@@ -110,21 +118,14 @@ test.skip('preamble extraction', t => {
     const node = cheerio(ele);
     t.is(node.attr('id'), 'preamble');
 
-    const extracted = container.find('#content')
-      .append(node.clone())
-      .end();
-    const html = extracted.html();
-    // console.log(extracted.find('body').html());
-    const preamble = cheerio.load(html);
-    t.is(preamble('div#preamble').siblings().length, 0);
-    t.true(preamble('div#preamble').children().first().hasClass('sectionbody'));
+    extractPreamble(printer, container, node);
   });
 });
 
-test.skip('Part extraction', t => {
+test('Part extraction', t => {
   const $ = newDOM(sampleHTML);
   const container = makeContainer($);
-
+  let partNum = 0;
   $('#content').children().each((i, ele) => {
     const node = cheerio(ele);
     if (node.hasClass('partintro'))
@@ -135,20 +136,16 @@ test.skip('Part extraction', t => {
       return;
 
     // node is h1.sect0
-    let extracted = container.find('#content')
-      .append(node.clone())
-      .append(node.next().clone())
-      .end();
-    // part includes next sibling class='partintro'
-    /*
-    if (node.next().hasClass('partintro'))
-      extracted = extracted.append(node.next().clone());
-    extracted = extracted.end().find('#content');
-    */
-    const html = extracted.html();
-    const part = cheerio.load(html);
-    // if (i === 1) console.log("\n", part('body').html(), "\n");
-    t.true(part('#content').children().first().hasClass('sect0'));
-    t.true(cheerio(part('#content').children().get(1)).hasClass('partintro'));
+
+    const printer = (fnamePrefix, dom) => {
+      /* DEBUG
+      console.log('Part', fnamePrefix);
+      if (fnamePrefix === '1') console.log(dom.find('body').html());
+      */
+      t.true(dom.find('#content').children().first().hasClass('sect0'));
+      t.true(cheerio(dom.find('#content').children().get(1)).hasClass('partintro'));
+    }
+
+    extractPart(printer, container, node, ++partNum);
   });
 });
