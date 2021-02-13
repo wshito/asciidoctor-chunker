@@ -40,8 +40,9 @@ const childClassName = className => {}
 */
 
 /**
+ * Extracts the node with 'sect*' classname recursively.
  * 
- * @param {(fnamePrefix: string, html: string) => void} printer The callback which takes the filename prefix and html string maily to print or write out to the file.
+ * @param {(fnamePrefix: string, dom: object) => void} printer The callback which takes the filename prefix and html string maily to print or write out to the file.
  * @param {number} maxLevel The maximum secLevel to extract.
  * @param {Object} container jQuery object of container DOM which has the appending point: `#content`.
  * @param {Object} node The current section node extracted from DOM.
@@ -52,12 +53,12 @@ const childClassName = className => {}
 export const extract = (printer, maxLevel, container, node, thisSecLevel, fnamePrefix, sectionNumber) => {
   // case with no extraction
   if (maxLevel === thisSecLevel) {
-    printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone()).html());
+    printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone()).end());
     return;
   }
   const childSelector = `div.sect${thisSecLevel+1}`;
   // extract myself
-  printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).html());
+  printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
 
   // get children nodes
   const children = node.find(childSelector);
@@ -72,3 +73,29 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
       thisSecLevel + 1,
       `${fnamePrefix}-${sectionNumber}`, i + 1));
 }
+
+/**
+ * Creates new DOM with empty content.
+ *
+ * @param {Cheerio} $ The instance of Cheerio.
+ */
+export const makeContainer = $ => cheerio($.root().clone().find('#content').empty().end());
+
+// const processPreamble
+
+/**
+ * Make chunked html
+ *
+ * @param {(fnamePrefix: string, html: string) => void} printer The callback which takes the filename prefix and html string maily to print or write out to the file.
+ * @param {Cheerio} $ The instance of Cheerio.
+ * @param {number} maxLevel The maximum secLevel to extract.
+ *  The default is 1 which extracts parts and chapters.
+ *
+ */
+export const chunker = (printer, $, maxLevel) => {
+  const container = makeContainer($);
+  $('#content').children().each((i, node) => {
+    const ele = cheerio(node);
+    // if ()
+  });
+};
