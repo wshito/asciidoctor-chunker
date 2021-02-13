@@ -4,3 +4,5 @@ output-single
 *.fasl
 asciidoctor.org
 node_modules
+html_chunks
+tmp
