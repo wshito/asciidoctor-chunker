@@ -86,12 +86,18 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
 */
 
 /**
- * Extracts the node with 'sectN' classname where N >= 1
+ * Process the nodes with 'sectN' classname where N >= 1
  * recursively.  This function does not return anything.
- * This takes printer function for side effect.
- * 
- * @param {(fnamePrefix: string, dom: Cheerio) => void} processor The callback which takes the filename prefix and Cheerio instance and do
- * some chapter content rocessing.
+ * This takes processor callback to handle actual task
+ * on each visitng nodes.
+ *
+ * The visiting nodes processing has been abstracted
+ * so the creation of ID-filename hashtable can also
+ * use this code.
+ *
+ * @param {(fnamePrefix: string, dom: Cheerio) => void} processor
+ *  The callback which takes the filename prefix and Cheerio
+ *  instance and do some chapter content processing.
  * @param {number} maxLevel The maximum secLevel to extract.
  * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
  * @param {Cheerio} node The current section node extracted from DOM.
@@ -166,7 +172,7 @@ export const extractPart = (printer) =>
  * Extracts the node with 'sectN' classname where N >= 1
  * recursively.  This function does not return anything.
  * This takes printer function for side effect.
- * 
+ *
  * @param {(fnamePrefix: string, dom: Cheerio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to the file.
  * @param {number} maxLevel The maximum secLevel to extract.
  * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
@@ -183,6 +189,9 @@ export const extractChapters = (printer) =>
 /**
  * Visit the nodes under the #content node and invoke
  * the given processors.
+ *
+ * The visiting nodes processing has been abstracted so the
+ * creation of ID-filename hashtable can also use this code.
  *
  * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
  * @param {Cheerio} $ The instance of Cheerio.
