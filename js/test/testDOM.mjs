@@ -18,37 +18,42 @@ import { extractPart } from '../src/DOM.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
-  'chap1': ['0-1', '0-1-1', '0-1-2', '0-1-3'], // 1st chapter structure
+  'chap1': ['chap1', 'chap1_sec1', 'chap1_sec2', 'chap1_sec3'], // 1st chapter structure
   // chap 2, depth 1
-  'chap2:depth1': ['0-2'],
+  'chap2:depth1': ['chap2'],
   // chap 2, depth 2
-  'chap2:depth2': ['0-2',
-    '0-2-1',
-    '0-2-2',
-    '0-2-3'
+  'chap2:depth2': ['chap2',
+    'chap2_sec1',
+    'chap2_sec2',
+    'chap2_sec3'
   ],
   // chap 2, depth 3
-  'chap2:depth3': ['0-2',
-    '0-2-1',
-    '0-2-2',
-    '0-2-2-1',
-    '0-2-2-2',
-    '0-2-2-3',
-    '0-2-3'
+  'chap2:depth3': ['chap2',
+    'chap2_sec1',
+    'chap2_sec2',
+    'chap2_sec2-1',
+    'chap2_sec2-2',
+    'chap2_sec2-3',
+    'chap2_sec3'
   ],
   // chap 2, depth 4
-  'chap2:depth4': ['0-2',
-    '0-2-1',
-    '0-2-2',
-    '0-2-2-1',
-    '0-2-2-1-1', '0-2-2-1-2',
-    '0-2-2-2',
-    '0-2-2-2-1', '0-2-2-2-2', '0-2-2-2-3',
-    '0-2-2-3',
-    '0-2-3'
+  'chap2:depth4': ['chap2',
+    'chap2_sec1',
+    'chap2_sec2',
+    'chap2_sec2-1',
+    'chap2_sec2-1-1', 'chap2_sec2-1-2',
+    'chap2_sec2-2',
+    'chap2_sec2-2-1', 'chap2_sec2-2-2', 'chap2_sec2-2-3',
+    'chap2_sec2-3',
+    'chap2_sec3'
   ]
 };
-const sectClass = seclabel => `sect${seclabel.split('-').length - 1}`;
+const sectClass = seclabel => {
+  const firstSplit = seclabel.split('_');
+  const sectLevel = firstSplit.length === 1 ? 1 :
+    seclabel.split('-').length + 1;
+  return `sect${sectLevel}`;
+}
 
 test('test DOM created by cheerio', t => {
   const cheerioHTML = newDOM(sampleHTML).html();
@@ -61,7 +66,7 @@ test('extract sections', t => {
     let counter = 0; // closure
     return (fnamePrefix, dom) => {
       /* For DEBUG
-      if (fnamePrefix === '0-2-2-2-3')
+      if (fnamePrefix === 'chap2_sec2-2-3')
         console.log(dom.find('body').html());
       */
       const html = dom.find('#content').html();
@@ -81,23 +86,23 @@ test('extract sections', t => {
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extract(printer('chap1'), 1, container, $('div.sect1').first(), 1, '0', chap);
+  extract(printer('chap1'), 1, container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("2nd round");
-  extract(printer('chap1'), 2, container, $('div.sect1').first(), 1, '0', chap);
+  extract(printer('chap1'), 2, container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("3rd round");
-  extract(printer('chap1'), 3, container, $('div.sect1').first(), 1, '0', chap);
+  extract(printer('chap1'), 3, container, $('div.sect1').first(), 1, 'chap', chap);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extract(printer('chap2:depth1'), 1, container, cheerio($('div.sect1').get(1)), 1, '0', chap);
+  extract(printer('chap2:depth1'), 1, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("2nd round");
-  extract(printer('chap2:depth2'), 2, container, cheerio($('div.sect1').get(1)), 1, '0', chap);
+  extract(printer('chap2:depth2'), 2, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("3rd round");
-  extract(printer('chap2:depth3'), 3, container, cheerio($('div.sect1').get(1)), 1, '0', chap);
+  extract(printer('chap2:depth3'), 3, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("4th round");
-  extract(printer('chap2:depth4'), 6, container, cheerio($('div.sect1').get(1)), 1, '0', chap);
+  extract(printer('chap2:depth4'), 6, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
 
   t.pass();
 });

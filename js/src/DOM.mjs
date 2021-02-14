@@ -153,7 +153,7 @@ export const makeChunks = (printer, $, maxLevel) => {
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
     if (node.hasClass('sect1'))
-      return extract(printer, maxLevel, container, node, 1, `chap`, ++chap); // recursive extraction of chapters
+      return extract(printer, maxLevel, container, node, 1, 'chap', ++chap); // recursive extraction of chapters
     if (node.hasClass('sect0'))
       return extractPart(printer, container, node, ++part); // part extraction
     if (node.attr('id') === 'preamble')
