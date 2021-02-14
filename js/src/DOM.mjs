@@ -7,7 +7,13 @@
 import fs from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
+import { pipe } from './Utils.mjs';
 import * as dom from './DomFunc.mjs';
+
+/*
+ * Module to provide the Asciidoctor single HTML specific
+ * DOM manipulations.
+ */
 
 /**
  * Returns a new DOM wrapped with the jQuery interface.
@@ -18,6 +24,36 @@ import * as dom from './DomFunc.mjs';
 export function newDOM (filename) {
   return cheerio.load(fs.readFileSync(filename));
 }
+
+/**
+ * Returns the div#content node where all the document
+ * contents are appended to.
+ * 
+ * @param {Cheerio} node The DOM which has #content node.
+ */
+export const getContentNode$ = node => dom.find$('#content')(node);
+
+/**
+ * This function creates a new container with contents
+ * appended at #content element.  The contents is also cloned
+ * internally before appended.
+ *
+ * @param {Cheerio} container The Cheerio instance of DOM which
+ *  has #content element to append the contents.  This function
+ *  does not touch the passed container.  The container is cloned
+ *  and then attach the contents.
+ * @param {Cheerio} contents The Cheerio instance of DOM node
+ *  to be appended to the container.  The contents are cloned
+ *  internally and then appended.
+ * @returns The newly created Cheerio instance of the document
+ *  with contents appended.
+ */
+const makeDocument = (container, ...contents) =>
+  pipe(
+    dom.clone,
+    getContentNode$,
+    dom.append$(...contents) // dom.append$() clones contents
+  )(container);
 
 /**
  * Creates the basename for output html file based on
@@ -66,12 +102,12 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
   const filename = basename(fnamePrefix, thisSecLevel, sectionNumber);
   // case with no extraction
   if (maxLevel === thisSecLevel) {
-    printer(filename, dom.makeDocument(container, node))
+    printer(filename, makeDocument(container, node))
     return;
   }
   const childSelector = `div.sect${thisSecLevel+1}`;
   // extract myself
-  printer(filename, dom.makeDocument(container, node.clone().find(childSelector).remove().end()));
+  printer(filename, makeDocument(container, node.clone().find(childSelector).remove().end()));
 
   // get children nodes
   const children = node.find(childSelector);
@@ -92,7 +128,7 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
  *
  * @param {Cheerio} $ The instance of Cheerio.
  */
-export const makeContainer = $ => cheerio($.root().clone().find('#content').empty().end());
+export const makeContainer = $ => $.root().clone().find('#content').empty().end();
 
 /**
  * 
@@ -101,7 +137,7 @@ export const makeContainer = $ => cheerio($.root().clone().find('#content').empt
  * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
  */
 export const extractPreamble = (printer, container, preambleNode) => {
-  printer('preamble', dom.makeDocument(container, preambleNode));
+  printer('preamble', makeDocument(container, preambleNode));
 }
 
 /**
@@ -113,7 +149,7 @@ export const extractPreamble = (printer, container, preambleNode) => {
  */
 export const extractPart = (printer, container, partTitleNode, partNum) => {
   printer(`part${partNum}`,
-    dom.makeDocument(container,
+    makeDocument(container,
       ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode])));
 }
 
