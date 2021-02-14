@@ -54,14 +54,16 @@ const childClassName = className => {}
  * @param {number} sectionNumber The section number in the current section level.
  */
 export const extract = (printer, maxLevel, container, node, thisSecLevel, fnamePrefix, sectionNumber) => {
+  const basename = thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
+    thisSecLevel === 2 ? `${fnamePrefix}_sec${sectionNumber}` : `${fnamePrefix}-${sectionNumber}`;
   // case with no extraction
   if (maxLevel === thisSecLevel) {
-    printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone()).end());
+    printer(basename, container.clone().find('#content').append(node.clone()).end());
     return;
   }
   const childSelector = `div.sect${thisSecLevel+1}`;
   // extract myself
-  printer(`${fnamePrefix}-${sectionNumber}`, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
+  printer(basename, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
 
   // get children nodes
   const children = node.find(childSelector);
@@ -74,7 +76,7 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
     extract(printer, maxLevel, container,
       cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
       thisSecLevel + 1,
-      `${fnamePrefix}-${sectionNumber}`, i + 1));
+      basename, i + 1));
 }
 
 /**
@@ -91,7 +93,7 @@ export const makeContainer = $ => cheerio($.root().clone().find('#content').empt
  * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
  */
 export const extractPreamble = (printer, container, preambleNode) => {
-  printer('0', container.clone().find('#content').append(preambleNode.clone()).end());
+  printer('preamble', container.clone().find('#content').append(preambleNode.clone()).end());
 }
 
 /**
@@ -102,7 +104,7 @@ export const extractPreamble = (printer, container, preambleNode) => {
  * @param {number} partNum The part number.
  */
 export const extractPart = (printer, container, partTitleNode, partNum) => {
-  printer(`${partNum}`,
+  printer(`part${partNum}`,
     container.clone()
     .find('#content')
     .append(partTitleNode.clone())
@@ -144,7 +146,7 @@ export const makeChunks = (printer, $, maxLevel) => {
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
     if (node.hasClass('sect1'))
-      return extract(printer, maxLevel, container, node, 1, `${part}`, ++chap); // recursive extraction of chapters
+      return extract(printer, maxLevel, container, node, 1, `chap`, ++chap); // recursive extraction of chapters
     if (node.hasClass('sect0'))
       return extractPart(printer, container, node, ++part); // part extraction
     if (node.attr('id') === 'preamble')
