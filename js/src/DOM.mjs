@@ -18,8 +18,9 @@ export function newDOM (filename) {
   return cheerio.load(fs.readFileSync(filename));
 }
 
-const childClassName = className => {}
-
+const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
+  thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
+  thisSecLevel === 2 ? `${fnamePrefix}_sec${sectionNumber}` : `${fnamePrefix}-${sectionNumber}`;
 
 /*
   extract inside the bracket:
@@ -54,16 +55,15 @@ const childClassName = className => {}
  * @param {number} sectionNumber The section number in the current section level.
  */
 export const extract = (printer, maxLevel, container, node, thisSecLevel, fnamePrefix, sectionNumber) => {
-  const basename = thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
-    thisSecLevel === 2 ? `${fnamePrefix}_sec${sectionNumber}` : `${fnamePrefix}-${sectionNumber}`;
+  const filename = basename(fnamePrefix, thisSecLevel, sectionNumber);
   // case with no extraction
   if (maxLevel === thisSecLevel) {
-    printer(basename, container.clone().find('#content').append(node.clone()).end());
+    printer(filename, container.clone().find('#content').append(node.clone()).end());
     return;
   }
   const childSelector = `div.sect${thisSecLevel+1}`;
   // extract myself
-  printer(basename, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
+  printer(filename, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
 
   // get children nodes
   const children = node.find(childSelector);
@@ -76,7 +76,7 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
     extract(printer, maxLevel, container,
       cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
       thisSecLevel + 1,
-      basename, i + 1));
+      filename, i + 1));
 }
 
 /**
