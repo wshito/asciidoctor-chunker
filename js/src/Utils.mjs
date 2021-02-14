@@ -10,3 +10,10 @@ export const pipe = (...funcs) => (...args) => {
     newArgs = [funcs[i].apply(this, newArgs)];
   return newArgs[0];
 }
+
+export const compose = (...funcs) => (...args) => {
+  let newArgs = args;
+  for (let i = funcs.length - 1; i > -1; i--)
+    newArgs = [funcs[i].apply(this, newArgs)];
+  return newArgs[0];
+}

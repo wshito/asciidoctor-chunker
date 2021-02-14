@@ -7,6 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
+import * as dom from './DomFunc.mjs';
 
 /**
  * Returns a new DOM wrapped with the jQuery interface.
@@ -65,12 +66,12 @@ export const extract = (printer, maxLevel, container, node, thisSecLevel, fnameP
   const filename = basename(fnamePrefix, thisSecLevel, sectionNumber);
   // case with no extraction
   if (maxLevel === thisSecLevel) {
-    printer(filename, container.clone().find('#content').append(node.clone()).end());
+    printer(filename, dom.makeDocument(container, node))
     return;
   }
   const childSelector = `div.sect${thisSecLevel+1}`;
   // extract myself
-  printer(filename, container.clone().find('#content').append(node.clone().find(childSelector).remove().end()).end());
+  printer(filename, dom.makeDocument(container, node.clone().find(childSelector).remove().end()));
 
   // get children nodes
   const children = node.find(childSelector);
@@ -100,7 +101,7 @@ export const makeContainer = $ => cheerio($.root().clone().find('#content').empt
  * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
  */
 export const extractPreamble = (printer, container, preambleNode) => {
-  printer('preamble', container.clone().find('#content').append(preambleNode.clone()).end());
+  printer('preamble', dom.makeDocument(container, preambleNode));
 }
 
 /**
@@ -112,13 +113,8 @@ export const extractPreamble = (printer, container, preambleNode) => {
  */
 export const extractPart = (printer, container, partTitleNode, partNum) => {
   printer(`part${partNum}`,
-    container.clone()
-    .find('#content')
-    .append(partTitleNode.clone())
-    // TODO test if the part has next content and then append
-    // if (node.next().hasClass('partintro'))
-    .append(partTitleNode.next().clone())
-    .end());
+    dom.makeDocument(container,
+      ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode])));
 }
 
 export const printer = outDir => (fnamePrefix, dom) => {
