@@ -9,12 +9,12 @@ import fs from 'fs';
 import test from 'ava';
 import {
   newDOM,
-  extract,
+  extractChapters,
   makeContainer,
   extractPreamble,
+  extractPart
 } from '../src/DOM.mjs';
 import cheerio from 'cheerio';
-import { extractPart } from '../src/DOM.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -86,23 +86,23 @@ test('extract sections', t => {
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extract(printer('chap1'), 1, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(1, container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("2nd round");
-  extract(printer('chap1'), 2, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(2, container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("3rd round");
-  extract(printer('chap1'), 3, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(3, container, $('div.sect1').first(), 1, 'chap', chap);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extract(printer('chap2:depth1'), 1, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth1'))(1, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("2nd round");
-  extract(printer('chap2:depth2'), 2, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth2'))(2, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("3rd round");
-  extract(printer('chap2:depth3'), 3, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth3'))(3, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("4th round");
-  extract(printer('chap2:depth4'), 6, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth4'))(6, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
 
   t.pass();
 });
@@ -123,7 +123,7 @@ test('preamble extraction', t => {
     const node = cheerio(ele);
     t.is(node.attr('id'), 'preamble');
 
-    extractPreamble(printer, container, node);
+    extractPreamble(printer)(container, node);
   });
 });
 
@@ -151,6 +151,6 @@ test('Part extraction', t => {
       t.true(cheerio(dom.find('#content').children().get(1)).hasClass('partintro'));
     }
 
-    extractPart(printer, container, node, ++partNum);
+    extractPart(printer)(container, node, ++partNum);
   });
 });

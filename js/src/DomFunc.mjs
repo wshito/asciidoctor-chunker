@@ -71,4 +71,4 @@ export const remove = selector => node =>
  *  node is emptied out.
  */
 export const empty = selector => node =>
-  cheerio(node.clone().find(selector).empty().end());
+  node.clone().find(selector).empty().end();
