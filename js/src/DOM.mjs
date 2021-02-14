@@ -18,6 +18,13 @@ export function newDOM (filename) {
   return cheerio.load(fs.readFileSync(filename));
 }
 
+/**
+ * Creates the basename for output html file based on
+ * the section level and section number.  Eg. chap1, chap1_sec3-2.
+ * @param {string} fnamePrefix 
+ * @param {number} thisSecLevel 
+ * @param {number} sectionNumber 
+ */
 const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
   thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
   thisSecLevel === 2 ? `${fnamePrefix}_sec${sectionNumber}` : `${fnamePrefix}-${sectionNumber}`;
