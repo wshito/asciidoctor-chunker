@@ -15,6 +15,7 @@ import {
   extractPart
 } from '../src/DOM.mjs';
 import cheerio from 'cheerio';
+import { makeChunks } from '../src/DOM.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -46,7 +47,13 @@ const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
     'chap2_sec2-2-1', 'chap2_sec2-2-2', 'chap2_sec2-2-3',
     'chap2_sec2-3',
     'chap2_sec3'
-  ]
+  ],
+  // chap 3, depth 2
+  'chap3:depth2': ['chap3',
+    'chap3_sec1',
+    'chap3_sec2',
+    'chap3_sec3',
+  ],
 };
 const sectClass = seclabel => {
   const firstSplit = seclabel.split('_');
@@ -76,35 +83,76 @@ test('extract sections', t => {
       const expected = `${label}: <div class="${sectClass(label)}">`;
       console.log(actual);
       t.is(actual, expected);
-    }
+    };
   };
   const $ = newDOM(sampleHTML);
   const container = makeContainer($);
+  const makeDefaultDepth = (num) => ({ depth: { default: num } });
 
   /* Test is done inside the printer() function */
   // for Chapter 1
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extractChapters(printer('chap1'))(1, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(makeDefaultDepth(1), container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("2nd round");
-  extractChapters(printer('chap1'))(2, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(makeDefaultDepth(2), container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("3rd round");
-  extractChapters(printer('chap1'))(3, container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'))(makeDefaultDepth(3), container, $('div.sect1').first(), 1, 'chap', chap);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extractChapters(printer('chap2:depth1'))(1, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth1'))(makeDefaultDepth(1), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("2nd round");
-  extractChapters(printer('chap2:depth2'))(2, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth2'))(makeDefaultDepth(2), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("3rd round");
-  extractChapters(printer('chap2:depth3'))(3, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth3'))(makeDefaultDepth(3), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("4th round");
-  extractChapters(printer('chap2:depth4'))(6, container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth4'))(makeDefaultDepth(6), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
 
   t.pass();
+});
+
+test('fine tuned extrations', t => {
+  const config = {
+    depth: {
+      default: 1, // the default extracton is chapter level
+      2: 4, // extracts subsubsections in chap2
+      3: 2 // extracts sections in chap 3
+    }
+  };
+  const results = { part: [], chap: [] };
+  const printer = (res) => (fnamePrefix, dom) => {
+    let div = fnamePrefix.startsWith('part') ?
+      dom.find('#content > h1') : dom.find('#content > div');
+    const id = div.children().first().attr('id') ||
+      div.attr('id');
+    if (fnamePrefix.startsWith('chap'))
+      results.chap.push({ filename: fnamePrefix, id });
+    else
+      results.part.push({ filename: fnamePrefix, id });
+    // console.log(fnamePrefix);
+  };
+
+  makeChunks(printer(results), newDOM(sampleHTML), config);
+  // test preamble and part extraction
+  t.is(results.part.length, 3);
+  t.deepEqual(results.part[0], { filename: 'preamble', id: 'preamble' });
+  t.deepEqual(results.part[1], { filename: 'part1', id: '_part_i' });
+  t.deepEqual(results.part[2], { filename: 'part2', id: '_part_ii' });
+  // test chapter extraction
+  t.is(results.chap.length,
+    1 + sampleHTMLstructure['chap2:depth4'].length +
+    sampleHTMLstructure['chap3:depth2'].length);
+  // make list of expected filenames
+  const filenames = ['chap1'].concat(sampleHTMLstructure['chap2:depth4']).concat(sampleHTMLstructure['chap3:depth2']);
+  // check actual filenames obtained
+  t.deepEqual(results.chap.map(ele => ele.filename),
+    filenames);
+  // check actual ids obtained
+  t.is(results.chap[5].id, '_chap2_sec_2_1_1');
 });
 
 test('preamble extraction', t => {

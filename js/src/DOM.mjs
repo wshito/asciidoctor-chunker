@@ -98,7 +98,18 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
  * @param {(fnamePrefix: string, dom: Cheerio) => void} processor
  *  The callback which takes the filename prefix and Cheerio
  *  instance and do some chapter content processing.
- * @param {number} maxLevel The maximum secLevel to extract.
+ * @param {object} config: The configuration object which has
+ *  `depth` property to specify the maximum sectLevel to extract.
+ *  The default is 1 which extracts parts and chapters.
+ * @param {object} config.depth The configuration to specify the
+ *  maximum sectLevel to extract.  The example format is as follows:
+ *  ```
+ *  depth: {
+ *    default: 1, // the default is to extract only chapters
+ *    2: 4,  // extracts subsubsections in chap 2
+ *    3: 2,  // extracts sections in chap 3
+ *  }
+ *  ``` 
  * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
  * @param {Cheerio} node The current section node extracted from DOM.
  * @param {number} thisSectLevel the current node's section level where chapter is level 1, section is level 2, and so on.
@@ -107,7 +118,8 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
  */
 export const processChapters = processor => {
   const _processChapters =
-    (maxLevel, container, node, thisSectLevel, fnamePrefix, sectionNumber) => {
+    (config, container, node, thisSectLevel, fnamePrefix, sectionNumber) => {
+      const maxLevel = config.depth[sectionNumber] || config.depth.default;
       const filename = basename(fnamePrefix, thisSectLevel, sectionNumber);
       // case with no extraction
       if (maxLevel === thisSectLevel) {
@@ -126,7 +138,7 @@ export const processChapters = processor => {
       // go into children nodes to extract.
       // make sure to return to make it tail call to minimize the stack
       return children.each((i, ele) =>
-        _processChapters(maxLevel, container,
+        _processChapters(config, container,
           cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
           thisSectLevel + 1,
           filename, i + 1));
@@ -195,12 +207,21 @@ export const extractChapters = (printer) =>
  *
  * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
  * @param {Cheerio} $ The instance of Cheerio.
- * @param {number} maxLevel The maximum secLevel to extract.
+ * @param {object} config: The configuration object which has
+ *  `depth` object to specify the maximum sectLevel to extract.
  *  The default is 1 which extracts parts and chapters.
- *
+ * @param {object} config.depth The configuration to specify the 
+ *  maximum sectLevel to extract.  The example format is as follows:
+ *  ```
+ *  depth: {
+ *    default: 1, // the default is to extract only chapters
+ *    2: 4,  // extracts subsubsections in chap 2
+ *    3: 2,  // extracts sections in chap 3
+ *  }
+ *  ```
  */
 const processContents = (
-  preambleProcessor, partProcessor, chapterProcessor, $, maxLevel) => {
+  preambleProcessor, partProcessor, chapterProcessor, $, config) => {
   const container = makeContainer($);
   let chap = 0;
   let part = 0;
@@ -209,7 +230,7 @@ const processContents = (
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
     if (node.hasClass('sect1'))
-      return chapterProcessor(maxLevel, container, node, 1, 'chap', ++chap); // recursive extraction of chapters
+      return chapterProcessor(config, container, node, 1, 'chap', ++chap); // recursive extraction of chapters
     if (node.hasClass('sect0'))
       return partProcessor(container, node, ++part); // part extraction
     if (node.attr('id') === 'preamble')
@@ -239,14 +260,26 @@ export const printer = outDir => (fnamePrefix, dom) => {
  * 
  * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
  * @param {Cheerio} $ The instance of Cheerio.
- * @param {number} maxLevel The maximum secLevel to extract.
+ * @param {object} config: The configuration object which has
+ *  `depth` object to specify the maximum sectLevel to extract.
  *  The default is 1 which extracts parts and chapters.
+ * @param {object} config.depth The configuration to specify the 
+ *  maximum sectLevel to extract.  The example format is as follows:
+ *  ```
+ *  depth: {
+ *    default: 1, // the default is to extract only chapters
+ *    2: 4,  // extracts subsubsections in chap 2
+ *    3: 2,  // extracts sections in chap 3
+ *  }
+ *  ```
  */
-export const makeChunks = (printer, $, maxLevel) => {
+export const makeChunks = (printer, $, config) => {
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
     extractPreamble(printer),
     extractPart(printer),
-    extractChapters(printer), $, maxLevel);
+    extractChapters(printer),
+    $,
+    config);
 }
