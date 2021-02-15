@@ -332,7 +332,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
  * whole book of adoc html file.
  * This function does not return anything.  This takes
  * a printer function for side effect.
- * 
+ *
  * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
  * @param {Cheerio} $ The instance of Cheerio.
  * @param {object} config: The configuration object which has
@@ -350,7 +350,8 @@ export const printer = outDir => (fnamePrefix, dom) => {
  */
 export const makeChunks = (printer, $, config) => {
   const ht = makeHashTable($.root(), config); // Map<id, filename>
-  const container = makeContainer($)
+  const rewriteLinks = updateLinks(ht);
+  const container = rewriteLinks(makeContainer($));
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
@@ -359,4 +360,14 @@ export const makeChunks = (printer, $, config) => {
     extractChapters(printer, container),
     $.root(),
     config);
+}
+
+const updateLinks = (ht) => (node) => {
+  node.find('a').each((i, ele) => {
+    const a = cheerio(ele);
+    const url = a.attr('href');
+    if (url.startsWith('#'))
+      a.attr('href', `${ht.get(url.substring(1))}${url}`);
+  });
+  return node;
 }

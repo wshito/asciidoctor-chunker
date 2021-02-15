@@ -24,6 +24,7 @@ const main = (adocHtmlFile,
   const writer = printer(outdir);
   const dom = newDOM(adocHtmlFile);
   makeChunks(writer, dom, config);
+  console.log(`Successfully chunked! => ${outdir}/index.html\n`);
 }
 
 main(sampleHTML, 'html_chunks', sampleConfig);
