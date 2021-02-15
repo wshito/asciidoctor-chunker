@@ -5,7 +5,6 @@
 
 'use strict';
 
-import fs from 'fs';
 import { makeChunks, newDOM, printer } from './DOM.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';

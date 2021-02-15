@@ -38,6 +38,8 @@ export const getContentNode$ = node => dom.find$('#content')(node);
  * appended at #content element.  The contents is also cloned
  * internally before appended.
  *
+ * @param {Map<id, filename>} hashtable The hashtable of
+ *  (key, value) = (id, filename).
  * @param {Cheerio} container The Cheerio instance of DOM which
  *  has #content element to append the contents.  This function
  *  does not touch the passed container.  The container is cloned
@@ -48,19 +50,22 @@ export const getContentNode$ = node => dom.find$('#content')(node);
  * @returns The newly created Cheerio instance of the document
  *  with contents appended.
  */
-const makeDocument = (container, ...contents) =>
-  pipe(
+export const makeDocument = (hashtable) => (container, ...contents) => {
+  const linkRewriter = updateLinks(hashtable);
+  const nodes = contents.map(linkRewriter);
+  return pipe(
     dom.clone,
     getContentNode$,
-    dom.append$(...contents) // dom.append$() clones contents
+    dom.append$(...nodes) // dom.append$() clones contents
   )(container);
+}
 
 /**
  * Creates the basename for output html file based on
  * the section level and section number.  Eg. chap1, chap1_sec3-2.
- * @param {string} fnamePrefix 
- * @param {number} thisSecLevel 
- * @param {number} sectionNumber 
+ * @param {string} fnamePrefix
+ * @param {number} thisSecLevel
+ * @param {number} sectionNumber
  */
 const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
   thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
@@ -168,15 +173,14 @@ export const makeContainer = $ => dom.empty('#content')($.root());
  * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
  * @param {boolean} isFirstPage true if this is the first page as index.html.
  */
-export const extractPreamble = (printer, container) =>
+export const extractPreamble = (printer, container, documentMaker) =>
   (rootNode, preambleNode, isFirstPage) => {
     const basename = isFirstPage ? 'index' : 'preamble';
-    printer(basename, makeDocument(container, preambleNode));
+    printer(basename, documentMaker(container, preambleNode));
   }
 
-const makePartDocument = (container, partTitleNode) =>
-  makeDocument(container,
-    ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode]));
+const makePartDocument = (container, partTitleNode, documentMaker) =>
+  documentMaker(container, ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode]));
 
 /**
  *
@@ -191,10 +195,11 @@ const makePartDocument = (container, partTitleNode) =>
  * @param {Cheerio} partTitleNode The part title node that is 'h1.sect0'.
  * @param {number} partNum The part number.
  */
-export const extractPart = (printer, container) =>
+export const extractPart = (printer, container, documentMaker) =>
   (rootNode, partTitleNode, partNum, isFirstPage) => {
     const basename = isFirstPage ? 'index' : `part${partNum}`;
-    printer(basename, makePartDocument(container, partTitleNode));
+    printer(basename,
+      makePartDocument(container, partTitleNode, documentMaker));
   };
 
 /**
@@ -224,9 +229,9 @@ export const extractPart = (printer, container) =>
  * @param {string} fnamePrefix The filename prefix.
  * @param {number} sectionNumber The section number in the current section level.
  */
-export const extractChapters = (printer, container) =>
+export const extractChapters = (printer, container, documentMaker) =>
   processChapters((filename, rootNode, node, isFirstPage) => {
-    printer(filename, makeDocument(container, node));
+    printer(filename, documentMaker(container, node));
   });
 
 /**
@@ -350,14 +355,14 @@ export const printer = outDir => (fnamePrefix, dom) => {
  */
 export const makeChunks = (printer, $, config) => {
   const ht = makeHashTable($.root(), config); // Map<id, filename>
-  const rewriteLinks = updateLinks(ht);
-  const container = rewriteLinks(makeContainer($));
+  const linkRewriter = updateLinks(ht);
+  const container = linkRewriter(makeContainer($));
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
-    extractPreamble(printer, container),
-    extractPart(printer, container),
-    extractChapters(printer, container),
+    extractPreamble(printer, container, makeDocument(ht)),
+    extractPart(printer, container, makeDocument(ht)),
+    extractChapters(printer, container, makeDocument(ht)),
     $.root(),
     config);
 }

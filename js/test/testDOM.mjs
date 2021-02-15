@@ -15,6 +15,7 @@ import {
   extractPart,
   makeChunks,
   makeHashTable,
+  makeDocument,
 } from '../src/DOM.mjs';
 import cheerio from 'cheerio';
 
@@ -90,28 +91,32 @@ test('extract sections', t => {
   const container = makeContainer($);
   const makeDefaultDepth = (num) => ({ depth: { default: num } });
 
+  // we don't have to rewrite the links in the
+  // extraction test so pass the empty hashtabel
+  // to makeDocument()
+  const dm = makeDocument(new Map());
   /* Test is done inside the printer() function */
   // for Chapter 1
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extractChapters(printer('chap1'), container)(makeDefaultDepth(1), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(1), container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("2nd round");
-  extractChapters(printer('chap1'), container)(makeDefaultDepth(2), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(2), container, $('div.sect1').first(), 1, 'chap', chap);
   console.log("3rd round");
-  extractChapters(printer('chap1'), container)(makeDefaultDepth(3), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(3), container, $('div.sect1').first(), 1, 'chap', chap);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extractChapters(printer('chap2:depth1'), container)(makeDefaultDepth(1), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth1'), container, dm)(makeDefaultDepth(1), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("2nd round");
-  extractChapters(printer('chap2:depth2'), container)(makeDefaultDepth(2), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth2'), container, dm)(makeDefaultDepth(2), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("3rd round");
-  extractChapters(printer('chap2:depth3'), container)(makeDefaultDepth(3), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth3'), container, dm)(makeDefaultDepth(3), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
   console.log("4th round");
-  extractChapters(printer('chap2:depth4'), container)(makeDefaultDepth(6), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth4'), container, dm)(makeDefaultDepth(6), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
 
   t.pass();
 });
@@ -172,8 +177,10 @@ test('preamble extraction', t => {
       return;
     const node = cheerio(ele);
     t.is(node.attr('id'), 'preamble');
-
-    extractPreamble(printer, container)($.root(), node);
+    // we don't have to rewrite the links in the
+    // extraction test so pass the empty hashtabel
+    // to makeDocument()
+    extractPreamble(printer, container, makeDocument(new Map()))($.root(), node);
   });
 });
 
@@ -200,8 +207,10 @@ test('Part extraction', t => {
       t.true(dom.find('#content').children().first().hasClass('sect0'));
       t.true(cheerio(dom.find('#content').children().get(1)).hasClass('partintro'));
     }
-
-    extractPart(printer, container)($.root(), node, ++partNum);
+    // we don't have to rewrite the links in the
+    // extraction test so pass the empty hashtabel
+    // to makeDocument()
+    extractPart(printer, container, makeDocument(new Map()))($.root(), node, ++partNum);
   });
 });
 
