@@ -31,7 +31,31 @@ export function newDOM (filename) {
  * 
  * @param {Cheerio} node The DOM which has #content node.
  */
-export const getContentNode$ = node => dom.find$('#content')(node);
+export const getContentNode$ = (node) =>
+  dom.find$('#content')(node);
+
+/**
+ * Returns the first id of the given page.
+ *
+ * @param {Cheerio} contentNode The Cheerio instance that
+ *  context is pointint `#content`.
+ */
+// TODO unused
+const getFirstContentId = (contentNode) =>
+  contentNode.children().first().attr('id') ||
+  contentNode.children().first().children().first().attr('id');
+
+// TODO unused
+const removeHash = str => str.substring(0, str.indexOf('#'));
+
+// TODO unused
+const updatePageTopAnchor = (hashtable, node) => {
+  const id = pipe(
+    getContentNode$,
+    getFirstContentId
+  )(node);
+  hashtable.set(id, removeHash(id));
+}
 
 /**
  * This function creates a new container with contents
@@ -58,7 +82,7 @@ export const makeDocument = (hashtable) => (container, ...contents) => {
     getContentNode$,
     dom.append$(...nodes) // dom.append$() clones contents
   )(container);
-}
+};
 
 /**
  * Creates the basename for output html file based on
@@ -291,13 +315,20 @@ const processContents = (
  */
 export const makeHashTable = (rootNode, config) => {
   const ht = new Map();
+  // record (ID, url) pair in the hashtable
+  // when the id is the top element in the page
+  // remove the hash so the page top is displayed properly
   const recordIds = (node, filename) => {
+    // Set id and URL
+    node.find('*[id]').each((i, e) => {
+      const id = cheerio(e).attr('id');
+      ht.set(id, `${filename}#${id}`);
+    });
+    // remove the hash from the URL
     if (node.attr('id')) // for preamble and part
       ht.set(node.attr('id'), filename);
-    // for chapters
-    node.find('*[id]').each((i, e) => {
-      ht.set(cheerio(e).attr('id'), filename);
-    });
+    else // for chapters and sections
+      ht.set(node.children().first().attr('id'), filename);
   };
   const recordPreambleIds = (container, preambleNode, isFirstPage) => {
     recordIds(preambleNode, isFirstPage ? 'index.html' : 'preamble.html');
@@ -371,8 +402,10 @@ const updateLinks = (ht) => (node) => {
   node.find('a').each((i, ele) => {
     const a = cheerio(ele);
     const url = a.attr('href');
-    if (url.startsWith('#'))
-      a.attr('href', `${ht.get(url.substring(1))}${url}`);
+    if (url.startsWith('#')) {
+      const id = url.substring(1);
+      a.attr('href', `${ht.get(id)}`);
+    }
   });
   return node;
 }
