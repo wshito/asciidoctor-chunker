@@ -115,12 +115,13 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
  * @param {number} thisSectLevel the current node's section level where chapter is level 1, section is level 2, and so on.
  * @param {string} fnamePrefix The filename prefix.
  * @param {number} sectionNumber The section number in the current section level.
+ * @param {boolean} isFirstPage true if this is the index.html page.
  */
 export const processChapters = processor => {
   const _processChapters =
-    (config, container, node, thisSectLevel, fnamePrefix, sectionNumber) => {
+    (config, container, node, thisSectLevel, fnamePrefix, sectionNumber, isFirstPage) => {
       const maxLevel = config.depth[sectionNumber] || config.depth.default;
-      const filename = basename(fnamePrefix, thisSectLevel, sectionNumber);
+      const filename = isFirstPage ? 'index' : basename(fnamePrefix, thisSectLevel, sectionNumber);
       // case with no extraction
       if (maxLevel === thisSectLevel) {
         processor(filename, container, node)
@@ -160,8 +161,9 @@ export const makeContainer = $ => dom.empty('#content')($.root());
  * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
  */
 export const extractPreamble = (printer) =>
-  (container, preambleNode) => {
-    printer('preamble', makeDocument(container, preambleNode));
+  (container, preambleNode, isFirstPage) => {
+    const basename = isFirstPage ? 'index' : 'preamble';
+    printer(basename, makeDocument(container, preambleNode));
   }
 
 const makePartDocument = (container, partTitleNode) =>
@@ -176,8 +178,9 @@ const makePartDocument = (container, partTitleNode) =>
  * @param {number} partNum The part number.
  */
 export const extractPart = (printer) =>
-  (container, partTitleNode, partNum) => {
-    printer(`part${partNum}`, makePartDocument(container, partTitleNode));
+  (container, partTitleNode, partNum, isFirstPage) => {
+    const basename = isFirstPage ? 'index' : `part${partNum}`;
+    printer(basename, makePartDocument(container, partTitleNode));
   };
 
 /**
@@ -194,7 +197,7 @@ export const extractPart = (printer) =>
  * @param {number} sectionNumber The section number in the current section level.
  */
 export const extractChapters = (printer) =>
-  processChapters((filename, container, node) => {
+  processChapters((filename, container, node, isFirstPage) => {
     printer(filename, makeDocument(container, node));
   });
 
@@ -227,14 +230,16 @@ const processContents = (
   let part = 0;
   $('#content').children().each((i, ele) => {
     const node = cheerio(ele);
+    const isFirstPage = i === 0;
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
     if (node.hasClass('sect1'))
-      return chapterProcessor(config, container, node, 1, 'chap', ++chap); // recursive extraction of chapters
+      return chapterProcessor(config, container, node, 1, 'chap',
+        ++chap, isFirstPage); // recursive extraction of chapters
     if (node.hasClass('sect0'))
-      return partProcessor(container, node, ++part); // part extraction
+      return partProcessor(container, node, ++part, isFirstPage); // part extraction
     if (node.attr('id') === 'preamble')
-      return preambleProcessor(container, node);
+      return preambleProcessor(container, node, isFirstPage);
 
     console.log('Woops, unknown contents here to be processed.')
   });

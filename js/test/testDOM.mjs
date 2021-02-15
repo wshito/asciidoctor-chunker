@@ -139,7 +139,7 @@ test('fine tuned extrations', t => {
   makeChunks(printer(results), newDOM(sampleHTML), config);
   // test preamble and part extraction
   t.is(results.part.length, 3);
-  t.deepEqual(results.part[0], { filename: 'preamble', id: 'preamble' });
+  t.deepEqual(results.part[0], { filename: 'index', id: 'preamble' });
   t.deepEqual(results.part[1], { filename: 'part1', id: '_part_i' });
   t.deepEqual(results.part[2], { filename: 'part2', id: '_part_ii' });
   // test chapter extraction
