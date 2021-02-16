@@ -16,7 +16,10 @@ import {
   makeChunks,
   makeHashTable,
   makeDocument,
+  getFirstContentId,
+  getContentNode$,
 } from '../src/DOM.mjs';
+import { pipe } from '../src/Utils.mjs';
 import cheerio from 'cheerio';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
@@ -214,7 +217,7 @@ test('Part extraction', t => {
   });
 });
 
-test('(id, filename) hastable', t => {
+test('No hash to the link of first element in each page', t => {
   const $ = newDOM(sampleHTML);
   const config = {
     depth: {
@@ -223,8 +226,18 @@ test('(id, filename) hastable', t => {
       3: 2 // extracts sections in chap 3
     }
   };
-  const ht = makeHashTable($.root(), config);
-  // console.log(ht.size);
-  // ht.forEach((val, key) => console.log(val, key));
-  t.pass();
+  const printer = (fnamePrefix, dom) => {
+    const hash = `#${pipe(
+      getContentNode$,
+      getFirstContentId
+    )(dom)}`;
+    let noHash = true;
+    dom.find('a').each((i, ele) => {
+      // console.log(cheerio(ele).attr('href'));
+      noHash = noHash && !cheerio(ele).attr('href').endsWith(hash);
+      return noHash; // if false, each() will exit loop early
+    });
+    t.true(noHash);
+  };
+  makeChunks(printer, $, config); // test is inside the printer()
 });

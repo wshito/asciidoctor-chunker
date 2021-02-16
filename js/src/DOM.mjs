@@ -40,22 +40,9 @@ export const getContentNode$ = (node) =>
  * @param {Cheerio} contentNode The Cheerio instance that
  *  context is pointint `#content`.
  */
-// TODO unused
-const getFirstContentId = (contentNode) =>
+export const getFirstContentId = (contentNode) =>
   contentNode.children().first().attr('id') ||
   contentNode.children().first().children().first().attr('id');
-
-// TODO unused
-const removeHash = str => str.substring(0, str.indexOf('#'));
-
-// TODO unused
-const updatePageTopAnchor = (hashtable, node) => {
-  const id = pipe(
-    getContentNode$,
-    getFirstContentId
-  )(node);
-  hashtable.set(id, removeHash(id));
-}
 
 /**
  * This function creates a new container with contents
