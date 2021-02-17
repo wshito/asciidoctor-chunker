@@ -5,7 +5,6 @@
 
 'use strict';
 
-import fs from 'fs';
 import test from 'ava';
 import {
   newDOM,
@@ -99,36 +98,54 @@ test('extract sections', t => {
   };
   const $ = newDOM(sampleHTML);
   const container = makeContainer($);
-  const makeDefaultDepth = (num) => ({ depth: { default: num } });
 
-  // we don't have to rewrite the links in the
-  // extraction test so pass the empty hashtabel
-  // to makeDocument()
-  const dm = makeDocument(referredFootnotesKeeperDymmy, new Map());
   /* Test is done inside the printer() function */
   // for Chapter 1
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(1), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container,
+      createDocumentMaker($)(1))
+    (makeConfigWithDepth(1), container,
+      $('div.sect1').first(), 1, 'chap', chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(2), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container,
+      createDocumentMaker($)(2))
+    (makeConfigWithDepth(2), container,
+      $('div.sect1').first(), 1, 'chap', chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap1'), container, dm)(makeDefaultDepth(3), container, $('div.sect1').first(), 1, 'chap', chap);
+  extractChapters(printer('chap1'), container,
+      createDocumentMaker($)(3))
+    (makeConfigWithDepth(3), container,
+      $('div.sect1').first(), 1, 'chap', chap, false);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extractChapters(printer('chap2:depth1'), container, dm)(makeDefaultDepth(1), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth1'), container,
+      createDocumentMaker($)(1))
+    (makeConfigWithDepth(1), container,
+      cheerio($('div.sect1').get(1)), 1, 'chap',
+      chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap2:depth2'), container, dm)(makeDefaultDepth(2), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth2'), container,
+      createDocumentMaker($)(2))
+    (makeConfigWithDepth(2), container,
+      cheerio($('div.sect1').get(1)), 1, 'chap',
+      chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap2:depth3'), container, dm)(makeDefaultDepth(3), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
+  extractChapters(printer('chap2:depth3'), container,
+      createDocumentMaker($)(3))
+    (makeConfigWithDepth(3), container,
+      cheerio($('div.sect1').get(1)), 1, 'chap',
+      chap, false);
   console.log("4th round");
-  extractChapters(printer('chap2:depth4'), container, dm)(makeDefaultDepth(6), container, cheerio($('div.sect1').get(1)), 1, 'chap', chap);
-
-  t.pass();
+  extractChapters(printer('chap2:depth4'), container,
+      createDocumentMaker($)(6))
+    (makeConfigWithDepth(6), container,
+      cheerio($('div.sect1').get(1)), 1, 'chap',
+      chap, false);
 });
 
 test('fine tuned extrations', t => {
@@ -141,6 +158,10 @@ test('fine tuned extrations', t => {
   };
   const results = { part: [], chap: [] };
   const printer = (res) => (fnamePrefix, dom) => {
+    if (fnamePrefix === 'index') {
+      results.part.push({ filename: fnamePrefix, id: 'preamble' });
+      return;
+    }
     let div = fnamePrefix.startsWith('part') ?
       dom.find('#content > h1') : dom.find('#content > div');
     const id = div.children().first().attr('id') ||
@@ -190,7 +211,9 @@ test('preamble extraction', t => {
     // we don't have to rewrite the links in the
     // extraction test so pass the empty hashtabel
     // to makeDocument()
-    extractPreamble(printer, container, makeDocument(referredFootnotesKeeperDymmy, new Map()))($.root(), node);
+    extractPreamble(printer, container,
+        createDocumentMaker($)(1))
+      (makeConfigWithDepth(1), $.root(), node, false);
   });
 });
 
@@ -221,7 +244,9 @@ test('Part extraction', t => {
     // extraction test so pass the empty hashtabel
     // to makeDocument()
     extractPart(printer, container,
-      makeDocument(referredFootnotesKeeperDymmy, new Map()))($.root(), node, ++partNum);
+        createDocumentMaker($)(1))
+      (makeConfigWithDepth(1), $.root(),
+        node, ++partNum, false);
   });
 });
 
@@ -240,9 +265,16 @@ test('No hash to the link of first element in each page', t => {
       getFirstContentId
     )(dom)}`;
     let noHash = true;
+    // none of the ahcnhors in the page
+    // should have the url pointing to the 
+    // first content with hashed url since
+    // it should be simply the page address.
     dom.find('a').each((i, ele) => {
-      // console.log(cheerio(ele).attr('href'));
       noHash = noHash && !cheerio(ele).attr('href').endsWith(hash);
+      if (!noHash)
+        console.log(cheerio(ele).attr('href'),
+          "    has ", hash);
+
       return noHash; // if false, each() will exit loop early
     });
     t.true(noHash);
@@ -342,6 +374,28 @@ test('updateFootnotes()()', t => {
   */
 });
 
+test('makeHashtable()', t => {
+  const $ = newDOM(sampleHTML);
+  const config = {
+    depth: {
+      default: 1, // the default extracton is chapter level
+      2: 4, // extracts subsubsections in chap2
+      3: 2 // extracts sections in chap 3
+    }
+  };
+  const ht = makeHashTable($.root(), config);
+  t.is(ht.get('_first_chapter'), 'chap1.html');
+  t.is(ht.get('_part_i'), 'part1.html');
+
+  // test page structure information in hashtable
+  const pageNav = ht.get('navigation');
+  const { filename2pageNum, filenameList } = pageNav;
+  filenameList.forEach((f, i, arry) =>
+    t.is(arry[filename2pageNum[f]], f));
+  // console.log(filenameList);
+  // console.log(filename2pageNum);
+});
+
 test('makeChunks()', t => {
   const $ = newDOM(sampleHTML);
   const config = {
@@ -365,6 +419,7 @@ test('makeChunks()', t => {
 
   makeChunks(printer, $, config);
 });
+
 
 // extracts div.sectNUM for the section ID
 function extract ($, secID) {
@@ -400,4 +455,30 @@ function testChunk (pageDescription, dom, t) {
     const node = cheerio(e);
     t.is(node.attr('id'), dsc.footnotes[i]);
   });
+}
+
+function makeConfigWithDepth (num) {
+  return { depth: { default: num } };
+}
+
+/**
+ * Creates one-level-curried makeDocument() function for
+ * testing purpose.  The depth of extraction is configured
+ * with the argument `depth`.  This setting is solely for
+ * hash table cration to obtain the id-filename mapping
+ * and page structure for page navigation.  If hashtable
+ * is not used in the test, the depth should not
+ * really matter.
+ *
+ * @param {number} depth 
+ */
+// we don't have to rewrite the links in the
+// extraction test so pass the empty hashtabel
+// to makeDocument()
+function createDocumentMaker ($) {
+  return (depth) =>
+    makeDocument(
+      referredFootnotesKeeperDymmy,
+      makeHashTable($.root(),
+        makeConfigWithDepth(depth)));
 }

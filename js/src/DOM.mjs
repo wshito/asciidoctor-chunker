@@ -52,7 +52,8 @@ export const getFirstContentId = (contentNode) =>
  * @param {Function} referredFootnotesKeeper$ the curried functon of
  *  keepReferredFootnotes$(footnoteDefIds:: Map<string>).
  * @param {Map<id, filename>} hashtable The hashtable of
- *  (key, value) = (id, filename).
+ *  (key, value) = (id, filename), plus the
+ *  ('navigation', {filename, pageNum})
  * @param {Cheerio} container The Cheerio instance of DOM which
  *  has #content element to append the contents.  This function
  *  does not touch the passed container.  The container is cloned
@@ -64,14 +65,15 @@ export const getFirstContentId = (contentNode) =>
  *  with contents appended.
  */
 export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
-  (container, ...contents) => {
+  (config, basename, container, ...contents) => {
     const linkRewriter = updateLinks(hashtable);
     const nodes = contents.map(linkRewriter);
     const newContainer = D.clone(container);
     return pipe(
       getContentNode$,
       D.append$(...nodes), // dom.append$() clones contents
-      updateFootnotes(referredFootnotesKeeper$(newContainer.find('#footnotes')))
+      updateFootnotes(referredFootnotesKeeper$(newContainer.find('#footnotes'))),
+      addPageNavigation(basename, hashtable.get('navigation'))
     )(newContainer);
   };
 
@@ -144,12 +146,12 @@ export const processChapters = processor => {
       const filename = isFirstPage ? 'index' : basename(fnamePrefix, thisSectLevel, sectionNumber);
       // case with no extraction
       if (maxLevel === thisSectLevel) {
-        processor(filename, container, node, isFirstPage)
+        processor(config, filename, container, node, isFirstPage)
         return;
       }
       const childSelector = `div.sect${thisSectLevel+1}`;
       // extract myself
-      processor(filename, container, D.remove(childSelector)(node), isFirstPage);
+      processor(config, filename, container, D.remove(childSelector)(node), isFirstPage);
 
       // get children nodes
       const children = node.find(childSelector);
@@ -189,13 +191,13 @@ export const makeContainer = $ => D.empty('#content')($.root());
  * @param {boolean} isFirstPage true if this is the first page as index.html.
  */
 export const extractPreamble = (printer, container, documentMaker) =>
-  (rootNode, preambleNode, isFirstPage) => {
+  (config, rootNode, preambleNode, isFirstPage) => {
     const basename = isFirstPage ? 'index' : 'preamble';
-    printer(basename, documentMaker(container, preambleNode));
+    printer(basename, documentMaker(config, basename, container, preambleNode));
   }
 
-const makePartDocument = (container, partTitleNode, documentMaker) =>
-  documentMaker(container, ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode]));
+const makePartDocument = (config, basename, container, partTitleNode, documentMaker) =>
+  documentMaker(config, basename, container, ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode]));
 
 /**
  *
@@ -211,10 +213,10 @@ const makePartDocument = (container, partTitleNode, documentMaker) =>
  * @param {number} partNum The part number.
  */
 export const extractPart = (printer, container, documentMaker) =>
-  (rootNode, partTitleNode, partNum, isFirstPage) => {
+  (config, rootNode, partTitleNode, partNum, isFirstPage) => {
     const basename = isFirstPage ? 'index' : `part${partNum}`;
     printer(basename,
-      makePartDocument(container, partTitleNode, documentMaker));
+      makePartDocument(config, basename, container, partTitleNode, documentMaker));
   };
 
 /**
@@ -245,8 +247,10 @@ export const extractPart = (printer, container, documentMaker) =>
  * @param {number} sectionNumber The section number in the current section level.
  */
 export const extractChapters = (printer, container, documentMaker) =>
-  processChapters((filename, rootNode, node, isFirstPage) => {
-    printer(filename, documentMaker(container, node));
+  // the argument is the processor function that will be used
+  // inside the processChapters().
+  processChapters((config, basename, rootNode, node, isFirstPage) => {
+    printer(basename, documentMaker(config, basename, container, node));
   });
 
 /**
@@ -290,29 +294,40 @@ const processContents = (
       return chapterProcessor(config, root, node, 1, 'chap',
         ++chap, isFirstPage); // recursive extraction of chapters
     if (node.hasClass('sect0'))
-      return partProcessor(root, node, ++part, isFirstPage); // part extraction
+      return partProcessor(config, root, node, ++part, isFirstPage); // part extraction
     if (node.attr('id') === 'preamble')
-      return preambleProcessor(root, node, isFirstPage);
+      return preambleProcessor(config, root, node, isFirstPage);
 
     console.log('Woops, unknown contents here to be processed.')
   });
 };
 
 /**
- * Returns the hashtable (Map instance) of (id, url).  The url is
- * where the id is defined.  If id is 'foo', the url is
+ * Returns the hashtable (Map instance) of (id, url).
+ * The url is where the id is defined.  If id is 'foo', the url is
  * 'filename.html#foo' except the title element of the chunked page.
  * The title element's url is simply the filename wihout the hashed id.
+ *
+ * You can also obtain the object {filename, pageNum} from this
+ * hashtable with the key 'navigation'.  You can use this array
+ * to obtain previous and next page filename.
  *
  * @param {Cheerio} rootNode The root dom
  * @param {object} config The config object for extraction settings.
  */
 export const makeHashTable = (rootNode, config) => {
   const ht = new Map();
+  const filename2pageNum = {};
+  const filenameList = [];
+  let pageNum = 0;
   // record (ID, url) pair in the hashtable
   // when the id is the top element in the page
   // remove the hash so the page top is displayed properly
   const recordIds = (node, filename) => {
+    // keep track of filenames
+    filename2pageNum[filename] = pageNum;
+    filenameList[pageNum] = filename;
+    pageNum++;
     // Set id and URL
     node.find('*[id]').each((i, e) => {
       const id = cheerio(e).attr('id');
@@ -325,14 +340,14 @@ export const makeHashTable = (rootNode, config) => {
     else // for chapters and sections
       ht.set(node.children().first().attr('id'), filename);
   };
-  const recordPreambleIds = (container, preambleNode, isFirstPage) => {
+  const recordPreambleIds = (config, container, preambleNode, isFirstPage) => {
     recordIds(preambleNode, isFirstPage ? 'index.html' : 'preamble.html');
   };
-  const recordPartIds = (container, partTitleNode, partNum, isFirstPage) => {
+  const recordPartIds = (config, container, partTitleNode, partNum, isFirstPage) => {
     recordIds(partTitleNode, isFirstPage ? 'index.html' : `part${partNum}.html`);
   };
   const recordChapterIds =
-    processChapters((filename, container, node, isFirstPage) => {
+    processChapters((config, filename, container, node, isFirstPage) => {
       recordIds(node, isFirstPage ? 'index.html' : `${filename}.html`);
     });
   processContents(
@@ -342,7 +357,7 @@ export const makeHashTable = (rootNode, config) => {
     rootNode,
     config
   );
-
+  ht.set('navigation', { filename2pageNum, filenameList });
   return ht;
 }
 
@@ -359,7 +374,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
 }
 
 const addTitlepageToc$ = (rootNode) => {
-  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc ul.sectlevel0 > li'));
+  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc ul.sectlevel0 > li:first-child'));
 }
 /**
  * Make chunked html.  This is the main function to extract
@@ -532,3 +547,40 @@ export const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
   )(rootNode);
   return rootNode;
 }
+
+const findCurrentPageTocAnchor = (fnamePrefix) => (rootNode) =>
+  rootNode.find(`a[href^=${fnamePrefix}.html]`);
+
+const markCurrent$ = node => node.addClass('current');
+('class');
+
+export const addPageNavigation = (basename, { filename2pageNum, filenameList }) =>
+  (rootNode) => {
+    const thisPageNum = filename2pageNum[`${basename}.html`];
+    const prev = thisPageNum > 0 ? filenameList[thisPageNum - 1] : null;
+    const next = thisPageNum < filenameList.length - 1 ? filenameList[thisPageNum + 1] : null;
+    const html = createNav(prev, next);
+    const div = rootNode.find('body > div:last-of-type');
+    if (div.attr('id') === 'footer')
+      cheerio(html).insertBefore(div);
+    else
+      cheerio(html).insertAfter(div);
+
+    return rootNode;
+  };
+
+const createNav = (prev, next) => `
+<nav>
+  ${prev ?
+    `<a rel="prev" href="${prev}" class="prev"
+        aria-keyshortcuts="Left">
+        <i class="fa fa-angle-left"></i>
+     </a>` : ''}
+  ${next ?
+    `<a rel="next" href="${next}" class="next"
+        aria-keyshortcuts="Right">
+        <i class="fa fa-angle-right"></i>
+     </a>` : ''}
+  <div style="clear: both"></div>
+</nav>
+`;
