@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
 import { pipe } from './Utils.mjs';
-import * as dom from './DomFunc.mjs';
+import * as D from './DomFunc.mjs';
 
 /*
  * Module to provide the Asciidoctor single HTML specific
@@ -32,7 +32,7 @@ export function newDOM (filename) {
  * @param {Cheerio} node The DOM which has #content node.
  */
 export const getContentNode$ = (node) =>
-  dom.find$('#content')(node);
+  D.find$('#content')(node);
 
 /**
  * Returns the first id of the given page.
@@ -49,6 +49,8 @@ export const getFirstContentId = (contentNode) =>
  * appended at #content element.  The contents is also cloned
  * internally before appended.
  *
+ * @param {Function} referredFootnotesKeeper$ the curried functon of
+ *  keepReferredFootnotes$(footnoteDefIds:: Map<string>).
  * @param {Map<id, filename>} hashtable The hashtable of
  *  (key, value) = (id, filename).
  * @param {Cheerio} container The Cheerio instance of DOM which
@@ -61,15 +63,17 @@ export const getFirstContentId = (contentNode) =>
  * @returns The newly created Cheerio instance of the document
  *  with contents appended.
  */
-export const makeDocument = (hashtable) => (container, ...contents) => {
-  const linkRewriter = updateLinks(hashtable);
-  const nodes = contents.map(linkRewriter);
-  return pipe(
-    dom.clone,
-    getContentNode$,
-    dom.append$(...nodes) // dom.append$() clones contents
-  )(container);
-};
+export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
+  (container, ...contents) => {
+    const linkRewriter = updateLinks(hashtable);
+    const nodes = contents.map(linkRewriter);
+    const newContainer = D.clone(container);
+    return pipe(
+      getContentNode$,
+      D.append$(...nodes), // dom.append$() clones contents
+      updateFootnotes(referredFootnotesKeeper$(newContainer.find('#footnotes')))
+    )(newContainer);
+  };
 
 /**
  * Creates the basename for output html file based on
@@ -145,7 +149,7 @@ export const processChapters = processor => {
       }
       const childSelector = `div.sect${thisSectLevel+1}`;
       // extract myself
-      processor(filename, container, dom.remove(childSelector)(node), isFirstPage);
+      processor(filename, container, D.remove(childSelector)(node), isFirstPage);
 
       // get children nodes
       const children = node.find(childSelector);
@@ -169,7 +173,7 @@ export const processChapters = processor => {
  *
  * @param {Cheerio} $ The instance of Cheerio.
  */
-export const makeContainer = $ => dom.empty('#content')($.root());
+export const makeContainer = $ => D.empty('#content')($.root());
 
 /**
  *
@@ -295,7 +299,10 @@ const processContents = (
 };
 
 /**
- * Returns the hashtable (Map instance) of (id, filename).
+ * Returns the hashtable (Map instance) of (id, url).  The url is
+ * where the id is defined.  If id is 'foo', the url is
+ * 'filename.html#foo' except the title element of the chunked page.
+ * The title element's url is simply the filename wihout the hashed id.
  *
  * @param {Cheerio} rootNode The root dom
  * @param {object} config The config object for extraction settings.
@@ -309,6 +316,7 @@ export const makeHashTable = (rootNode, config) => {
     // Set id and URL
     node.find('*[id]').each((i, e) => {
       const id = cheerio(e).attr('id');
+      if (id.startsWith('_footnotedef_')) return;
       ht.set(id, `${filename}#${id}`);
     });
     // remove the hash from the URL
@@ -350,6 +358,9 @@ export const printer = outDir => (fnamePrefix, dom) => {
   });
 }
 
+const addTitlepageToc$ = (rootNode) => {
+  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc ul.sectlevel0 > li'));
+}
 /**
  * Make chunked html.  This is the main function to extract
  * whole book of adoc html file.
@@ -375,24 +386,149 @@ export const makeChunks = (printer, $, config) => {
   const ht = makeHashTable($.root(), config); // Map<id, filename>
   const linkRewriter = updateLinks(ht);
   const container = linkRewriter(makeContainer($));
+  addTitlepageToc$(container); // add titlepage link in the toc
+  const footnotesKeeper$ =
+    keepReferredFootnotes$(getFootnoteDefIds($('#footnotes')));
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
-    extractPreamble(printer, container, makeDocument(ht)),
-    extractPart(printer, container, makeDocument(ht)),
-    extractChapters(printer, container, makeDocument(ht)),
+    extractPreamble(printer, container, makeDocument(footnotesKeeper$, ht)),
+    extractPart(printer, container, makeDocument(footnotesKeeper$, ht)),
+    extractChapters(printer, container, makeDocument(footnotesKeeper$, ht)),
     $.root(),
     config);
 }
 
+/**
+ * @param {Map<id, url>} ht the Hashtable of <id, url>.  If id is 'foo' then
+ *  url is 'filename.html#foo' where the filename is where the id is defined.
+ */
 const updateLinks = (ht) => (node) => {
   node.find('a').each((i, ele) => {
     const a = cheerio(ele);
     const url = a.attr('href');
-    if (url.startsWith('#')) {
+    // footnote is always whithin the chunked page so no need to rewrite
+    if (url.startsWith('#') &&
+      !url.startsWith('#_footnotedef_') &&
+      !url.startsWith('#_footnoteref_')) {
       const id = url.substring(1);
       a.attr('href', `${ht.get(id)}`);
     }
   });
   return node;
+}
+
+/**
+ * Returns set of footnote ids in String.
+ *
+ * @param footnotesNode Cheerio instance of `div#footnotes`
+ * @returns {Set<string>} The Set instance with footnote ids.
+ */
+export const getFootnoteDefIds = (footnotesNode) => {
+  const fnoteDefIds = new Set();
+  footnotesNode.find('div.footnote').each((i, ele) => {
+    fnoteDefIds.add(cheerio(ele).attr('id'));
+  });
+  return fnoteDefIds;
+};
+
+/**
+ * Returns Cheerio instance of selections of footnote referers anchor elements.
+ * 
+ * @param {Cheerio} contentNode The `div#content` node.
+ * @returns {Cheerio} the Cheerio instance of selections of footnote
+ *   referers anchor elements.
+ */
+export const findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
+
+/**
+ * Removes the unreferred footnotes from the page and returns
+ * the Cheerio instance with selections of all the footnote referer anchor
+ * nodes.
+ * 
+ * @param {Set<string>} footnoteDefIds The set of all the footnote def ids.
+ * @param {Cheerio} footnotesNode The Cherrio instance of current page's
+ *  #footnotes node.  The footnotes under this node will be modified.
+ * @param {Cheerio} referers The Cheerio intance which holds found anchors that
+ *  refers to a footnote.
+ */
+export const keepReferredFootnotes$ = (footnoteDefIds) =>
+  (footnotesNode) => (referers) => {
+    if (referers.length === 0) {
+      footnotesNode.empty().end();
+      return referers;
+    }
+    const removingFootnotes = new Set([...footnoteDefIds]);
+    // console.log("before removing", removingFootnotes.size);
+    // console.log("Referers length", referers.length);
+    referers.each((i, ele) => {
+      // console.log(cheerio(ele).attr('href'));
+      removingFootnotes.delete(cheerio(ele).attr('href').substring(1));
+    });
+    // console.log("after removing", removingFootnotes.size);
+    removingFootnotes.forEach(id => {
+      // console.log("removing", id);
+      footnotesNode.find(`#${id}`).remove().end();
+    });
+    return referers;
+  };
+
+/**
+ * Adds referer id to anchor which refers to the multiply used footnote.
+ * This has side effect that modifies some of referers anchor's id attribute.
+ * 
+ * @param {cheerio} referers The Cheerio instance with the selection of
+ *  nodes that refer to multiply used footnotes.
+ */
+export const updateRefererId$ = (referers) => {
+  if (referers.length === 0) return referers;
+  const added = new Set();
+  referers.each((i, ele) => {
+    const a = cheerio(ele);
+    if (a.attr('id')) return;
+    const url = a.attr('href')
+    if (added.has(url)) return;
+    added.add(url);
+    const refID = makeFootnoteRefId(url);
+    a.attr('id', refID);
+  });
+  return referers;
+};
+
+/**
+ * Converts the url `#_footnotedef_4` to `_footnoteref_4`.
+ * 
+ * @param {string} defURL The hash link to the footnote definition as 
+ *   `_footnotedef_4`.
+ * @returns corresponding referer's ID such as `_footnoteref_4`
+ */
+export const makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
+
+/**
+ * 
+ * @param {Function} referredFootnotesKeeper$ the curried functon of
+ *  keepReferredFootnotes$(footnoteDefIds:: Map<string>).
+ * @param {Cheerio} node The root node of the chunked page.
+ */
+export const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
+  // each footnote definition has `<div id='_footnotedef_4' class='footnote'>`
+  // the referer has
+  // `<a id='_footnoteref_4' href='#_footnotedef_4' class='footnote'>
+  // multiply used footnote's referer does not have id as
+  // `<a href='#_footnotedef_4' class='footnote'>
+  //
+  // if a[href='#_footnotedef_4'] is whithin the page,
+  // div#_footnotedef_4 should be kept, and
+  // and id='_footnoteref_4' should be added to the first
+  // a[href='#_footnotedef_4'] in the page
+
+  // see if there are referers]
+  pipe(
+    getContentNode$,
+    // (a) => { console.log("here1"); return a },
+    findFootnoteReferers,
+    referredFootnotesKeeper$,
+    updateRefererId$,
+  )(rootNode);
+  return rootNode;
 }
