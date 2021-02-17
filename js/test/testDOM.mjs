@@ -467,7 +467,7 @@ function makeConfigWithDepth (num) {
  * with the argument `depth`.  This setting is solely for
  * hash table cration to obtain the id-filename mapping
  * and page structure for page navigation.  If hashtable
- * is not used in the test, the depth should not
+ * is used only for the test, the depth should not
  * really matter.
  *
  * @param {number} depth 
