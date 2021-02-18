@@ -38,3 +38,30 @@ export const sourceIsNewerThan = (source) =>
         src.value.atimeMs > targ.value.atimeMs
       );
   };
+
+/**
+ * Asynchronously returns true if the file
+ * or dir exists.
+ * 
+ * @param {string} path
+ * @returns Promoise that returns true if file
+ *  or dir exists.  Returns false if not existed
+ *  or promise rejected.
+ */
+export const exists = (path) =>
+  new Promise((resolve, reject) => {
+    fs.access(path, fs.constants.F_OK, (err) => {
+      if (err) resolve(false);
+      resolve(true);
+    });
+  });
+
+/**
+ * Asyncronously removes recursively forcefully
+ * as `rm -rf`.
+ *
+ * @param {string} path 
+ * @returns Promise that returns nothing when
+ *  resolved and error object when rejected.
+ */
+export const rm = (path) => fsp.rm(path, { force: true, recursive: true });
