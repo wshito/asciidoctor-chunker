@@ -7,19 +7,16 @@
 import fs from 'fs';
 const fsp = fs.promises;
 /**
- * Make directory recursively as `mkdir -p`
- * and returns the given path string for
- * the use of method chain when resolved.
+ * Asynchronously make directory recursively as `mkdir -p`
+ * and returns the given path string for the use of
+ * method chain when resolved.
  *
- * @param {string} path 
+ * @param {string} path
  */
 export const mkdirs = (path) =>
-  new Promise((resolve, reject) => {
-    fs.mkdir(path, { recursive: true }, (err) => {
-      if (err) reject(err);
-      resolve(path);
-    });
-  });
+  fsp.mkdir(path, { recursive: true }).then(
+    onfulfilled => path,
+    onrejected => onrejected);
 
 /**
  * Returns true if source is newer (modified) than 
@@ -49,19 +46,18 @@ export const sourceIsNewerThan = (source) =>
  *  or promise rejected.
  */
 export const exists = (path) =>
-  new Promise((resolve, reject) => {
-    fs.access(path, fs.constants.F_OK, (err) => {
-      if (err) resolve(false);
-      resolve(true);
-    });
-  });
+  fsp.access(path, fs.constants.F_OK).then(
+    onfullfilled => true,
+    onrejected => false);
 
 /**
  * Asyncronously removes recursively forcefully
  * as `rm -rf`.
  *
  * @param {string} path 
- * @returns Promise that returns nothing when
+ * @returns Promise that returns removed path when
  *  resolved and error object when rejected.
  */
-export const rm = (path) => fsp.rm(path, { force: true, recursive: true });
+export const rm = (path) => fsp.rm(path, { force: true, recursive: true }).then(
+  onfulfilled => path,
+  onrejected => onrejected);

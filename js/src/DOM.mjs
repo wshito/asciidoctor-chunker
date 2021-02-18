@@ -10,6 +10,8 @@ import cheerio from 'cheerio';
 import { pipe } from './Utils.mjs';
 import * as D from './DomFunc.mjs';
 
+const fsp = fs.promises;
+
 /*
  * Module to provide the Asciidoctor single HTML specific
  * DOM manipulations.
@@ -366,11 +368,8 @@ export const printer = outDir => (fnamePrefix, dom) => {
     dir: outDir,
     base: `${fnamePrefix}.html`
   });
-  fs.writeFile(fname, dom.html(), err => {
-    if (err)
-      console.log("File write error:", fname);
-    // console.log(fname);
-  });
+  fsp.writeFile(fname, dom.html()).catch(err =>
+    console.log("File write error:", fname));
 }
 
 const addTitlepageToc$ = (rootNode) => {
