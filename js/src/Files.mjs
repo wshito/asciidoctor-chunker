@@ -9,7 +9,7 @@ const fsp = fs.promises;
 /**
  * Make directory recursively as `mkdir -p`
  * and returns the given path string for
- * the use of method chain.
+ * the use of method chain when resolved.
  *
  * @param {string} path 
  */
