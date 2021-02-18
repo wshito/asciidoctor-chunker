@@ -5,7 +5,14 @@
 'use strict';
 
 import test from 'ava';
-import { exists, rm, mkdirs, sourceIsNewerThan } from '../src/Files.mjs';
+import {
+  exists,
+  rm,
+  mkdirs,
+  sourceIsNewerThan,
+  copyIfNewer,
+  relative2absolute,
+} from '../src/Files.mjs';
 import fs from 'fs';
 const fsp = fs.promises;
 
@@ -26,4 +33,21 @@ test('sourceIsNewerThan()', async t => {
   // cleanup
   await rm('test/tmp2');
   t.false(await exists('test/tmp2'));
+});
+
+test('copyIfNewer()', async t => {
+  const target = 'test/tmp3/a/b/c/README.md';
+  t.is(await copyIfNewer('README.md')(target), target); // must be copied
+  t.is(await copyIfNewer('README.md')(target), false); // not be copied
+
+  // cleanup
+  await rm('test/tmp3');
+  t.false(await exists('test/tmp3'));
+
+});
+
+test('relative2absolute()', t => {
+  t.is(relative2absolute('a/b/c/index.html')('./d/e/f/g.html'), 'a/b/c/d/e/f/g.html');
+  t.is(relative2absolute('a/b/c/index.html')('../d/e/f/g.html'), 'a/b/d/e/f/g.html');
+  t.is(relative2absolute('a/b/c/index.html')('../../g.html'), 'a/g.html');
 });
