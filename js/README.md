@@ -55,5 +55,5 @@ MIT
 ## Developer's Memo
 
 - Unit test uses `test/resources/output/single/sample.html` generated from `test/resources/sample.adoc`.
-- `npm install cheerio`
-- `npm install --save-dev ava`
+- `npm install cheerio commander`
+- `npm install --save-dev ava webpack webpack-cli`
