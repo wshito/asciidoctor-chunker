@@ -181,7 +181,7 @@ export const processChapters = processor => {
  *
  * @param {Cheerio} $ The instance of Cheerio.
  */
-export const makeContainer = $ => D.empty('#content')($.root());
+export const makeContainer = ($) => D.empty('#content')($.root());;
 
 /**
  *
@@ -378,6 +378,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
 
 const addTitlepageToc$ = (rootNode) => {
   cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc ul.sectlevel0 > li:first-child'));
+  return rootNode;
 }
 /**
  * Make chunked html.  This is the main function to extract
@@ -403,8 +404,13 @@ const addTitlepageToc$ = (rootNode) => {
 export const makeChunks = (printer, $, config) => {
   const ht = makeHashTable($.root(), config); // Map<id, filename>
   const linkRewriter = updateLinks(ht);
-  const container = linkRewriter(makeContainer($));
-  addTitlepageToc$(container); // add titlepage link in the toc
+  const container = pipe(
+    makeContainer,
+    linkRewriter,
+    extractCSS(config.outdir),
+    addTitlepageToc$
+  )($)
+  // addTitlepageToc$(container); // add titlepage link in the toc
   const footnotesKeeper$ =
     keepReferredFootnotes$(getFootnoteDefIds($('#footnotes')));
   // delegates recursive processing to processContents()
@@ -613,5 +619,16 @@ export const copyRelativeFiles = (basefile, outDir) => (dom) => {
 
   getLocalFiles(dom).forEach(file =>
     copyIfNewer(toAbsoluteInSrcDir(file))
-    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file liked from the document is missing: ${file}`)));
+    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file liked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
 };
+
+export const extractCSS = (outDir) => (rootNode) => {
+  rootNode.find('style').each((i, e) => {
+    const basename = `style${i}.css`;
+    const node = cheerio(e);
+    fsp.writeFile(path.join(outDir, basename),
+      cheerio(e).contents().text());
+    node.replaceWith(cheerio(`<link rel='stylesheet' href='${basename}' type='text/css' />`));
+  });
+  return rootNode;
+}

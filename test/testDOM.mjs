@@ -27,6 +27,8 @@ import {
 import { append$ } from '../src/DomFunc.mjs';
 import { pipe } from '../src/Utils.mjs';
 import cheerio from 'cheerio';
+import { rm, exists } from '../src/Files.mjs';
+import { mkdirs } from '../src/Files.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -148,8 +150,10 @@ test('extract sections', t => {
       chap, false);
 });
 
-test('fine tuned extrations', t => {
+test('fine tuned extrations', async t => {
+  const outdir = 'test/resources/tmp';
   const config = {
+    outdir,
     depth: {
       default: 1, // the default extracton is chapter level
       2: 4, // extracts subsubsections in chap2
@@ -173,6 +177,7 @@ test('fine tuned extrations', t => {
     // console.log("Here", fnamePrefix);
   };
 
+  await mkdirs(outdir);
   makeChunks(printer(results), newDOM(sampleHTML), config);
 
   // test preamble and part extraction
@@ -191,6 +196,10 @@ test('fine tuned extrations', t => {
     filenames);
   // check actual ids obtained
   t.is(results.chap[5].id, '_chap2_sec_2_1_1');
+
+  // cleanup for css file extraction side effects in makeChunks()
+  await rm(outdir);
+  t.false(await exists(outdir));
 });
 
 test('preamble extraction', t => {
@@ -250,9 +259,11 @@ test('Part extraction', t => {
   });
 });
 
-test('No hash to the link of first element in each page', t => {
+test('No hash to the link of first element in each page', async t => {
   const $ = newDOM(sampleHTML);
+  const outdir = 'test/resources/tmp2';
   const config = {
+    outdir,
     depth: {
       default: 1, // the default extracton is chapter level
       2: 4, // extracts subsubsections in chap2
@@ -279,7 +290,12 @@ test('No hash to the link of first element in each page', t => {
     });
     t.true(noHash);
   };
+  await mkdirs(outdir);
   makeChunks(printer, $, config); // test is inside the printer()
+
+  // cleanup for css file extraction side effects in makeChunks()
+  await rm(outdir);
+  t.false(await exists(outdir));
 });
 
 test('getFootnoteDefIds()', t => {
@@ -396,9 +412,11 @@ test('makeHashtable()', t => {
   // console.log(filename2pageNum);
 });
 
-test('makeChunks()', t => {
+test('makeChunks()', async t => {
   const $ = newDOM(sampleHTML);
+  const outdir = 'test/resources/tmp3';
   const config = {
+    outdir,
     depth: {
       default: 1, // the default extracton is chapter level
       2: 4, // extracts subsubsections in chap2
@@ -416,8 +434,12 @@ test('makeChunks()', t => {
     }
     // console.log(fnamePrefix);
   };
-
+  await mkdirs(outdir);
   makeChunks(printer, $, config);
+
+  // cleanup for css file extraction side effects in makeChunks()
+  await rm(outdir);
+  t.false(await exists(outdir));
 });
 
 

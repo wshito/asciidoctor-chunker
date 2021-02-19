@@ -9,6 +9,7 @@ import { makeChunks, newDOM, printer, copyRelativeFiles } from './DOM.mjs';
 import { makeConfig } from './CommandOptions.mjs';
 import { exists } from './Files.mjs';
 import { mkdirs } from './Files.mjs';
+import { extractCSS } from './DOM.mjs';
 
 
 const sampleHTML = 'test/resources/output/single/sample.html';
@@ -39,6 +40,7 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   console.log(`Successfully chunked! => ${outdir}/index.html\n`);
 }
 
+console.log();
 const { singleHTML, config } = makeConfig(process.argv, defaultConfig);
 
 main(singleHTML, config);

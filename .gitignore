@@ -5,4 +5,5 @@ output-single
 asciidoctor.org
 node_modules
 html_chunks
-tmp
+test/resources/output
+tmp*

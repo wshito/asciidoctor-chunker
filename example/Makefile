@@ -10,7 +10,7 @@ CHUNK_OUTPUT    = output-chunk
 
 
 SINGLE_DIR     := $(SINGLE_OUTPUT)/single
-CHUNK_DIR      := $(CHUNK_OUTPUT)/html_chunk
+CHUNK_DIR      := $(CHUNK_OUTPUT)/html_chunks
 SINGLE_IMG_DIR := $(SINGLE_OUTPUT)/images
 
 SINGLE := $(SINGLE_DIR)/user-manual.html
@@ -32,7 +32,7 @@ $(CHUNK): $(SINGLE)
 	$(ASCIIDOCTOR_CHUNKER_SCRIPT) $<  -o $(CHUNK_DIR)
 
 # prepare images
-$(SINGLE_IMG_DIR): asciidoctor.org $(SINGLE_DIR)
+$(SINGLE_IMG_DIR): | asciidoctor.org $(SINGLE_DIR)
 	cd $(SINGLE_OUTPUT); \
 	ln -s ../asciidoctor.org/images ./ ;\
 	cd -
