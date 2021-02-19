@@ -16,7 +16,7 @@ import {
 import fs from 'fs';
 const fsp = fs.promises;
 
-test.skip('mkdirs()', async t => {
+test('mkdirs()', async t => {
   const path = await mkdirs('test/tmp/a/b/c')
   t.true(await exists(path));
   await rm('test/tmp');
