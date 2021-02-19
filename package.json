@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "start": "node src/index.mjs test/resources/output/single/sample.html -depth 2:4,3:2",
-    "manual": "node src/index.mjs ../test/output-single/single/user-manual.html -o ../test/output-chunk",
+    "manual": "node src/index.mjs example/output-single/single/user-manual.html -o example/output-chunk/html_chunks",
     "test": "ava --verbose --timeout=10m",
     "watch:test": "ava --watch"
   },

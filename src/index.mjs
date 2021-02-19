@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { makeChunks, newDOM, printer } from './DOM.mjs';
+import { makeChunks, newDOM, printer, copyRelativeFiles } from './DOM.mjs';
 import { makeConfig } from './CommandOptions.mjs';
 import { exists } from './Files.mjs';
 import { mkdirs } from './Files.mjs';
@@ -34,11 +34,11 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   if (!await exists(outdir)) await mkdirs(outdir);
   const writer = printer(outdir);
   const dom = newDOM(adocHtmlFile);
+  copyRelativeFiles(adocHtmlFile, outdir)(dom.root());
   makeChunks(writer, dom, config);
-  console.log(`Successfully chunked! => ${outdir}/index.html`);
+  console.log(`Successfully chunked! => ${outdir}/index.html\n`);
 }
 
-console.log();
 const { singleHTML, config } = makeConfig(process.argv, defaultConfig);
 
 main(singleHTML, config);

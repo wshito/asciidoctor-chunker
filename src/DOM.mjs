@@ -9,6 +9,10 @@ import path from 'path';
 import cheerio from 'cheerio';
 import { pipe } from './Utils.mjs';
 import * as D from './DomFunc.mjs';
+import {
+  relative2absolute,
+  copyIfNewer
+} from './Files.mjs';
 
 const fsp = fs.promises;
 
@@ -583,3 +587,31 @@ const createNav = (prev, next) => `
   <div style="clear: both"></div>
 </nav>
 `;
+
+const notRelative = /^#|https:|http:/;
+/**
+ * Extracts relative paths from tagName[attrName] elements
+ * under the given dom node.
+ *
+ * @param {Cheerio} dom The Cheerio instance of DOM.
+ */
+const getLocalFiles = (dom) => {
+  const localFiles = [];
+  dom.find(`link[href], script[src]`).each((i, ele) => {
+    const node = cheerio(ele);
+    const url = node.attr('href') || node.attr('src');
+    if (!url.match(notRelative) && !path.isAbsolute(url))
+      localFiles.push(url);
+  });
+  return localFiles;
+};
+
+
+export const copyRelativeFiles = (basefile, outDir) => (dom) => {
+  const toAbsoluteInOutDir = (relativeFile) => path.join(outDir, relativeFile);
+  const toAbsoluteInSrcDir = relative2absolute(basefile);
+
+  getLocalFiles(dom).forEach(file =>
+    copyIfNewer(toAbsoluteInSrcDir(file))
+    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file liked from the document is missing: ${file}`)));
+};
