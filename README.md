@@ -41,7 +41,7 @@ You can list the multiple settings by connecting each specifier with a comma.  E
 
 The single number sets the default level of extraction.  The number 1 is the application's default and it extracts the the chapter evel.  The number 2 for section extraction, 3 for subsection, and so on to 6 which is the maximum section level of Asciidoctor.
 
-The list of collon separated numbers can change the extraction depth for specific chapters.  You can use hyphen to specify the range of chapters to set.
+The list of collon separated numbers, `chap:level`, can change the extraction depth for specific chapters, so `3:2` means chapter 3 is extracted down to 2 levels (ie. section level).  You can use hyphen to specify the range of chapters to set as `chapFrom-chapTo:level`, so `1-3:5` means chapter 1 through 5 should be extracted with the depth level 5.
 
 Example:
 ```
