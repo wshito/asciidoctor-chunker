@@ -3,7 +3,7 @@
 # Copyright (c) 2018 wshito (@waterloo_jp)
 #
 
-ASCIIDOCTOR_CHUNKER_SCRIPT = ../roswell/asciidoctor-chunker.ros
+ASCIIDOCTOR_CHUNKER_SCRIPT = node ../js/asciidoctor-chunker.js
 
 SINGLE_OUTPUT   = output-single
 CHUNK_OUTPUT    = output-chunk

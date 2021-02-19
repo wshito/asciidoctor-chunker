@@ -47,11 +47,16 @@ Example:
                      level 3 for chap3 to 8.`)
     .parse(argv);
 
-  const { depth, outdir } = args;
+  // console.log(args);
+  const { args: inputfile, depth, outdir } = args;
+
+  if (inputfile.length !== 1) {
+    args.help();
+  }
 
   const d = parseDepth(depth);
 
-  return { depth: d, outdir };
+  return { singleHTML: inputfile[0], config: { depth: d, outdir } };
 }
 
 /**

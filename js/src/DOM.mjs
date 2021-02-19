@@ -418,7 +418,7 @@ export const makeChunks = (printer, $, config) => {
  *  url is 'filename.html#foo' where the filename is where the id is defined.
  */
 const updateLinks = (ht) => (node) => {
-  node.find('a').each((i, ele) => {
+  node.find('a[href]').each((i, ele) => {
     const a = cheerio(ele);
     const url = a.attr('href');
     // footnote is always whithin the chunked page so no need to rewrite
