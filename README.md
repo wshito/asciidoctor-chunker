@@ -27,7 +27,7 @@ Here is [the sample output](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_c
 Asciidoctor-Chunker is written in JavaScript and runs with NodeJS.roswell).
 
 1. Install [Node.js](https://nodejs.org/), the JavaScript runtime. 
-1. Download the pre-built program from [dist/asciidoctor-chunker.js](/dist).  Simply run it as:
+1. Download the pre-built program from the [latest release](https://github.com/wshito/asciidoctor-chunker/releases/latest).  Simply run the script `asciidoctor-chunker.js` as:
     ```
     $ node asiidoctor-chunker.js [single-html-file] -o [output-directory]
     ```
