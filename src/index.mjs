@@ -35,9 +35,10 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   const writer = printer(outdir);
   const dom = newDOM(adocHtmlFile);
   makeChunks(writer, dom, config);
-  console.log(`Successfully chunked! => ${outdir}/index.html\n`);
+  console.log(`Successfully chunked! => ${outdir}/index.html`);
 }
 
+console.log();
 const { singleHTML, config } = makeConfig(process.argv, defaultConfig);
 
 main(singleHTML, config);
