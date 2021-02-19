@@ -6,4 +6,3 @@ asciidoctor.org
 node_modules
 html_chunks
 tmp
-**/dist/asciidoctor-chunker.js
