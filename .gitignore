@@ -3,3 +3,7 @@ output-chunk
 output-single
 *.fasl
 asciidoctor.org
+node_modules
+html_chunks
+test/resources/output
+tmp*
