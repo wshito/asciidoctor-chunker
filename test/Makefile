@@ -3,7 +3,7 @@
 # Copyright (c) 2018 wshito (@waterloo_jp)
 #
 
-ASCIIDOCTOR_CHUNKER_SCRIPT = node dist/asciidoctor-chunker.js
+ASCIIDOCTOR_CHUNKER_SCRIPT = ../roswell/asciidoctor-chunker.ros
 
 SINGLE_OUTPUT   = output-single
 CHUNK_OUTPUT    = output-chunk
@@ -25,7 +25,7 @@ single: $(SINGLE)
 
 # fetch the asciidoctor.org site
 asciidoctor.org:
-	git clone https://github.com/asciidoctor/asciidoctor.org.git
+	git clone https://github.com/asciidoctor/asciidoctor.org.git -b docs-archive
 
 # generate chunked html
 $(CHUNK): $(SINGLE)
