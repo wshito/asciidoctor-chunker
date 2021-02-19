@@ -603,7 +603,7 @@ const notRelative = /^#|https:|http:/;
  */
 const getLocalFiles = (dom) => {
   const localFiles = [];
-  dom.find(`link[href], script[src]`).each((i, ele) => {
+  dom.find(`link[href], script[src], img[src]`).each((i, ele) => {
     const node = cheerio(ele);
     const url = node.attr('href') || node.attr('src');
     if (!url.match(notRelative) && !path.isAbsolute(url))
