@@ -13,7 +13,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(version),
+      __VERSION__: version,
     })
   ],
 };

@@ -6,13 +6,15 @@
 
 import commander from 'commander';
 
+// __VERSION__ is replaced by webpack DefinePlugin
+const version = (typeof __VERSION__) !== 'undefined' ? __VERSION__ : 'dev';
 /**
  * 
  * @param {Array} argv The reference to `process.argv`.
  */
 export const makeConfig = (argv) => {
 
-  const args = commander.version(__VERSION__)
+  const args = commander.version(version)
     .name('node asciidoctor-chunker.js')
     .usage('<single.html> [options]')
     .option('-o, --outdir <directory>',
