@@ -627,7 +627,7 @@ export const copyRelativeFiles = (basefile, outDir) => (dom) => {
 
   getLocalFiles(dom).forEach(file =>
     copyIfNewer(toAbsoluteInSrcDir(file))
-    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file liked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
+    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
 };
 
 export const extractCSS = (outDir) => (rootNode) => {
