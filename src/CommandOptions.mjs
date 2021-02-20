@@ -12,7 +12,7 @@ import commander from 'commander';
  */
 export const makeConfig = (argv) => {
 
-  const args = commander.version('0.9')
+  const args = commander.version(__VERSION__)
     .name('node asciidoctor-chunker.js')
     .usage('<single.html> [options]')
     .option('-o, --outdir <directory>',

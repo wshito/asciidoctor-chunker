@@ -7,9 +7,10 @@
     "build": "webpack",
     "sample": "cd test/resources; make single; cd -; node src/index.mjs test/resources/output/single/sample.html -depth 2:4,3:2 -o test/resources/output/html_chunks",
     "manual": "cd example; make single; cd -; node src/index.mjs example/output-single/single/user-manual.html -o example/output-chunk/html_chunks",
-    "test": "ava --verbose --timeout=10m",
+    "test": "ava --verbose",
     "watch:test": "ava --watch",
-    "clean": "cd test/resources; make clean; cd ../../example; make clean; cd -"
+    "pack": "make",
+    "clean": "make clean; cd test/resources; make clean; cd ../../example; make clean; cd -"
   },
   "keywords": [
     "Asciidoctor"

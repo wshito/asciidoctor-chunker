@@ -1,4 +1,7 @@
 const path = require('path');
+const webpack = require('webpack');
+
+const version = JSON.stringify(require('./package.json').version);
 
 module.exports = {
   mode: 'production',
@@ -8,4 +11,9 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'asciidoctor-chunker.js',
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(version),
+    })
+  ],
 };
