@@ -16,4 +16,10 @@ module.exports = {
       __VERSION__: version,
     })
   ],
+  module: {
+    rules: [{
+      test: /\.css$/i,
+      type: 'asset/source',
+    }],
+  },
 };

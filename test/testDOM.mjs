@@ -23,6 +23,7 @@ import {
   updateRefererId$,
   makeFootnoteRefId,
   updateFootnotes,
+  removeParameters,
 } from '../src/DOM.mjs';
 import { append$ } from '../src/DomFunc.mjs';
 import { pipe } from '../src/Utils.mjs';
@@ -442,6 +443,11 @@ test('makeChunks()', async t => {
   t.false(await exists(outdir));
 });
 
+test('removeParameters(url)', t => {
+
+  t.is(removeParameters('chunked.js?4'), 'chunked.js');
+  t.is(removeParameters('a/b/cde?fg/chunked.js?4'), 'a/b/cde?fg/chunked.js');
+});
 
 // extracts div.sectNUM for the section ID
 function extract ($, secID) {

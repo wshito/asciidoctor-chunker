@@ -595,7 +595,14 @@ const createNav = (prev, next) => `
 </nav>
 `;
 
-const notRelative = /^#|https:|http:/;
+const notRelative = /^#|https:|http:|file:/;
+
+export const removeParameters = (url) => {
+  const base = path.basename(url);
+  const i = base.indexOf('?');
+  return i === -1 ? url :
+    path.join(path.dirname(url), base.substring(0, i));
+}
 /**
  * Extracts relative paths from tagName[attrName] elements
  * under the given dom node.
@@ -607,12 +614,12 @@ const getLocalFiles = (dom) => {
   dom.find(`link[href], script[src], img[src]`).each((i, ele) => {
     const node = cheerio(ele);
     const url = node.attr('href') || node.attr('src');
-    if (!url.match(notRelative) && !path.isAbsolute(url))
-      localFiles.push(url);
+    if (!url.match(notRelative) && !path.isAbsolute(url)) {
+      localFiles.push(removeParameters(url));
+    }
   });
   return localFiles;
 };
-
 
 export const copyRelativeFiles = (basefile, outDir) => (dom) => {
   const toAbsoluteInOutDir = (relativeFile) => path.join(outDir, relativeFile);
@@ -657,11 +664,9 @@ const cssLink$ = (outdir, cssFile) => {
   const basename = path.basename(cssFile);
   const dest = path.join(outdir, basename);
   if (cssFile === 'asciidoctor-chunker.css') {
-    if (typeof __VERSION__ === 'undefined')
-      copyIfNewer(path.join('src', 'css', 'asciidoctor-chunker.css'))(dest);
-    else {
-      // extract from the webpack bundle
-    }
+    import('./css/asciidoctor-chunker.css') // webpack bundle
+      .then(content => fsp.writeFile(dest, content))
+      .catch(e => copyIfNewer(path.join('src', 'css', 'asciidoctor-chunker.css'))(dest)); // no bundle, regular file
   } else
     copyIfNewer(cssFile)(dest);
   return `<link rel="stylesheet" href="${basename}" type="text/css" />`;
