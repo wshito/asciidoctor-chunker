@@ -671,5 +671,3 @@ const cssLink$ = (outdir, cssFile) => {
     copyIfNewer(cssFile)(dest);
   return `<link rel="stylesheet" href="${basename}" type="text/css" />`;
 }
-
-const asciidoctorChunkerCSS = null;
