@@ -408,6 +408,7 @@ export const makeChunks = (printer, $, config) => {
     makeContainer,
     linkRewriter,
     extractCSS(config.outdir),
+    insertCSS(config),
     addTitlepageToc$
   )($)
   // addTitlepageToc$(container); // add titlepage link in the toc
@@ -581,12 +582,12 @@ export const addPageNavigation = (basename, { filename2pageNum, filenameList }) 
 const createNav = (prev, next) => `
 <nav>
   ${prev ?
-    `<a rel="prev" href="${prev}" class="prev"
+    `<a rel="prev" href="${prev}" class="nav nav-prev"
         aria-keyshortcuts="Left">
         <i class="fa fa-angle-left"></i>
      </a>` : ''}
   ${next ?
-    `<a rel="next" href="${next}" class="next"
+    `<a rel="next" href="${next}" class="nav nav-next"
         aria-keyshortcuts="Right">
         <i class="fa fa-angle-right"></i>
      </a>` : ''}
@@ -631,4 +632,39 @@ export const extractCSS = (outDir) => (rootNode) => {
     node.replaceWith(cheerio(`<link rel='stylesheet' href='${basename}' type='text/css' />`));
   });
   return rootNode;
+};
+
+/**
+ * 
+ * @param {object} config 
+ */
+export const insertCSS = (config) => (rootNode) => {
+  const { css, outdir } = config;
+  if (!css || css.length == 0) return rootNode;
+  const head = rootNode.find('head');
+  css.forEach(cssFile => head.append(cssLink$(outdir, cssFile)));
+  return rootNode;
+};
+
+/**
+ * Returns the link url and also copies the css file into the output directory
+ * which causes the side effect.
+ * 
+ * @param {string} outdir path to the output directory
+ * @param {string} cssFile path to the css file to include
+ */
+const cssLink$ = (outdir, cssFile) => {
+  const basename = path.basename(cssFile);
+  const dest = path.join(outdir, basename);
+  if (cssFile === 'asciidoctor-chunker.css') {
+    if (typeof __VERSION__ === 'undefined')
+      copyIfNewer(path.join('src', 'css', 'asciidoctor-chunker.css'))(dest);
+    else {
+      // extract from the webpack bundle
+    }
+  } else
+    copyIfNewer(cssFile)(dest);
+  return `<link rel="stylesheet" href="${basename}" type="text/css" />`;
 }
+
+const asciidoctorChunkerCSS = null;

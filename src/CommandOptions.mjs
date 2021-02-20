@@ -61,7 +61,14 @@ Example:
 
   const d = parseDepth(depth);
 
-  return { singleHTML: inputfile[0], config: { depth: d, outdir } };
+  return {
+    singleHTML: inputfile[0],
+    config: {
+      depth: d,
+      outdir,
+      css: ['asciidoctor-chunker.css']
+    }
+  };
 }
 
 /**
