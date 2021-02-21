@@ -30,6 +30,7 @@ import { pipe } from '../src/Utils.mjs';
 import cheerio from 'cheerio';
 import { rm, exists } from '../src/Files.mjs';
 import { mkdirs } from '../src/Files.mjs';
+import { makeConfig } from '../src/CommandOptions.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -90,7 +91,7 @@ test('extract sections', t => {
       if (fnamePrefix === 'chap2_sec2-2-3')
         console.log(dom.find('body').html());
       */
-      const html = dom.find('#content').html();
+      const html = dom.find('#content').html().trim();
       // console.log(html);
       const actual = `${fnamePrefix}: ${html.split('\n')[0]}`;
       const label = sampleHTMLstructure[chap][counter++];
@@ -100,7 +101,7 @@ test('extract sections', t => {
     };
   };
   const $ = newDOM(sampleHTML);
-  const container = makeContainer($);
+  const container = makeContainer(makeConfigWithDepth(1))($);
 
   /* Test is done inside the printer() function */
   // for Chapter 1
@@ -205,7 +206,7 @@ test('fine tuned extrations', async t => {
 
 test('preamble extraction', t => {
   const $ = newDOM(sampleHTML);
-  const container = makeContainer($);
+  const container = makeContainer(makeConfigWithDepth(1))($);
 
   const printer = (fnamePrefix, dom) => {
     // console.log(dom.find('body').html());
@@ -229,7 +230,7 @@ test('preamble extraction', t => {
 
 test('Part extraction', t => {
   const $ = newDOM(sampleHTML);
-  const container = makeContainer($);
+  const container = makeContainer(makeConfigWithDepth(1))($);
   let partNum = 0;
   $('#content').children().each((i, ele) => {
     const node = cheerio(ele);
@@ -455,7 +456,7 @@ function extract ($, secID) {
 }
 // manually make a page with secID extracted
 function makeDoc ($, secID) {
-  const container = makeContainer($);
+  const container = makeContainer(makeConfigWithDepth(1))($);
   const node = extract($, secID);
   const contentNode = getContentNode$(container);
   return append$(node)(contentNode);
@@ -486,7 +487,7 @@ function testChunk (pageDescription, dom, t) {
 }
 
 function makeConfigWithDepth (num) {
-  return { depth: { default: num } };
+  return { depth: { default: num }, strictMode: true, css: [] };
 }
 
 /**
