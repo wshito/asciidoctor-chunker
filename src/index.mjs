@@ -19,14 +19,16 @@ const sampleConfig = {
     default: 1, // the default extracton is chapter level
     2: 4, // extracts subsubsections in chap2
     3: 2 // extracts sections in chap 3
-  }
+  },
+  css: ['asciidoctor-chunker.css'],
+  strictMode: true,
 };
 
 const defaultConfig = {
+  depth: 1, // the default extracton is chapter level
   outdir: 'html_chunks',
-  depth: {
-    default: 1, // the default extracton is chapter level
-  }
+  css: ['asciidoctor-chunker.css'],
+  strictMode: true,
 };
 
 
