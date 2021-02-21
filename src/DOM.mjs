@@ -203,8 +203,10 @@ export const makeContainer = (config) => ($) => {
 const showStrictModeMessage = (contentNode) => {
   const getNodeInfo = node => `tag=${node[0].name} id=${node.attr('id')}, class=${node.attr('class')}`;
 
-  console.log(`INFO: non-asciidoc contents encountered under <div id='#content'>.  They are ignored and not included in chunked html by default.  If you want them to be included, use the command option '--no-strictMode'`);
-  contentNode.html().trim().split(/\n+/).forEach(line => console.log(`INFO: found => ${line}`));
+  console.log(`INFO: Non-Asciidoc contents encountered under <div id='#content'>.
+INFO: They are ignored and not included in chunked html by default.
+INFO: If you want them to be included, use the '--no-strictMode' command option.`);
+  contentNode.html().trim().split(/\n+/).forEach(line => console.log(`INFO: Found content => ${line}`));
   console.log();
 };
 
@@ -447,6 +449,7 @@ export const makeChunks = (printer, $, config) => {
   const linkRewriter = updateLinks(ht);
   const container = pipe(
     makeContainer(config),
+    checkTocLinks,
     linkRewriter,
     extractCSS(config.outdir),
     insertCSS(config),
@@ -465,17 +468,22 @@ export const makeChunks = (printer, $, config) => {
     config);
 }
 
+const checkTocLinks = (rootNode) => {
+  if (rootNode.find('#toc a[href^=#]').length === 0)
+    console.log('INFO: Your TOC has no in-document links.\n');
+  return rootNode;
+};
+
 /**
  * @param {Map<id, url>} ht the Hashtable of <id, url>.  If id is 'foo' then
  *  url is 'filename.html#foo' where the filename is where the id is defined.
  */
 const updateLinks = (ht) => (node) => {
-  node.find('a[href]').each((i, ele) => {
+  node.find('a[href^=#]').each((i, ele) => {
     const a = cheerio(ele);
     const url = a.attr('href');
     // footnote is always whithin the chunked page so no need to rewrite
-    if (url.startsWith('#') &&
-      !url.startsWith('#_footnotedef_') &&
+    if (!url.startsWith('#_footnotedef_') &&
       !url.startsWith('#_footnoteref_')) {
       const id = url.substring(1);
       a.attr('href', `${ht.get(id)}`);
