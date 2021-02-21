@@ -14,7 +14,7 @@ DIR := asciidoctor-chunker_v$(VERSION)
 
 SCRIPT := $(DIR)/asciidoctor-chunker.js
 
-SOURCES := src/*.mjs src/css/*.css .json
+SOURCES := src/*.mjs src/css/*.css package.json
 
 zip: $(DIR).zip
 
