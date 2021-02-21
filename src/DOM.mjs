@@ -13,6 +13,7 @@ import {
   relative2absolute,
   copyIfNewer
 } from './Files.mjs';
+import { fileURLToPath } from 'url';
 
 const fsp = fs.promises;
 
@@ -37,8 +38,7 @@ export function newDOM (filename) {
  * 
  * @param {Cheerio} node The DOM which has #content node.
  */
-export const getContentNode$ = (node) =>
-  D.find$('#content')(node);
+export const getContentNode$ = (node) => D.find$('#content')(node);
 
 /**
  * Returns the first id of the given page.
@@ -180,8 +180,33 @@ export const processChapters = processor => {
  * Creates new DOM with empty content.
  *
  * @param {Cheerio} $ The instance of Cheerio.
+ * @param {boolean} isStictMode true if extraction mode
+ *  is in strict mode.  In strict mode, asciidoctor-chunker
+ *  assumes there are only defult contents under div#content.
+ *  If the mode is not strict, makeContainer() leaves unknown
+ *  contents under div#content untouched.
+ *  The default is false or undefined.
+ *
  */
-export const makeContainer = ($) => D.empty('#content')($.root());;
+export const makeContainer = (config) => ($) => {
+  const { strictMode } = config;
+  const root = $.root().clone().find('#content > #preamble, #content > .partintro, #content > .sect1, #content > .sect0').remove().end();
+  const content = root.find('#content');
+  if (strictMode) { // in strict mode
+    if (content.children().length > 0)
+      showStrictModeMessage(content);
+    return content.empty().end();
+  }
+  return root;
+}
+
+const showStrictModeMessage = (contentNode) => {
+  const getNodeInfo = node => `tag=${node[0].name} id=${node.attr('id')}, class=${node.attr('class')}`;
+
+  console.log(`INFO: non-asciidoc contents encountered under <div id='#content'>.  They are ignored and not included in chunked html by default.  If you want them to be included, use the command option '--no-strictMode'`);
+  contentNode.html().trim().split(/\n+/).forEach(line => console.log(`INFO: found => ${line}`));
+  console.log();
+};
 
 /**
  *
@@ -291,21 +316,37 @@ const processContents = (
   const root = rootNode.clone();
   let chap = 0;
   let part = 0;
+  let firstPageProcessed = false;
+  let isFirstPage = false;
   root.find('#content').children().each((i, ele) => {
     const node = cheerio(ele);
-    const isFirstPage = i === 0;
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
-    if (node.hasClass('sect1'))
+    if (node.hasClass('sect1')) {
+      if (!firstPageProcessed && !isFirstPage) {
+        isFirstPage = true;
+        firstPageProcessed = true;
+      } else
+        isFirstPage = false;
       return chapterProcessor(config, root, node, 1, 'chap',
         ++chap, isFirstPage); // recursive extraction of chapters
-    if (node.hasClass('sect0'))
-      return partProcessor(config, root, node, ++part, isFirstPage); // part extraction
-    if (node.attr('id') === 'preamble')
+    }
+    if (node.hasClass('sect0')) {
+      if (!firstPageProcessed && !isFirstPage) {
+        isFirstPage = true;
+        firstPageProcessed = true;
+      } else
+        isFirstPage = false;
+      // part extraction
+      return partProcessor(config, root, node, ++part, isFirstPage);
+    }
+    if (node.attr('id') === 'preamble') {
+      isFirstPage = true;
+      firstPageProcessed = true;
       return preambleProcessor(config, root, node, isFirstPage);
-
-    console.log('Woops, unknown contents here to be processed.')
+    }
   });
+
 };
 
 /**
@@ -377,7 +418,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
 }
 
 const addTitlepageToc$ = (rootNode) => {
-  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc ul.sectlevel0 > li:first-child'));
+  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc > ul > li:first-child'));
   return rootNode;
 }
 /**
@@ -405,7 +446,7 @@ export const makeChunks = (printer, $, config) => {
   const ht = makeHashTable($.root(), config); // Map<id, filename>
   const linkRewriter = updateLinks(ht);
   const container = pipe(
-    makeContainer,
+    makeContainer(config),
     linkRewriter,
     extractCSS(config.outdir),
     insertCSS(config),
@@ -664,9 +705,15 @@ const cssLink$ = (outdir, cssFile) => {
   const basename = path.basename(cssFile);
   const dest = path.join(outdir, basename);
   if (cssFile === 'asciidoctor-chunker.css') {
-    import('./css/asciidoctor-chunker.css') // webpack bundle
-      .then(content => fsp.writeFile(dest, content))
-      .catch(e => copyIfNewer(path.join('src', 'css', 'asciidoctor-chunker.css'))(dest)); // no bundle, regular file
+    import( /* webpackMode: "eager" */
+        './css/asciidoctor-chunker.css') // webpack bundle
+      .then(module => fsp.writeFile(dest, module.default))
+      .catch(e => {
+        const __dirname = path.dirname(fileURLToPath(
+          import.meta.url));
+        const src = path.resolve(__dirname, 'css', 'asciidoctor-chunker.css');
+        copyIfNewer(src)(dest);
+      }); // no bundle, regular file
   } else
     copyIfNewer(cssFile)(dest);
   return `<link rel="stylesheet" href="${basename}" type="text/css" />`;
