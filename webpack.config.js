@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
+// inject version into src/CommandOption.mjs with DefinePlugin
 const version = JSON.stringify(require('./package.json').version);
 
 module.exports = {
