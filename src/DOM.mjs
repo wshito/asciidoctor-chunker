@@ -79,7 +79,9 @@ export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
       getContentNode$,
       D.append$(...nodes), // dom.append$() clones contents
       updateFootnotes(referredFootnotesKeeper$(newContainer.find('#footnotes'))),
-      addPageNavigation(basename, hashtable.get('navigation'))
+      addPageNavigation(basename, hashtable.get('navigation')),
+      setCurrentToToc(basename),
+      insertScript,
     )(newContainer);
   };
 
@@ -607,8 +609,23 @@ export const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
   return rootNode;
 }
 
+/**
+ * Sets `current` classname on the crrent page's <li> element.
+ * 
+ * @param {string} fnamePrefix file's basename
+ * @param {Cheerio} rootNode the Cheerio instance of root node
+ * @returns the Cheerio instance of root node.
+ */
+const setCurrentToToc = (fnamePrefix) => (rootNode) => {
+  pipe(
+    findCurrentPageTocAnchor(fnamePrefix),
+    markCurrent$,
+  )(rootNode);
+  return rootNode;
+}
+
 const findCurrentPageTocAnchor = (fnamePrefix) => (rootNode) =>
-  rootNode.find(`a[href^=${fnamePrefix}.html]`);
+  rootNode.find(`#toc a[href^="${fnamePrefix}.html"]`).parent();
 
 const markCurrent$ = node => node.addClass('current');
 ('class');
@@ -725,4 +742,22 @@ const cssLink$ = (outdir, cssFile) => {
   } else
     copyIfNewer(cssFile)(dest);
   return `<link rel="stylesheet" href="${basename}" type="text/css" />`;
+}
+
+const insertScript = (rootNode) => {
+  rootNode.find('html').append(`
+  <script>
+  function isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+  }
+  let curr = document.getElementsByClassName('current');
+  if (!isInViewport(curr[curr.length - 1]))
+    curr[0].scrollIntoView({behavior: "smooth"});
+  </script>
+  `);
+  return rootNode;
 }

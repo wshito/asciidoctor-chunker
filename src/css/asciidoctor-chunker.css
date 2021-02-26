@@ -29,3 +29,14 @@
   float: left;
   display: block;
 }
+
+#toc li {
+  padding: 0.07rem;
+}
+
+li.current {
+  border-radius: 0.5rem;
+  background-color: rgb(226, 231, 235);
+  /* rgb(226, 231, 235); */
+  /* rgb(255, 247, 229); */
+}
