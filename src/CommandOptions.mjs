@@ -33,33 +33,39 @@ export const makeConfig = (argv) => {
   The default splits are made by preamble, parts, and chapters.
   You can specify the extraction level with the '--depth' option.
 
-  In strict mode, asciidoctor-chunker extracts the officially
-  supported contents under div#content node.  If you have inserted
-  custom elements under div#content turn off the strict mode by
-  using '--no-strictMode'.
+  If you have any custom elements inserted under <div d=#content>
+  in the source single html, asciidoctor-chunker ignores it by
+  default. If you want them to be included into the chunked html,
+  set the option --no-strictMode. The element will be copied to
+  every chunked page.
 
-  By default, 'asciidoctor-chunker.css' is included.  You can
-  override this setting with '--css custom1.css,custom2.css'.
-  The files are copied to the output directory so the given
-  paths must be accessible from the program.  The links
-  in style element will be inserted keepin the order in the list.
-  If you want 'asciidoctor-chunker.css' to be included as well,
-  simply put that in the list.  The 'asciidoctor-chunker.css'
-  file does not have to be available in the path.
+  By default asciidoctor-chunker.css is included in the
+  output directory. It provides the non-opinionated page
+  navigation at the bottom of every chunked page. You can
+  override this by giving a comma separated list of paths
+  to your custom css files. They are copied into the output
+  directory so the paths must be accessible by
+  asciidoctor-chunker.
 
 The Depth Specifier:
-  You can list the multiple settings by connecting each specifier
-  with a comma.  Each specifier is consisted of either a single
-  number or collon separated two numbers.
+  You can list the multiple settings by connecting each
+  specifier with a comma. Each specifier is consisted of
+  either a single number or a collon separated with two
+  numbers.
 
-  The single number sets the default level of extraction.  The
-  number 1 is the application's default and it extracts the
-  the chapter level.  The number 2 for section extraction,
-  3 for subsection, and so on to 6.
+  The single number sets the default level of extraction.
+  Number 1 is the application's default and it extracts the
+  chapter level. Number 2 for section extraction, 3 for
+  subsection, and so on to 6 which is the maximum section
+  level of Asciidoctor.
 
-  The list of collon separated numbers can change the extraction
-  depth for specific chapters.  You can use hyphen to specify the
-  range of chapters to set.
+  The list of collon separated numbers, chap:level, can
+  change the extraction depth for specific chapters,
+  so 3:2 means chapter 3 is extracted down to 2 levels (i.e.
+  section level). You can use a hyphen to specify the range
+  of chapters to set as chapFrom-chapTo:level, so 1-3:5 means
+  chapter 1 through 5 should be extracted with the depth
+  level 5.
 
 Example:
   --depth 2          The default level 2, all the chapters and
