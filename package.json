@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "sample": "cd test/resources; make single; cd -; node src/index.mjs test/resources/output/single/sample.html -depth 2:4,3:2 -o test/resources/output/html_chunks",
-    "manual": "cd example; make single; cd -; node src/index.mjs example/output-single/single/user-manual.html -o example/output-chunk/html_chunks",
+    "manual": "cd example; make single; cd -; node src/index.mjs example/output-single/single/user-manual.html -o example/output-chunk/html_chunk",
     "test": "npm run sample && ava --verbose",
     "watch:test": "npm run sample && ava --watch",
     "pack": "make",
