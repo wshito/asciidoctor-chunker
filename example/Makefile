@@ -10,7 +10,7 @@ CHUNK_OUTPUT    = output-chunk
 
 
 SINGLE_DIR     := $(SINGLE_OUTPUT)/single
-CHUNK_DIR      := $(CHUNK_OUTPUT)/html_chunks
+CHUNK_DIR      := $(CHUNK_OUTPUT)/html_chunk
 SINGLE_IMG_DIR := $(SINGLE_OUTPUT)/images
 
 SINGLE := $(SINGLE_DIR)/user-manual.html
