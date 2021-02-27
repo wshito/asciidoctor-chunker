@@ -747,16 +747,25 @@ const cssLink$ = (outdir, cssFile) => {
 const insertScript = (rootNode) => {
   rootNode.find('html').append(`
   <script>
-  function isInViewport(element) {
-    const rect = element.getBoundingClientRect();
+  function isInViewport(ele) {
+    const rect = ele.getBoundingClientRect();
     return (
         rect.top >= 0 &&
         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
     );
   }
+  function yPosition (ele) {
+    const rect = ele.getBoundingClientRect();
+    return (rect.top - 20); // 20px above
+  }
   let curr = document.getElementsByClassName('current');
-  if (!isInViewport(curr[curr.length - 1]))
-    curr[0].scrollIntoView({behavior: "smooth"});
+  if (!isInViewport(curr[curr.length - 1])) {
+    document.getElementById('toc').scrollTo({
+      top: yPosition(curr[0]),
+      left: 0,
+      behavior: 'smooth'
+    });
+  }
   </script>
   `);
   return rootNode;
