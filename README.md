@@ -52,7 +52,7 @@ If you installed globally:
    ```
    asiidoctor-chunker [single-html-file] -o [output-directory]
    ```
-If you installed locally invoke the following under the directory in installed:
+If you installed locally invoke the following under the directory you installed:
    ```
    npx asciidoctor-chunker [single-html-file] -o [output-directory]
    ```
