@@ -1,6 +1,6 @@
 {
   "name": "asciidoctor-chunker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Creates chunked (multi-page) HTML from Asciidoctor's single HTML file with supporting the fine-tuned splits in chapters, sections and any depth of subsections.",
   "author": "Wataru Shito (https://github.com/wshito)",
   "bin": {
