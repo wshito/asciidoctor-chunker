@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2021 Wataru Shito (@waterloo_jp)
@@ -10,6 +12,7 @@ import { makeConfig } from './CommandOptions.mjs';
 import { exists } from './Files.mjs';
 import { mkdirs } from './Files.mjs';
 import { extractCSS } from './DOM.mjs';
+import path from 'path';
 
 
 const sampleHTML = 'test/resources/output/single/sample.html';
@@ -39,7 +42,7 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   const dom = newDOM(adocHtmlFile);
   copyRelativeFiles(adocHtmlFile, outdir)(dom.root());
   makeChunks(writer, dom, config);
-  console.log(`Successfully chunked! => ${outdir}/index.html\n`);
+  console.log(`Successfully chunked! => ${path.join(outdir, 'index.html')}\n`);
 }
 
 console.log();

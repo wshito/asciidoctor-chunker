@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const ShebangPlugin = require('webpack-shebang-plugin');
 
 // inject version into src/CommandOption.mjs with DefinePlugin
 const version = JSON.stringify(require('./package.json').version);
@@ -15,7 +16,8 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       __VERSION__: version,
-    })
+    }),
+    new ShebangPlugin()
   ],
   module: {
     rules: [{

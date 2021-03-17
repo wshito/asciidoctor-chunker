@@ -1,0 +1,14 @@
+*~
+output-chunk
+output-single
+*.fasl
+asciidoctor.org
+node_modules
+html_chunks
+test/resources/output
+tmp*
+asciidoctor-chunker_v*
+dist/*.asciidoctor-chunker.js
+.jsbeautifyrc
+legacy-code
+settings.json
