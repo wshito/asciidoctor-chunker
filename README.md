@@ -1,6 +1,7 @@
 # asciidoctor-chunker
 
 [![npm version](https://badge.fury.io/js/asciidoctor-chunker.svg)](https://badge.fury.io/js/asciidoctor-chunker)
+[![Node.js CI](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml/badge.svg)](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the support of fine-tuned splits by chapters, sections, or any depth of subsections.  Here is [the sample output.](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_chunk/index.html)  Each chapter can have different levels of extraction depth.  See [What it does](#what-it-does) for details.
