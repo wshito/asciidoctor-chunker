@@ -35,7 +35,7 @@ export function newDOM (filename) {
 /**
  * Returns the div#content node where all the document
  * contents are appended to.
- * 
+ *
  * @param {Cheerio} node The DOM which has #content node.
  */
 export const getContentNode$ = (node) => D.find$('#content')(node);
@@ -139,7 +139,7 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
  *    2: 4,  // extracts subsubsections in chap 2
  *    3: 2,  // extracts sections in chap 3
  *  }
- *  ``` 
+ *  ```
  * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
  * @param {Cheerio} node The current section node extracted from DOM.
  * @param {number} thisSectLevel the current node's section level where chapter is level 1, section is level 2, and so on.
@@ -296,7 +296,7 @@ export const extractChapters = (printer, container, documentMaker) =>
  *  => void} preambleProcessor
  * @param {(root:boolean, node:{Cheerio}, partNumber:number, isFirstPage:boolean)
  *  => void} partProcessor
- * @param {(config:{object}, root:boolean, node:{Cheerio}, thisSectLevel:number, 
+ * @param {(config:{object}, root:boolean, node:{Cheerio}, thisSectLevel:number,
  *   filenamePrefix:{string}, sectionNumber:number, isFirstPage:boolean)
  *  => void} chapterProcessor
  * @param {Cheerio} rootNode The document root node which is the
@@ -421,8 +421,8 @@ export const printer = outDir => (fnamePrefix, dom) => {
     console.log("File write error:", fname));
 }
 
-const addTitlepageToc$ = (rootNode) => {
-  cheerio('<li><a href="index.html">Titlepage</a></li>').insertBefore(rootNode.find('div#toc > ul > li:first-child'));
+const addTitlepageToc$ = (config) => (rootNode) => {
+  cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
   return rootNode;
 }
 /**
@@ -436,7 +436,7 @@ const addTitlepageToc$ = (rootNode) => {
  * @param {object} config: The configuration object which has
  *  `depth` object to specify the maximum sectLevel to extract.
  *  The default is 1 which extracts parts and chapters.
- * @param {object} config.depth The configuration to specify the 
+ * @param {object} config.depth The configuration to specify the
  *  maximum sectLevel to extract.  The example format is as follows:
  *  ```
  *  depth: {
@@ -455,7 +455,7 @@ export const makeChunks = (printer, $, config) => {
     linkRewriter,
     extractCSS(config.outdir),
     insertCSS(config),
-    addTitlepageToc$
+    addTitlepageToc$(config),
   )($)
   // addTitlepageToc$(container); // add titlepage link in the toc
   const footnotesKeeper$ =
@@ -510,7 +510,7 @@ export const getFootnoteDefIds = (footnotesNode) => {
 
 /**
  * Returns Cheerio instance of selections of footnote referers anchor elements.
- * 
+ *
  * @param {Cheerio} contentNode The `div#content` node.
  * @returns {Cheerio} the Cheerio instance of selections of footnote
  *   referers anchor elements.
@@ -521,7 +521,7 @@ export const findFootnoteReferers = (contentNode) => contentNode.find('a.footnot
  * Removes the unreferred footnotes from the page and returns
  * the Cheerio instance with selections of all the footnote referer anchor
  * nodes.
- * 
+ *
  * @param {Set<string>} footnoteDefIds The set of all the footnote def ids.
  * @param {Cheerio} footnotesNode The Cherrio instance of current page's
  *  #footnotes node.  The footnotes under this node will be modified.
@@ -552,7 +552,7 @@ export const keepReferredFootnotes$ = (footnoteDefIds) =>
 /**
  * Adds referer id to anchor which refers to the multiply used footnote.
  * This has side effect that modifies some of referers anchor's id attribute.
- * 
+ *
  * @param {cheerio} referers The Cheerio instance with the selection of
  *  nodes that refer to multiply used footnotes.
  */
@@ -573,15 +573,15 @@ export const updateRefererId$ = (referers) => {
 
 /**
  * Converts the url `#_footnotedef_4` to `_footnoteref_4`.
- * 
- * @param {string} defURL The hash link to the footnote definition as 
+ *
+ * @param {string} defURL The hash link to the footnote definition as
  *   `_footnotedef_4`.
  * @returns corresponding referer's ID such as `_footnoteref_4`
  */
 export const makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
 
 /**
- * 
+ *
  * @param {Function} referredFootnotesKeeper$ the curried functon of
  *  keepReferredFootnotes$(footnoteDefIds:: Map<string>).
  * @param {Cheerio} node The root node of the chunked page.
@@ -611,7 +611,7 @@ export const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
 
 /**
  * Sets `current` classname on the crrent page's <li> element.
- * 
+ *
  * @param {string} fnamePrefix file's basename
  * @param {Cheerio} rootNode the Cheerio instance of root node
  * @returns the Cheerio instance of root node.
@@ -708,8 +708,8 @@ export const extractCSS = (outDir) => (rootNode) => {
 };
 
 /**
- * 
- * @param {object} config 
+ *
+ * @param {object} config
  */
 export const insertCSS = (config) => (rootNode) => {
   const { css, outdir } = config;
@@ -722,7 +722,7 @@ export const insertCSS = (config) => (rootNode) => {
 /**
  * Returns the link url and also copies the css file into the output directory
  * which causes the side effect.
- * 
+ *
  * @param {string} outdir path to the output directory
  * @param {string} cssFile path to the css file to include
  */
