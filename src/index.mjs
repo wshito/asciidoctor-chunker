@@ -25,6 +25,7 @@ const sampleConfig = {
   },
   css: ['asciidoctor-chunker.css'],
   strictMode: true,
+  titlePage: 'Titlepage',
 };
 
 const defaultConfig = {
@@ -32,6 +33,7 @@ const defaultConfig = {
   outdir: 'html_chunks',
   css: ['asciidoctor-chunker.css'],
   strictMode: true,
+  titlePage: 'Titlepage',
 };
 
 

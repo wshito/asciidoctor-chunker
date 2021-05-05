@@ -279,7 +279,7 @@ test('No hash to the link of first element in each page', async t => {
     )(dom)}`;
     let noHash = true;
     // none of the ahcnhors in the page
-    // should have the url pointing to the 
+    // should have the url pointing to the
     // first content with hashed url since
     // it should be simply the page address.
     dom.find('a').each((i, ele) => {
@@ -450,6 +450,45 @@ test('removeParameters(url)', t => {
   t.is(removeParameters('a/b/cde?fg/chunked.js?4'), 'a/b/cde?fg/chunked.js');
 });
 
+test('test titlePage option', async t => {
+  const $ = newDOM(sampleHTML);
+  const outdir = 'test/resources/tmp4';
+  const config = {
+    outdir,
+    depth: {
+      default: 1, // the default extracton is chapter level
+      2: 4, // extracts subsubsections in chap2
+      3: 2 // extracts sections in chap 3
+    },
+    titlePage: 'Welcome',
+  };
+  const printer = (fnamePrefix, dom) => {
+    const hash = `#${pipe(
+      getContentNode$,
+      getFirstContentId
+    )(dom)}`;
+    let hasWelcome = true;
+    // Where an anchor points to index.html and
+    // appears in a list, its text should match
+    // our titlePage.
+    dom.find('li a[href="index.html"]').each((i, ele) => {
+      hasWelcome = hasWelcome && cheerio(ele).text() === 'Welcome';
+      if (!hasWelcome)
+        console.log(cheerio(ele).text(),
+          " incorrect");
+
+      return hasWelcome; // if false, each() will exit loop early
+    });
+    t.true(hasWelcome);
+  };
+  await mkdirs(outdir);
+  makeChunks(printer, $, config); // test is inside the printer()
+
+  // cleanup for css file extraction side effects in makeChunks()
+  await rm(outdir);
+  t.false(await exists(outdir));
+});
+
 // extracts div.sectNUM for the section ID
 function extract ($, secID) {
   return $(`#${secID}`).parent().clone();
@@ -471,10 +510,10 @@ function referredFootnotesKeeperDymmy (_) {
  * This is called from the test for makeChunk().
  * The test is based on the page description
  * object.
- * 
+ *
  * @param pageDescription
- * @param dom 
- * @param t 
+ * @param dom
+ * @param t
  */
 function testChunk (pageDescription, dom, t) {
   const dsc = pageDescription;
@@ -499,7 +538,7 @@ function makeConfigWithDepth (num) {
  * is used only for the test, the depth should not
  * really matter.
  *
- * @param {number} depth 
+ * @param {number} depth
  */
 // we don't have to rewrite the links in the
 // extraction test so pass the empty hashtabel

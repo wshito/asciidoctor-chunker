@@ -96,6 +96,10 @@ By default `asciidoctor-chunker.css` is included in the output directory.  It pr
 If you have any custom elements inserted under `<div id=#content></div>` in the source single html, `asciidoctor-chunker` ignores it by default.  If you want them to be included into the chunked html, set the option `--no-strictMode`.
 The element will be copied to every chunked page.
 
+## Customizing Titlepage
+
+The `index.html` created by `asciidoctor-chunker` is selected by clicking the word **Titlepage** in the table of contents. To change the default value, use the option `--titlePage [string]` where `[string]` is the desired text.
+
 ## Example
 
 The project contains the `example` directory where you can generate the chunked html for the [Asciidoctor User Manual](https://asciidoctor.org/docs/user-manual/) by invoking `make`.  Simply go into the `example` directory and invoke `make`.  This will clone the asciidoctor project from the github for the first time, then the chunked html will be generated under `test/output-chunk/html_chunk/` directory.  The `index.html` is the first page.
