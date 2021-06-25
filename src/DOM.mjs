@@ -7,6 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
+import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { pipe } from './Utils.mjs';
 import * as D from './DomFunc.mjs';
 import {
@@ -170,7 +171,7 @@ export const processChapters = processor => {
       // make sure to return to make it tail call to minimize the stack
       return children.each((i, ele) =>
         _processChapters(config, container,
-          cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
+          new Cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
           thisSectLevel + 1,
           filename, i + 1,
           false)); // isFirstPage = false
@@ -323,7 +324,7 @@ const processContents = (
   let firstPageProcessed = false;
   let isFirstPage = false;
   root.find('#content').children().each((i, ele) => {
-    const node = cheerio(ele);
+    const node = new Cheerio(ele);
     if (node.hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
     if (node.hasClass('sect1')) {
@@ -381,7 +382,7 @@ export const makeHashTable = (rootNode, config) => {
     pageNum++;
     // Set id and URL
     node.find('*[id]').each((i, e) => {
-      const id = cheerio(e).attr('id');
+      const id = new Cheerio(e).attr('id');
       if (id.startsWith('_footnotedef_')) return;
       ht.set(id, `${filename}#${id}`);
     });
@@ -422,7 +423,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
 }
 
 const addTitlepageToc$ = (config) => (rootNode) => {
-  cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
+  new Cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
   return rootNode;
 }
 /**
@@ -482,7 +483,7 @@ const checkTocLinks = (rootNode) => {
  */
 const updateLinks = (ht) => (node) => {
   node.find('a[href^=#]').each((i, ele) => {
-    const a = cheerio(ele);
+    const a = new Cheerio(ele);
     const url = a.attr('href');
     // footnote is always whithin the chunked page so no need to rewrite
     if (!url.startsWith('#_footnotedef_') &&
@@ -503,7 +504,7 @@ const updateLinks = (ht) => (node) => {
 export const getFootnoteDefIds = (footnotesNode) => {
   const fnoteDefIds = new Set();
   footnotesNode.find('div.footnote').each((i, ele) => {
-    fnoteDefIds.add(cheerio(ele).attr('id'));
+    fnoteDefIds.add(new Cheerio(ele).attr('id'));
   });
   return fnoteDefIds;
 };
@@ -539,7 +540,7 @@ export const keepReferredFootnotes$ = (footnoteDefIds) =>
     // console.log("Referers length", referers.length);
     referers.each((i, ele) => {
       // console.log(cheerio(ele).attr('href'));
-      removingFootnotes.delete(cheerio(ele).attr('href').substring(1));
+      removingFootnotes.delete(new Cheerio(ele).attr('href').substring(1));
     });
     // console.log("after removing", removingFootnotes.size);
     removingFootnotes.forEach(id => {
@@ -560,7 +561,7 @@ export const updateRefererId$ = (referers) => {
   if (referers.length === 0) return referers;
   const added = new Set();
   referers.each((i, ele) => {
-    const a = cheerio(ele);
+    const a = new Cheerio(ele);
     if (a.attr('id')) return;
     const url = a.attr('href')
     if (added.has(url)) return;
@@ -638,9 +639,9 @@ export const addPageNavigation = (basename, { filename2pageNum, filenameList }) 
     const html = createNav(prev, next);
     const div = rootNode.find('body > div:last-of-type');
     if (div.attr('id') === 'footer')
-      cheerio(html).insertBefore(div);
+      new Cheerio(html).insertBefore(div);
     else
-      cheerio(html).insertAfter(div);
+      new Cheerio(html).insertAfter(div);
 
     return rootNode;
   };
@@ -678,7 +679,7 @@ export const removeParameters = (url) => {
 const getLocalFiles = (dom) => {
   const localFiles = [];
   dom.find(`link[href], script[src], img[src]`).each((i, ele) => {
-    const node = cheerio(ele);
+    const node = new Cheerio(ele);
     const url = node.attr('href') || node.attr('src');
     if (!url.match(notRelative) && !path.isAbsolute(url)) {
       localFiles.push(removeParameters(url));
@@ -699,10 +700,10 @@ export const copyRelativeFiles = (basefile, outDir) => (dom) => {
 export const extractCSS = (outDir) => (rootNode) => {
   rootNode.find('style').each((i, e) => {
     const basename = `style${i}.css`;
-    const node = cheerio(e);
+    const node = new Cheerio(e);
     fsp.writeFile(path.join(outDir, basename),
-      cheerio(e).contents().text());
-    node.replaceWith(cheerio(`<link rel='stylesheet' href='${basename}' type='text/css' />`));
+      new Cheerio(e).contents().text());
+    node.replaceWith(new Cheerio(`<link rel='stylesheet' href='${basename}' type='text/css' />`));
   });
   return rootNode;
 };
