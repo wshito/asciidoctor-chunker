@@ -8,6 +8,7 @@ Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the
 
 ## News
 
+- 2021/8/3 [Ver 1.0.4](https://github.com/wshito/asciidoctor-chunker/releases) Added the keyboard shotcuts for the page navigation with arrow keys.  Added the accessibility labels on the page navigation for screen readers.
 - 2021/6/25 [Ver 1.0.3](https://github.com/wshito/asciidoctor-chunker/releases) Fixed the security vulnerabilities in the dependencies.
 - 2021/5/9 [Ver 1.0.2](https://github.com/wshito/asciidoctor-chunker/releases) The toc item for the titlepage can be configured with `--titlePage` option (thanks to [@johnthad](https://github.com/johnthad)).
 - 2021/3/17 [Ver 1.0.1](https://github.com/wshito/asciidoctor-chunker/releases) The script contains shebang and can be invoked directly.  Published on [npm](https://www.npmjs.com/package/asciidoctor-chunker).  You can install via npm.  See [Installation](#installation).
