@@ -49,7 +49,7 @@ $(SINGLE): $(SINGLE_IMG_DIR) $(SINGLE_DIR)
 zip: $(CHUNK_OUTPUT)/user-manual.zip
 
 $(CHUNK_OUTPUT)/user-manual.zip: $(CHUNK)
-	cd $(CHUNK_OUTPUT); zip -r user-manual.zip html_chunks images; cd -
+	cd $(CHUNK_OUTPUT); zip -r user-manual.zip html_chunk images; cd -
 
 clean:
 	rm -rf $(SINGLE_OUTPUT) $(CHUNK_OUTPUT) user-manual.zip
