@@ -650,11 +650,15 @@ const createNav = (prev, next) => `
 <nav>
   ${prev ?
     `<a rel="prev" href="${prev}" class="nav nav-prev"
+        title="Previous page"
+        aria-label="Previous page"
         aria-keyshortcuts="Left">
         <i class="fa fa-angle-left"></i>
      </a>` : ''}
   ${next ?
     `<a rel="next" href="${next}" class="nav nav-next"
+        title="Next page"
+        aria-label="Next page"
         aria-keyshortcuts="Right">
         <i class="fa fa-angle-right"></i>
      </a>` : ''}
@@ -767,6 +771,25 @@ const insertScript = (rootNode) => {
       behavior: 'smooth'
     });
   }
+
+  /* For page navigation */
+  function gotoPage(selector) {
+    const button = document.querySelector(selector);
+    if (button)
+      window.location.href = button.href;
+  }
+  document.addEventListener('keydown', e => {
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        gotoPage('.nav-next');
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        gotoPage('.nav-prev');
+        break;
+    }
+  });
   </script>
   `);
   return rootNode;
