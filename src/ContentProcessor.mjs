@@ -30,12 +30,12 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  *    }
  *  }
  *  ```
- *  @param {(string, number, number) => string} basenameFn The
- *  function that returns the basename of the current html given
+ *  @param {(string, number, number) => string} basenameMaker The
+ *  function that generates the basename of the current html given
  *  the section information.
  */
 const processContents = (
-  preambleProcessor, partProcessor, chapterProcessor, rootNode, config, basenameFn) => {
+  preambleProcessor, partProcessor, chapterProcessor, rootNode, config, basenameMaker) => {
   const root = rootNode.clone();
   let chap = 0;
   let part = 0;
@@ -52,7 +52,7 @@ const processContents = (
       } else
         isFirstPage = false;
       return chapterProcessor(config, root, node, 1, 'chap',
-        basenameFn, ++chap, isFirstPage); // recursive extraction of chapters
+        basenameMaker, ++chap, isFirstPage); // recursive extraction of chapters
     }
     if (node.hasClass('sect0')) {
       if (!firstPageProcessed && !isFirstPage) {
