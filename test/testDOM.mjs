@@ -6,9 +6,10 @@
 'use strict';
 
 import test from 'ava';
+import { getChapterExtractor } from '../src/Chapters.mjs';
+import getFilenameMaker from '../src/FilenameMaker.mjs';
 import {
   newDOM,
-  extractChapters,
   makeContainer,
   extractPreamble,
   extractPart,
@@ -26,7 +27,7 @@ import {
   removeParameters,
 } from '../src/DOM.mjs';
 import { append$ } from '../src/DomFunc.mjs';
-import { pipe } from '../src/Utils.mjs';
+import { pipe } from '../src/FP.mjs';
 import cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { rm, exists } from '../src/Files.mjs';
@@ -78,6 +79,11 @@ const sectClass = seclabel => {
   return `sect${sectLevel}`;
 }
 
+/**
+ * The function that handles making basename of the output file.
+ */
+const basenameMaker = getFilenameMaker();
+
 test('test DOM created by cheerio', t => {
   const cheerioHTML = newDOM(sampleHTML).html();
   t.truthy(cheerioHTML);
@@ -109,47 +115,49 @@ test('extract sections', t => {
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extractChapters(printer('chap1'), container,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(1))
     (makeConfigWithDepth(1), container,
-      $('div.sect1').first(), 1, 'chap', chap, false);
+      $('div.sect1').first(), 1, 'chap', basenameMaker,
+      chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap1'), container,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(2))
     (makeConfigWithDepth(2), container,
-      $('div.sect1').first(), 1, 'chap', chap, false);
+      $('div.sect1').first(), 1, 'chap', basenameMaker,
+      chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap1'), container,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(3))
     (makeConfigWithDepth(3), container,
-      $('div.sect1').first(), 1, 'chap', chap, false);
+      $('div.sect1').first(), 1, 'chap', basenameMaker,
+      chap, false);
   // for Chapter 2
   console.log("Chapter 2");
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extractChapters(printer('chap2:depth1'), container,
-      createDocumentMaker($)(1))
+  getChapterExtractor(printer('chap2:depth1'), container, basenameMaker, createDocumentMaker($)(1))
     (makeConfigWithDepth(1), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap',
+      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap2:depth2'), container,
+  getChapterExtractor(printer('chap2:depth2'), container, basenameMaker,
       createDocumentMaker($)(2))
     (makeConfigWithDepth(2), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap',
+      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap2:depth3'), container,
+  getChapterExtractor(printer('chap2:depth3'), container, basenameMaker,
       createDocumentMaker($)(3))
     (makeConfigWithDepth(3), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap',
+      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("4th round");
-  extractChapters(printer('chap2:depth4'), container,
+  getChapterExtractor(printer('chap2:depth4'), container, basenameMaker,
       createDocumentMaker($)(6))
     (makeConfigWithDepth(6), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap',
+      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
 });
 
@@ -181,7 +189,8 @@ test('fine tuned extrations', async t => {
   };
 
   await mkdirs(outdir);
-  makeChunks(printer(results), newDOM(sampleHTML), config);
+  // TODO
+  makeChunks(printer(results), newDOM(sampleHTML), config, basenameMaker);
 
   // test preamble and part extraction
   t.is(results.part.length, 3);
@@ -294,7 +303,8 @@ test('No hash to the link of first element in each page', async t => {
     t.true(noHash);
   };
   await mkdirs(outdir);
-  makeChunks(printer, $, config); // test is inside the printer()
+  // TODO
+  makeChunks(printer, $, config, basenameMaker); // test is inside the printer()
 
   // cleanup for css file extraction side effects in makeChunks()
   await rm(outdir);
@@ -438,7 +448,8 @@ test('makeChunks()', async t => {
     // console.log(fnamePrefix);
   };
   await mkdirs(outdir);
-  makeChunks(printer, $, config);
+  // TODO
+  makeChunks(printer, $, config, basenameMaker);
 
   // cleanup for css file extraction side effects in makeChunks()
   await rm(outdir);
@@ -483,7 +494,8 @@ test('test titlePage option', async t => {
     t.true(hasWelcome);
   };
   await mkdirs(outdir);
-  makeChunks(printer, $, config); // test is inside the printer()
+  // TODO
+  makeChunks(printer, $, config, basenameMaker); // test is inside the printer()
 
   // cleanup for css file extraction side effects in makeChunks()
   await rm(outdir);

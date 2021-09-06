@@ -6,7 +6,7 @@
 'use strict';
 
 import test from 'ava';
-import { pipe, compose } from '../src/Utils.mjs';
+import { pipe, compose } from '../src/FP.mjs';
 
 const add5 = x => x + 5;
 const mult10 = x => x * 10;
