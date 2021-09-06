@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
-import { pipe } from './Utils.mjs';
+import { pipe } from './FP.mjs';
 import * as D from './DomFunc.mjs';
 import {
   relative2absolute,
