@@ -78,9 +78,9 @@ Example:
                      level 3 for chap3 to 8.`)
     .parse(argv);
 
-  // console.log(args);
-  const { args: inputfile, depth, outdir, strictMode, titlePage, css = ['asciidoctor-chunker.css'] } = args;
-
+  // console.log(args.opts());
+  const { depth, outdir, strictMode, titlePage, css = ['asciidoctor-chunker.css'] } = args.opts();
+  const inputfile = args.args;
   if (inputfile.length !== 1) {
     args.help();
   }
