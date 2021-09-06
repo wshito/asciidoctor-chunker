@@ -15,6 +15,9 @@ import {
   copyIfNewer
 } from './Files.mjs';
 import { fileURLToPath } from 'url';
+import processContents from './ContentProcessor.mjs';
+import { processChapters, extractChapters } from './Chapters.mjs';
+import getFilenameMaker from './FilenameMaker.mjs';
 
 const fsp = fs.promises;
 
@@ -86,16 +89,7 @@ export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
     )(newContainer);
   };
 
-/**
- * Creates the basename for output html file based on
- * the section level and section number.  Eg. chap1, chap1_sec3-2.
- * @param {string} fnamePrefix
- * @param {number} thisSecLevel
- * @param {number} sectionNumber
- */
-const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
-  thisSecLevel === 1 ? `${fnamePrefix}${sectionNumber}` :
-  thisSecLevel === 2 ? `${fnamePrefix}_sec${sectionNumber}` : `${fnamePrefix}-${sectionNumber}`;
+const basenameMaker = getFilenameMaker();
 
 /*
   extract inside the bracket:
@@ -116,68 +110,6 @@ const basename = (fnamePrefix, thisSecLevel, sectionNumber) =>
   sect1 (h2) -- sect5 (h6)
 */
 
-/**
- * Process the nodes with 'sectN' classname where N >= 1
- * recursively.  This function does not return anything.
- * This takes processor callback to handle actual task
- * on each visitng nodes.
- *
- * The visiting nodes processing has been abstracted
- * so the creation of ID-filename hashtable can also
- * use this code.
- *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} processor
- *  The callback which takes the filename prefix and Cheerio
- *  instance and do some chapter content processing.
- * @param {object} config: The configuration object which has
- *  `depth` property to specify the maximum sectLevel to extract.
- *  The default is 1 which extracts parts and chapters.
- * @param {object} config.depth The configuration to specify the
- *  maximum sectLevel to extract.  The example format is as follows:
- *  ```
- *  depth: {
- *    default: 1, // the default is to extract only chapters
- *    2: 4,  // extracts subsubsections in chap 2
- *    3: 2,  // extracts sections in chap 3
- *  }
- *  ```
- * @param {Cheerio} container Cheerio instance of container DOM which has the appending point: `#content`.
- * @param {Cheerio} node The current section node extracted from DOM.
- * @param {number} thisSectLevel the current node's section level where chapter is level 1, section is level 2, and so on.
- * @param {string} fnamePrefix The filename prefix.
- * @param {number} sectionNumber The section number in the current section level.
- * @param {boolean} isFirstPage true if this is the index.html page.
- */
-export const processChapters = processor => {
-  const _processChapters =
-    (config, container, node, thisSectLevel, fnamePrefix, sectionNumber, isFirstPage) => {
-      const maxLevel = config.depth[sectionNumber] || config.depth.default;
-      const filename = isFirstPage ? 'index' : basename(fnamePrefix, thisSectLevel, sectionNumber);
-      // case with no extraction
-      if (maxLevel === thisSectLevel) {
-        processor(config, filename, container, node, isFirstPage)
-        return;
-      }
-      const childSelector = `div.sect${thisSectLevel+1}`;
-      // extract myself
-      processor(config, filename, container, D.remove(childSelector)(node), isFirstPage);
-
-      // get children nodes
-      const children = node.find(childSelector);
-      if (children.length === 0) {
-        return;
-      }
-      // go into children nodes to extract.
-      // make sure to return to make it tail call to minimize the stack
-      return children.each((i, ele) =>
-        _processChapters(config, container,
-          new Cheerio(ele), // ele is DOM node.  Wrap it with Cheerio object
-          thisSectLevel + 1,
-          filename, i + 1,
-          false)); // isFirstPage = false
-    };
-  return _processChapters;
-};
 
 /**
  * Creates new DOM with empty content.
@@ -256,105 +188,6 @@ export const extractPart = (printer, container, documentMaker) =>
   };
 
 /**
- * Extracts the node with 'sectN' classname where N >= 1
- * recursively and attaches to container's `div#content`.
- * This function does not return anything.
- * This takes printer function for side effect.
- *
- * First two args `printer` and `container` is curried.  The container,
- * where the extracted chap and sections are attached to, is reused by
- * cloning.  Make sure to create a template first so you do not have
- * to create the currounding container verytime you extract the chapters
- * and sections.
- *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} printer The callback
- *  which takes the filename prefix and Cheerio instance maily to print or
- *  write out to the file.
- * @param {Cheerio} container The dom holding `div#content` as a attaching point
- *  for extracted chapters and sections.  This is passed and kept in closure
- *  beforehand to be used as a template repeatedly.
- * @param {number} maxLevel The maximum secLevel to extract.
- * @param {Cheerio} rootNode The Cheerio instance of the root node where
- *   this chapter `node` is extracted from.  This argument is not used in
- *   this function.
- * @param {Cheerio} node The current section node extracted from DOM.
- * @param {number} thisSectLevel the current node's section level where chapter is level 1, section is level 2, and so on.
- * @param {string} fnamePrefix The filename prefix.
- * @param {number} sectionNumber The section number in the current section level.
- */
-export const extractChapters = (printer, container, documentMaker) =>
-  // the argument is the processor function that will be used
-  // inside the processChapters().
-  processChapters((config, basename, rootNode, node, isFirstPage) => {
-    printer(basename, documentMaker(config, basename, container, node));
-  });
-
-/**
- * Visit the nodes under the #content node and invoke
- * the given processor callbacks.
- *
- * @param {(root:boolean, node:{Cheerio}, isFirstPage:boolean)
- *  => void} preambleProcessor
- * @param {(root:boolean, node:{Cheerio}, partNumber:number, isFirstPage:boolean)
- *  => void} partProcessor
- * @param {(config:{object}, root:boolean, node:{Cheerio}, thisSectLevel:number,
- *   filenamePrefix:{string}, sectionNumber:number, isFirstPage:boolean)
- *  => void} chapterProcessor
- * @param {Cheerio} rootNode The document root node which is the
- *  instance of Cheerio.
- * @param {object} config: The configuration object which has
- *  `depth` object to specify the maximum sectLevel to extract.
- *  The default is 1 which extracts parts and chapters.
- *  The example format is as follows:
- *  ```
- *  {
- *    depth: {
- *      default: 1, // the default is to extract only chapters
- *      2: 4,  // extracts subsubsections in chap 2
- *      3: 2,  // extracts sections in chap 3
- *    }
- *  }
- *  ```
- */
-const processContents = (
-  preambleProcessor, partProcessor, chapterProcessor, rootNode, config) => {
-  const root = rootNode.clone();
-  let chap = 0;
-  let part = 0;
-  let firstPageProcessed = false;
-  let isFirstPage = false;
-  root.find('#content').children().each((i, ele) => {
-    const node = new Cheerio(ele);
-    if (node.hasClass('partintro'))
-      return; // ignore. this is taken care by part extraction
-    if (node.hasClass('sect1')) {
-      if (!firstPageProcessed && !isFirstPage) {
-        isFirstPage = true;
-        firstPageProcessed = true;
-      } else
-        isFirstPage = false;
-      return chapterProcessor(config, root, node, 1, 'chap',
-        ++chap, isFirstPage); // recursive extraction of chapters
-    }
-    if (node.hasClass('sect0')) {
-      if (!firstPageProcessed && !isFirstPage) {
-        isFirstPage = true;
-        firstPageProcessed = true;
-      } else
-        isFirstPage = false;
-      // part extraction
-      return partProcessor(config, root, node, ++part, isFirstPage);
-    }
-    if (node.attr('id') === 'preamble') {
-      isFirstPage = true;
-      firstPageProcessed = true;
-      return preambleProcessor(config, root, node, isFirstPage);
-    }
-  });
-
-};
-
-/**
  * Returns the hashtable (Map instance) of (id, url).
  * The url is where the id is defined.  If id is 'foo', the url is
  * 'filename.html#foo' except the title element of the chunked page.
@@ -407,7 +240,8 @@ export const makeHashTable = (rootNode, config) => {
     recordPartIds,
     recordChapterIds,
     rootNode,
-    config
+    config,
+    basenameMaker // pass the basename function to create a filename
   );
   ht.set('navigation', { filename2pageNum, filenameList });
   return ht;
@@ -432,7 +266,10 @@ const addTitlepageToc$ = (config) => (rootNode) => {
  * This function does not return anything.  This takes
  * a printer function for side effect.
  *
- * @param {(fnamePrefix: string, dom: Cherrio) => void} printer The callback which takes the filename prefix and Cheerio instance maily to print or write out to files.
+ * @param {(fnamePrefix: string, dom: Cherrio) => void} printer
+ *  The callback which takes the filename prefix (the base name of
+ *  the html file) and Cheerio instance maily to print or write out
+ *  to files.
  * @param {Cheerio} $ The instance of Cheerio.
  * @param {object} config: The configuration object which has
  *  `depth` object to specify the maximum sectLevel to extract.
@@ -464,11 +301,15 @@ export const makeChunks = (printer, $, config) => {
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
-    extractPreamble(printer, container, makeDocument(footnotesKeeper$, ht)),
-    extractPart(printer, container, makeDocument(footnotesKeeper$, ht)),
-    extractChapters(printer, container, makeDocument(footnotesKeeper$, ht)),
+    extractPreamble(printer, container,
+      makeDocument(footnotesKeeper$, ht)),
+    extractPart(printer, container,
+      makeDocument(footnotesKeeper$, ht)),
+    extractChapters(printer, container, basenameMaker,
+      makeDocument(footnotesKeeper$, ht)),
     $.root(),
-    config);
+    config,
+    basenameMaker);
 }
 
 const checkTocLinks = (rootNode) => {
