@@ -16,7 +16,7 @@ import {
 } from './Files.mjs';
 import { fileURLToPath } from 'url';
 import processContents from './ContentProcessor.mjs';
-import { processChapters, extractChapters } from './Chapters.mjs';
+import { getChapterProcessor, getChapterExtractor } from './Chapters.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
 
 const fsp = fs.promises;
@@ -232,7 +232,7 @@ export const makeHashTable = (rootNode, config) => {
     recordIds(partTitleNode, isFirstPage ? 'index.html' : `part${partNum}.html`);
   };
   const recordChapterIds =
-    processChapters((config, filename, container, node, isFirstPage) => {
+    getChapterProcessor((config, filename, container, node, isFirstPage) => {
       recordIds(node, isFirstPage ? 'index.html' : `${filename}.html`);
     });
   processContents(
@@ -305,7 +305,7 @@ export const makeChunks = (printer, $, config) => {
       makeDocument(footnotesKeeper$, ht)),
     extractPart(printer, container,
       makeDocument(footnotesKeeper$, ht)),
-    extractChapters(printer, container, basenameMaker,
+    getChapterExtractor(printer, container, basenameMaker,
       makeDocument(footnotesKeeper$, ht)),
     $.root(),
     config,

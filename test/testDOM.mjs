@@ -6,7 +6,7 @@
 'use strict';
 
 import test from 'ava';
-import { extractChapters } from '../src/Chapters.mjs';
+import { getChapterExtractor } from '../src/Chapters.mjs';
 import getFilenameMaker from '../src/FilenameMaker.mjs';
 import {
   newDOM,
@@ -115,19 +115,19 @@ test('extract sections', t => {
   let chap = 1;
   console.log("Chapter 1");
   console.log("1st round");
-  extractChapters(printer('chap1'), container, basenameMaker,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(1))
     (makeConfigWithDepth(1), container,
       $('div.sect1').first(), 1, 'chap', basenameMaker,
       chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap1'), container, basenameMaker,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(2))
     (makeConfigWithDepth(2), container,
       $('div.sect1').first(), 1, 'chap', basenameMaker,
       chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap1'), container, basenameMaker,
+  getChapterExtractor(printer('chap1'), container, basenameMaker,
       createDocumentMaker($)(3))
     (makeConfigWithDepth(3), container,
       $('div.sect1').first(), 1, 'chap', basenameMaker,
@@ -137,24 +137,24 @@ test('extract sections', t => {
   chap = 2;
   console.log("1st round");
   // get() returns a Node so wrap with Cheerio object
-  extractChapters(printer('chap2:depth1'), container, basenameMaker, createDocumentMaker($)(1))
+  getChapterExtractor(printer('chap2:depth1'), container, basenameMaker, createDocumentMaker($)(1))
     (makeConfigWithDepth(1), container,
       new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("2nd round");
-  extractChapters(printer('chap2:depth2'), container, basenameMaker,
+  getChapterExtractor(printer('chap2:depth2'), container, basenameMaker,
       createDocumentMaker($)(2))
     (makeConfigWithDepth(2), container,
       new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("3rd round");
-  extractChapters(printer('chap2:depth3'), container, basenameMaker,
+  getChapterExtractor(printer('chap2:depth3'), container, basenameMaker,
       createDocumentMaker($)(3))
     (makeConfigWithDepth(3), container,
       new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
       chap, false);
   console.log("4th round");
-  extractChapters(printer('chap2:depth4'), container, basenameMaker,
+  getChapterExtractor(printer('chap2:depth4'), container, basenameMaker,
       createDocumentMaker($)(6))
     (makeConfigWithDepth(6), container,
       new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
