@@ -17,6 +17,8 @@ import {
 import { fileURLToPath } from 'url';
 import processContents from './ContentProcessor.mjs';
 import { getChapterProcessor, getChapterExtractor } from './Chapters.mjs';
+import getPartExtractor from './Parts.mjs';
+import getPreambleExtractor from './Preamble.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
 
 const fsp = fs.promises;
@@ -146,48 +148,6 @@ INFO: If you want them to be included, use the '--no-strictMode' command option.
 };
 
 /**
- *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} printer The callback
- *  which takes the filename prefix and Cheerio instance maily to print or
- *  write out to the file.
- * @param {Cheerio} container The dom holding `div#content` as a attaching point
- *  for extracted chapters and sections.  This is passed and kept in closure
- *  beforehand to be used as a template repeatedly.
- * @param {Cheerio} rootNode The root node where this `preamble` node is
- *  extracted from.  This argument is not used in this function.
- * @param {Cheerio} preambleNode The preamble node that is 'div#preamble'.
- * @param {boolean} isFirstPage true if this is the first page as index.html.
- */
-export const extractPreamble = (printer, container, documentMaker) =>
-  (config, rootNode, preambleNode, isFirstPage) => {
-    const basename = isFirstPage ? 'index' : 'preamble';
-    printer(basename, documentMaker(config, basename, container, preambleNode));
-  }
-
-const makePartDocument = (config, basename, container, partTitleNode, documentMaker) =>
-  documentMaker(config, basename, container, ...(partTitleNode.next().hasClass('partintro') ? [partTitleNode, partTitleNode.next()] : [partTitleNode]));
-
-/**
- *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} printer The callback
- *  which takes the filename prefix and Cheerio instance maily to print or
- *  write out to the file.
- * @param {Cheerio} container The dom holding `div#content` as a attaching point
- *  for extracted chapters and sections.  This is passed and kept in closure
- *  beforehand to be used as a template repeatedly.
- * @param {Cheerio} rootNode The root node where this `part` node is extracted
- *  from.  This argument is not used in this function.
- * @param {Cheerio} partTitleNode The part title node that is 'h1.sect0'.
- * @param {number} partNum The part number.
- */
-export const extractPart = (printer, container, documentMaker) =>
-  (config, rootNode, partTitleNode, partNum, isFirstPage) => {
-    const basename = isFirstPage ? 'index' : `part${partNum}`;
-    printer(basename,
-      makePartDocument(config, basename, container, partTitleNode, documentMaker));
-  };
-
-/**
  * Returns the hashtable (Map instance) of (id, url).
  * The url is where the id is defined.  If id is 'foo', the url is
  * 'filename.html#foo' except the title element of the chunked page.
@@ -301,9 +261,9 @@ export const makeChunks = (printer, $, config) => {
   // delegates recursive processing to processContents()
   // by passing three processors to handle each contents.
   processContents(
-    extractPreamble(printer, container,
+    getPreambleExtractor(printer, container,
       makeDocument(footnotesKeeper$, ht)),
-    extractPart(printer, container,
+    getPartExtractor(printer, container,
       makeDocument(footnotesKeeper$, ht)),
     getChapterExtractor(printer, container, basenameMaker,
       makeDocument(footnotesKeeper$, ht)),
