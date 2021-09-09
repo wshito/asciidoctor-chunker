@@ -7,12 +7,12 @@
 
 import test from 'ava';
 import { getChapterExtractor } from '../src/Chapters.mjs';
+import getPartExtractor from '../src/Parts.mjs';
+import getPreambleExtractor from '../src/Preamble.mjs';
 import getFilenameMaker from '../src/FilenameMaker.mjs';
 import {
   newDOM,
   makeContainer,
-  extractPreamble,
-  extractPart,
   makeChunks,
   makeHashTable,
   makeDocument,
@@ -232,7 +232,7 @@ test('preamble extraction', t => {
     // we don't have to rewrite the links in the
     // extraction test so pass the empty hashtabel
     // to makeDocument()
-    extractPreamble(printer, container,
+    getPreambleExtractor(printer, container,
         createDocumentMaker($)(1))
       (makeConfigWithDepth(1), $.root(), node, false);
   });
@@ -264,7 +264,7 @@ test('Part extraction', t => {
     // we don't have to rewrite the links in the
     // extraction test so pass the empty hashtabel
     // to makeDocument()
-    extractPart(printer, container,
+    getPartExtractor(printer, container,
         createDocumentMaker($)(1))
       (makeConfigWithDepth(1), $.root(),
         node, ++partNum, false);
