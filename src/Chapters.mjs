@@ -48,6 +48,8 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  * @param {string} basename The basename of the target file.
  * @param {Cheerio} container Cheerio instance of container
  *  DOM which has the appending point: `#content`.
+ *  This is passed and kept in closure beforehand to be used
+ *  as a template repeatedly.
  * @param {Cheerio} node The current section node extracted from DOM.
  * @param {boolean} isFirstPage true if this is the index.html page.
  *
@@ -75,8 +77,9 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  *    3: 2,  // extracts sections in chap 3
  *  }
  *  ```
- * @param {Cheerio} container Cheerio instance of container
- *  DOM which has the appending point: `#content`.
+ * @param {Cheerio} container Cheerio instance of the container
+ *  DOM which has the appending point: `#content`.  This is the
+ *  root node of the container.
  * @param {Cheerio} node The current section node extracted from DOM.
  * @param {number} thisSectLevel the current node's section level
  *  where chapter is level 1, section is level 2, and so on.
@@ -202,8 +205,10 @@ const getChapterExtractor = (printer, container, basenameMaker,
     documentMaker) =>
   // Pass the processor function that is invoked by _processChapters().
   // The processor function is the printer to write out the html file.
-  getChapterProcessor((config, basename, rootNode, node, isFirstPage) => {
-    printer(basename, documentMaker(config, basename, container, node));
-  });
+  getChapterProcessor(
+    (config, basename, containerRoot, node, isFirstPage) => {
+      printer(basename,
+        documentMaker(config, basename, container, node));
+    });
 
 export { getChapterExtractor, getChapterProcessor };
