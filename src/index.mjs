@@ -11,9 +11,7 @@ import { makeChunks, newDOM, printer, copyRelativeFiles } from './DOM.mjs';
 import { makeConfig } from './CommandOptions.mjs';
 import { exists } from './Files.mjs';
 import { mkdirs } from './Files.mjs';
-import { extractCSS } from './DOM.mjs';
 import path from 'path';
-
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleConfig = {
