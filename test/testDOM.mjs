@@ -10,11 +10,11 @@ import { getChapterExtractor } from '../src/Chapters.mjs';
 import getPartExtractor from '../src/Parts.mjs';
 import getPreambleExtractor from '../src/Preamble.mjs';
 import getFilenameMaker from '../src/FilenameMaker.mjs';
+import makeHashTable from '../src/MakeHashTable.mjs';
 import {
   newDOM,
   makeContainer,
   makeChunks,
-  makeHashTable,
   makeDocument,
   getFirstContentId,
   getContentNode$,
