@@ -18,20 +18,21 @@ import {
   makeDocument,
   getFirstContentId,
   getContentNode$,
-  getFootnoteDefIds,
-  findFootnoteReferers,
-  keepReferredFootnotes$,
-  updateRefererId$,
-  makeFootnoteRefId,
-  updateFootnotes,
-  removeParameters,
 } from '../src/DOM.mjs';
 import { append$ } from '../src/DomFunc.mjs';
 import { pipe } from '../src/FP.mjs';
 import cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
-import { rm, exists } from '../src/Files.mjs';
+import { rm, exists, removeParameters } from '../src/Files.mjs';
 import { mkdirs } from '../src/Files.mjs';
+import {
+  getFootnoteDefIds,
+  makeFootnoteRefId,
+  updateRefererId$,
+  findFootnoteReferers,
+  keepReferredFootnotes$,
+  updateFootnotes,
+} from '../src/Footnotes.mjs';
 import { makeConfig } from '../src/CommandOptions.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
