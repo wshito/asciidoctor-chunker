@@ -14,7 +14,11 @@ import processContents from './ContentProcessor.mjs';
 import { getChapterExtractor } from './Chapters.mjs';
 import getPartExtractor from './Parts.mjs';
 import getPreambleExtractor from './Preamble.mjs';
-import { checkTocLinks, setCurrentToToc } from './TOC.mjs';
+import {
+  addTitlepageToc$,
+  checkTocLinks,
+  setCurrentToToc
+} from './TOC.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
 import makeHashTable from './MakeHashTable.mjs';
 import { insertCSS, extractCSS } from './CSS.mjs';
@@ -159,10 +163,6 @@ export const printer = outDir => (fnamePrefix, dom) => {
     console.log("File write error:", fname));
 }
 
-const addTitlepageToc$ = (config) => (rootNode) => {
-  new Cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
-  return rootNode;
-}
 /**
  * Make chunked html.  This is the main function to extract
  * whole book of adoc html file.

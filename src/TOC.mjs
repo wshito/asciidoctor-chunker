@@ -1,6 +1,12 @@
 'use strict';
 
+import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { pipe } from './FP.mjs';
+
+const addTitlepageToc$ = (config) => (rootNode) => {
+  new Cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
+  return rootNode;
+}
 
 const checkTocLinks = (rootNode) => {
   if (rootNode.find('#toc a[href^=#]').length === 0)
@@ -29,4 +35,4 @@ const setCurrentToToc = (fnamePrefix) => (rootNode) => {
   return rootNode;
 }
 
-export { checkTocLinks, setCurrentToToc };
+export { addTitlepageToc$, checkTocLinks, setCurrentToToc };
