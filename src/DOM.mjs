@@ -14,6 +14,7 @@ import processContents from './ContentProcessor.mjs';
 import { getChapterExtractor } from './Chapters.mjs';
 import getPartExtractor from './Parts.mjs';
 import getPreambleExtractor from './Preamble.mjs';
+import { checkTocLinks, setCurrentToToc } from './TOC.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
 import makeHashTable from './MakeHashTable.mjs';
 import { insertCSS, extractCSS } from './CSS.mjs';
@@ -214,12 +215,6 @@ export const makeChunks = (printer, $, config) => {
     basenameMaker);
 }
 
-const checkTocLinks = (rootNode) => {
-  if (rootNode.find('#toc a[href^=#]').length === 0)
-    console.log('INFO: Your TOC has no in-document links.\n');
-  return rootNode;
-};
-
 /**
  * @param {Map<id, url>} ht the Hashtable of <id, url>.  If id is 'foo' then
  *  url is 'filename.html#foo' where the filename is where the id is defined.
@@ -237,27 +232,6 @@ const updateLinks = (ht) => (node) => {
   });
   return node;
 }
-
-/**
- * Sets `current` classname on the crrent page's <li> element.
- *
- * @param {string} fnamePrefix file's basename
- * @param {Cheerio} rootNode the Cheerio instance of root node
- * @returns the Cheerio instance of root node.
- */
-const setCurrentToToc = (fnamePrefix) => (rootNode) => {
-  pipe(
-    findCurrentPageTocAnchor(fnamePrefix),
-    markCurrent$,
-  )(rootNode);
-  return rootNode;
-}
-
-const findCurrentPageTocAnchor = (fnamePrefix) => (rootNode) =>
-  rootNode.find(`#toc a[href^="${fnamePrefix}.html"]`).parent();
-
-const markCurrent$ = node => node.addClass('current');
-('class');
 
 export const addPageNavigation = (basename, { filename2pageNum, filenameList }) =>
   (rootNode) => {
@@ -293,8 +267,6 @@ const createNav = (prev, next) => `
   <div style="clear: both"></div>
 </nav>
 `;
-
-const notRelative = /^#|https:|http:|file:/;
 
 const insertScript = (rootNode) => {
   rootNode.find('html').append(`
