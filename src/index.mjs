@@ -7,10 +7,9 @@
 
 'use strict';
 
-import { makeChunks, newDOM, printer, copyRelativeFiles } from './DOM.mjs';
+import { makeChunks, newDOM, printer } from './DOM.mjs';
 import { makeConfig } from './CommandOptions.mjs';
-import { exists } from './Files.mjs';
-import { mkdirs } from './Files.mjs';
+import { exists, copyRelativeFiles, mkdirs } from './Files.mjs';
 import path from 'path';
 
 const sampleHTML = 'test/resources/output/single/sample.html';

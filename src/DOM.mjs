@@ -10,10 +10,6 @@ import cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { pipe } from './FP.mjs';
 import * as D from './DomFunc.mjs';
-import {
-  relative2absolute,
-  copyIfNewer
-} from './Files.mjs';
 import processContents from './ContentProcessor.mjs';
 import { getChapterExtractor } from './Chapters.mjs';
 import getPartExtractor from './Parts.mjs';
@@ -299,39 +295,6 @@ const createNav = (prev, next) => `
 `;
 
 const notRelative = /^#|https:|http:|file:/;
-
-export const removeParameters = (url) => {
-  const base = path.basename(url);
-  const i = base.indexOf('?');
-  return i === -1 ? url :
-    path.join(path.dirname(url), base.substring(0, i));
-}
-/**
- * Extracts relative paths from tagName[attrName] elements
- * under the given dom node.
- *
- * @param {Cheerio} dom The Cheerio instance of DOM.
- */
-const getLocalFiles = (dom) => {
-  const localFiles = [];
-  dom.find(`link[href], script[src], img[src]`).each((i, ele) => {
-    const node = new Cheerio(ele);
-    const url = node.attr('href') || node.attr('src');
-    if (!url.match(notRelative) && !path.isAbsolute(url)) {
-      localFiles.push(removeParameters(url));
-    }
-  });
-  return localFiles;
-};
-
-export const copyRelativeFiles = (basefile, outDir) => (dom) => {
-  const toAbsoluteInOutDir = (relativeFile) => path.join(outDir, relativeFile);
-  const toAbsoluteInSrcDir = relative2absolute(basefile);
-
-  getLocalFiles(dom).forEach(file =>
-    copyIfNewer(toAbsoluteInSrcDir(file))
-    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
-};
 
 const insertScript = (rootNode) => {
   rootNode.find('html').append(`
