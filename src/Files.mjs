@@ -4,6 +4,7 @@
  */
 'use strict';
 
+import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import path, { relative } from 'path';
 import fs from 'fs';
 const fsp = fs.promises;
@@ -114,6 +115,9 @@ export const removeParameters = (url) => {
   return i === -1 ? url :
     path.join(path.dirname(url), base.substring(0, i));
 }
+
+const notRelative = /^#|https:|http:|file:/;
+
 /**
  * Extracts relative paths from tagName[attrName] elements
  * under the given dom node.
