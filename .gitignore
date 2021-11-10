@@ -9,3 +9,4 @@ test/resources/output
 tmp*
 asciidoctor-chunker_v*
 dist/*.asciidoctor-chunker.js
+asciidoctor-chunker.js.LICENSE.txt

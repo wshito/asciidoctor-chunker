@@ -116,7 +116,7 @@ export const removeParameters = (url) => {
     path.join(path.dirname(url), base.substring(0, i));
 }
 
-const notRelative = /^#|https:|http:|file:/;
+const notRelative = /^#|^https:|^http:|^file:|^data:/;
 
 /**
  * Extracts relative paths from tagName[attrName] elements

@@ -1,14 +1,16 @@
 *~
+example
 output-chunk
 output-single
 *.fasl
 asciidoctor.org
 node_modules
 html_chunks
-test/resources/output
+test
 tmp*
 asciidoctor-chunker_v*
 dist/*.asciidoctor-chunker.js
+dist/asciidoctor-chunker.js.LICENSE.txt
 .jsbeautifyrc
 .eslintignore
 .github
@@ -17,3 +19,4 @@ dist/*.asciidoctor-chunker.js
 .vscode
 legacy-code
 settings.json
+Makefile

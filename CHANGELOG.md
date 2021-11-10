@@ -10,11 +10,12 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
 - Refactored by splitting a `DOM.mjs` into separate files.
-- All the changesa are now kept in `CHANGELOG.md` file.
+- All the changes are now kept in `CHANGELOG.md` file.
 
 ### Fixed
-- `npm` installs the shebang script instead of `src/index.mjs`. ([#25](https://github.com/wshito/asciidoctor-chunker/issues/25))
+- `npm` installs the shebang script instead of `src/index.mjs`. (Issue [#25](https://github.com/wshito/asciidoctor-chunker/issues/25))
 - Fixed the `undefined` url when the target link is missing.  The `target-missing` class attribute is added to the anchor whose target is missing.  (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
+- Properly handles the data URLs.  (Issue [#23](https://github.com/wshito/asciidoctor-chunker/issues/23))
 
 ### Security
 - Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, and trim-off-newlines.
