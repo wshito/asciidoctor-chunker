@@ -1,35 +1,35 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## Unreleased
 ### Changed
 - Improved help text from [@tajmone](https://github.com/tajmone).
 - Refactored by splitting a `DOM.mjs` into separate files.
 - All the changesa are now kept in `CHANGELOG.md` file.
 
-## [1.0.4] - 2021-08-03
+## v1.0.4 (2021-08-03)
 ### Added
 - Keyboard shortcuts for the page navigation with arrow keys.
 - Accessibility labels on the page navigation for screen readers.
 
-## [1.0.3] - 2021-06-25
+## v1.0.3 (2021-06-25)
 ### Security
 - Fixed the security vulnerabilities in the dependencies.
 
-## [1.0.2] - 2021-05-09
+## v1.0.2 (2021-05-09)
 ### Added
 - The `--titlePage` option that enables the custom toc label for the titlepage from [@johnthad](https://github.com/johnthad).
 
-## [1.0.1] - 2021-03-17
+## v1.0.1 (2021-03-17)
 ### Added
 - The shebang in the main script.
 
 ### Changed
 - The project is published on [npm](https://www.npmjs.com/package/asciidoctor-chunker).
 
-## [1.0.0] - 2021-02-27
+## v1.0.0 (2021-02-27)
 ### Added
 - The non opinionated page navigation at the bottom of each page.
 - You can insert custom css from the command line with `--css` option.
@@ -37,35 +37,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Gives warning if no relative links are available in tocs.
 - The current page toc is highlighted and scrolled into view.
 
-## [0.9] - 2021-02-20
+## v0.9 (2021-02-20)
 ### Changed
 - Re-implemented in JavaScript which is the complete re-write from the previous Lisp version.
 - The new JavaScript version can control any depth of sections to split.  And even more, each chapter can have a different depth extraction level.
 - Runs very fast!
 
-## [0.1] - 2021-02-20
+## v0.1 (2021-02-20)
 - Archived the stable lisp version as v0.1 and moved to `legacy-code` directory.
 - Started to work on the more enhanced version in `javascript` branch.
 
-## [Bug Fix] - 2019-01-24
+## Bug Fix (2019-01-24)
 - Supressed the waring message for cl-fad dependency [#6](https://github.com/wshito/asciidoctor-chunker/issues/6).  Fixed by [@snmsts](https://github.com/snmsts)
 
-## [Locally linked files are copied] - 2018-07-11
+## Locally linked files are copied (2018-07-11)
 - Locally linked files with `link` and `script` tags with relative paths are copied to the destination directory keeping the structure of the relative path.  So the custom CSS and script files should be properly copied by `asciidoctor-chunker`.
 [#2](https://github.com/wshito/asciidoctor-chunker/issues/2)
 
-## [Renamed to asciidoctor-chunker] - 2018-03-23
+## Renamed to asciidoctor-chunker (2018-03-23)
 - The project name is now `asciidoctor-chunker`. [(commit)](https://github.com/wshito/asciidoctor-chunker/commit/da9d6dd41eeb5301cba899de2e6de4835a17f775)
 
-## [Most feature implemented] - 2018-03-19
+## Most of the features are implemented (2018-03-19)
 ### Added
 - Only locally referenced images are copied.
   [(commit)](https://github.com/wshito/asciidoctor-chunker/commit/75e76ede2a0ea4e52d5999e030db9c3a4dc94b18)
 
-## [First working version] - 2018-03-12
+## First working version (2018-03-12)
 - The first working version. [(commit)](https://github.com/wshito/asciidoctor-chunker/commit/0d43d5b026a8ae193e311c7c09017b22acd182d3)
 - The project name has changed to `asciidoc-chunker`. [(commit)](https://github.com/wshito/asciidoctor-chunker/commit/8a0994a92d66ebe2f74aed0790ccfeb5b3dc8840)
 
-## [Initiated the project] - 2018-03-09
+## Initiated the project (2018-03-09)
 - The `adoc-chunker` project began. [(commit)](https://github.com/wshito/asciidoctor-chunker/commit/c3dba6db4a6e8584b16a4c5b27e0fa158c26c581)
 
