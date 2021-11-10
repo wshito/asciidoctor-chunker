@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 
 ## Unreleased
+### Added
+- The `missing-target` class is added to the anchor whose target is missing. (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
+
 ### Changed
 - Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
 - Refactored by splitting a `DOM.mjs` into separate files.
@@ -11,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - `npm` installs the shebang script instead of `src/index.mjs`. ([#25](https://github.com/wshito/asciidoctor-chunker/issues/25))
+- Fixed the `undefined` url when the target link is missing.  The `missing-target` class is added to the anchor whose target is missing.  (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
 
 ### Security
 - Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, and trim-off-newlines.
