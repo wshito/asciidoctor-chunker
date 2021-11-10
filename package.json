@@ -4,7 +4,7 @@
   "description": "Creates chunked (multi-page) HTML from Asciidoctor's single HTML file with supporting the fine-tuned splits in chapters, sections and any depth of subsections.",
   "author": "Wataru Shito (https://github.com/wshito)",
   "bin": {
-    "asciidoctor-chunker": "src/index.mjs"
+    "asciidoctor-chunker": "dist/asciidoctor-chunker.js"
   },
   "repository": {
     "type": "git",
