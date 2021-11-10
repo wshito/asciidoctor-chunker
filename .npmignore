@@ -10,6 +10,10 @@ tmp*
 asciidoctor-chunker_v*
 dist/*.asciidoctor-chunker.js
 .jsbeautifyrc
+.eslintignore
+.github
+.gitignore
+.prettierignore
+.vscode
 legacy-code
 settings.json
-.github
