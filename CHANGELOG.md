@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - Refactored by splitting a `DOM.mjs` into separate files.
 - All the changesa are now kept in `CHANGELOG.md` file.
 
+### Fixed
+- `npm` installs the shebang script instead of `src/index.mjs`. ([#25](https://github.com/wshito/asciidoctor-chunker/issues/25))
+
 ### Security
 - Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, and trim-off-newlines.
 
