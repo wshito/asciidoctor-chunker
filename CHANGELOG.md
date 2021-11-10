@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - Refactored by splitting a `DOM.mjs` into separate files.
 - All the changesa are now kept in `CHANGELOG.md` file.
 
+### Security
+- Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, and trim-off-newlines.
+
 ## v1.0.4 (2021-08-03)
 ### Added
 - Keyboard shortcuts for the page navigation with arrow keys.
