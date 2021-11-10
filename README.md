@@ -4,11 +4,11 @@
 [![Node.js CI](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml/badge.svg)](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the support of fine-tuned splits by chapters, sections, or any depth of subsections.  Here is [the sample output.](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_chunk/index.html)  Each chapter can have different levels of extraction depth.  See [What it does](#what-it-does) for details.
+Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the support of fine-tuned splits by chapters, sections, or any depth of subsections.  Here is [the sample output.](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_chunk/index.html)  Each chapter can have different levels of extraction depth.  See [What it does](#what-it-does) for details.  The asciidoctor-chunker is written in JavaScript and is very easy to install.  See [Installation](#installation).
 
-The `asciidoctor-chunker` is written in JavaScript and is very easy to install.  See [Installation](#installation).
+## Latest News
 
-## Latest News (see [CHANGELOG.md] for the complete history)
+See [CHANGELOG.md](CHANGELOG.md) for the complete history
 
 - 2021/8/3 [Ver 1.0.4](https://github.com/wshito/asciidoctor-chunker/releases) Added the keyboard shotcuts for the page navigation with arrow keys.  Added the accessibility labels on the page navigation for screen readers.
 - 2021/6/25 [Ver 1.0.3](https://github.com/wshito/asciidoctor-chunker/releases) Fixed the security vulnerabilities in the dependencies.
