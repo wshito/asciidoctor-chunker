@@ -4,23 +4,15 @@
 [![Node.js CI](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml/badge.svg)](https://github.com/wshito/asciidoctor-chunker/actions/workflows/node.js.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the support of fine-tuned splits by chapters, sections, or any depth of subsections.  Here is [the sample output.](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_chunk/index.html)  Each chapter can have different levels of extraction depth.  See [What it does](#what-it-does) for details.
+Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the support of fine-tuned splits by chapters, sections, or any depth of subsections.  Here is [the sample output.](http://www.seinan-gu.ac.jp/~shito/asciidoctor/html_chunk/index.html)  Each chapter can have different levels of extraction depth.  See [What it does](#what-it-does) for details.  The asciidoctor-chunker is written in JavaScript and is very easy to install.  See [Installation](#installation).
 
-## News
+## Latest News
+
+See [CHANGELOG.md](CHANGELOG.md) for the complete history
 
 - 2021/8/3 [Ver 1.0.4](https://github.com/wshito/asciidoctor-chunker/releases) Added the keyboard shotcuts for the page navigation with arrow keys.  Added the accessibility labels on the page navigation for screen readers.
 - 2021/6/25 [Ver 1.0.3](https://github.com/wshito/asciidoctor-chunker/releases) Fixed the security vulnerabilities in the dependencies.
 - 2021/5/9 [Ver 1.0.2](https://github.com/wshito/asciidoctor-chunker/releases) The toc item for the titlepage can be configured with `--titlePage` option (thanks to [@johnthad](https://github.com/johnthad)).
-- 2021/3/17 [Ver 1.0.1](https://github.com/wshito/asciidoctor-chunker/releases) The script contains shebang and can be invoked directly.  Published on [npm](https://www.npmjs.com/package/asciidoctor-chunker).  You can install via npm.  See [Installation](#installation).
-- 2021/2/27 [Ver 1.0.0 Released!](https://github.com/wshito/asciidoctor-chunker/releases)
-  - Non opinionated page navigation at the bottom of each page is available.
-  - You can insert custom css from the command line with `--css` option.
-  - If you have any custom elements inserted in the source html, they are handled in non-strict mode by setting `--no-strictMode` option.
-  - Gives warning if no relative links are available in tocs.
-  - The current page toc is highlighted and scrolled into view.
-- 2021/2/20  Ver 0.9 is released!  This is a complete re-write from the previous Lisp version.  **It is re-implemented in JavaScript!**  So it is super easy to setup with NodeJS!  The fine tuned split options are available.  Oh, and it runs a lot faster than the previous version!😊
-- 2021/2/10  Started work on the more enhanced version in `javascript` branch.  Please wait a couple of weeks.  The new version can control any depth of sections to split.  And even more, each chapter can have a different depth extraction level.   The new version is written in JavaScript so it will be a lot easier to install!
-- 2018/7/11  Locally linked files with `link` and `script` tags with relative paths are copied to the destination directory keeping the structure of the relative path.  So the custom CSS and script files should be properly copied by `asciidoctor-chunker`.
 
 ## What it does
 
