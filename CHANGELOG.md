@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 ### Added
-- The `missing-target` class is added to the anchor whose target is missing. (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
+- The `missing-target` class attribute is added to the anchor whose target is missing. (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
 
 ### Changed
 - Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
