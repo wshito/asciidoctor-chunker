@@ -227,7 +227,15 @@ const updateLinks = (ht) => (node) => {
     if (!url.startsWith('#_footnotedef_') &&
       !url.startsWith('#_footnoteref_')) {
       const id = url.substring(1);
-      a.attr('href', `${ht.get(id)}`);
+      const newURL = ht.get(id);
+      if (newURL) {
+        a.attr('href', newURL);
+      } else { // when target URL is missing (undefined)
+        const newClass = a.attr('class') ?
+          `${a.attr('class')} target-missing` : 'target-missing';
+        a.attr('href', `#${id}`);
+        a.attr('class', newClass);
+      }
     }
   });
   return node;
