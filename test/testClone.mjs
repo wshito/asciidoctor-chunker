@@ -1,9 +1,15 @@
 /*
  * This file is a part of Asciidoctor Chunker project.
- * Copyright (c) 2021 Wataru Shito (@waterloo_jp)
+ * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
  */
 'use strict';
 
+/**
+ * This test file is to study Cheerio API's behavior so
+ * this is independent from the project codes.
+ * 
+ * src/Node.mjs is implemented based on this study.
+ */
 import test from 'ava';
 import * as cheerio from 'cheerio';
 
@@ -51,6 +57,52 @@ test('tests append to the clone', t => {
     if (i == 0) t.false($(ele).hasClass('num')); // $(this) does not work
     if (i == 1) t.true($(ele).hasClass('num'));
     if (i == 2) t.true($(ele).hasClass('new'));
+  });
+
+  //-- check the original document --
+
+  // $().find() has no root context. Use $.root().find()
+  // to use find() on default context
+  const orig = $.root().find('#content p');
+  t.is(orig.length, 2);
+  orig.each((i, ele) => {
+    if (i == 0) {
+      t.false($(ele).hasClass('num'));
+      t.false($(ele).hasClass('new'));
+    }
+    if (i == 1) {
+      t.true($(ele).hasClass('num'));
+      t.false($(ele).hasClass('new'));
+    }
+  });
+});
+
+test('tests append to the cloned non-root element', t => {
+  const $ = cheerio.load(html, null, false);
+  const copy = $.root().clone(); // need to keep the root node to output html or access the whole DOM tree
+  const container = $(copy).find('#content').empty();
+
+  // use the original Cheerio $ instance
+  // with passing the element from the cloned root element
+  $(container).append('<p class="new">appended</p>');
+  /*          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    changes the state of container
+    container now points appended <p class="new"> element
+    chck the console.log below
+  */
+  // console.log(
+  //   $(container).html(), '\n----\n',
+  //   $(copy).html(), '\n----\n',
+  //   $.html());
+
+  //-- check the cloned document --
+  // same as copy.find('#content p').
+  // $(copy) sets the root context with copy and does not infulence the orignaly loaded root context
+  const p = $(copy).find('#content p');
+  t.is(p.length, 1);
+  p.each((i, ele) => {
+    t.true($(ele).hasClass('new')); // $(this) does not work
+    t.false($(ele).hasClass('num'));
   });
 
   //-- check the original document --
