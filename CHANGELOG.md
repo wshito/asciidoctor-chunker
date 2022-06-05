@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - Properly handles the data URLs.  (Issue [#23](https://github.com/wshito/asciidoctor-chunker/issues/23))
 
 ### Security
-- Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, and trim-off-newlines.
+- Fixed the vulnerabilities from the dependencies on ansi-regex, nth-check, trim-off-newlines, Minimist.
 
 ## v1.0.4 (2021-08-03)
 ### Added
