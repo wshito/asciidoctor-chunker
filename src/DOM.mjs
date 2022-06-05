@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { pipe } from './FP.mjs';
 import * as D from './DomFunc.mjs';
@@ -171,7 +171,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
  *
  * @param {(fnamePrefix: string, dom: Cherrio) => void} printer
  *  The callback which takes the filename prefix (the base name of
- *  the html file) and Cheerio instance maily to print or write out
+ *  the html file) and Cheerio instance mainly to print or write out
  *  to files.
  * @param {Cheerio} $ The instance of Cheerio.
  * @param {object} config: The configuration object which has
