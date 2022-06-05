@@ -89,11 +89,14 @@ class Node {
    * 
    * @param {*} attrName 
    * @param {*} value 
-   * @returns {string} of attribute name or void if setter is called.
+   * @returns {string | Node} the attribute name for getter, and this Node
+   *  instance if setter for method chain.
    */
   attr(attrName, value) {
-    if (value) this.context.attr(attrName, value);
-    else return this.context.attr(attrName);
+    if (value) {
+      this.context.attr(attrName, value);
+      return this;
+    } else return this.context.attr(attrName);
   }
 
   /**
@@ -118,7 +121,7 @@ class Node {
    * delimiter.
    * @param {*} str 
    * @returns {string | Node} the text content of this node for getter
-   *  and this Node instance if setter.
+   *  and this Node instance if setter for method chain.
    */
   text(str) {
     if (str) {
