@@ -60,6 +60,23 @@ class Node {
   }
 
   /**
+   * Gets or sets the attribute of this node.
+   * Only the first element of the attribute in the
+   * current node set is returned.
+   * 
+   * @param {*} attrName 
+   * @param {*} value 
+   * @returns {string | Node} the attribute name for the getter, and 
+   *  returns this Node instance for the setter for method chain.
+   */
+  attr(attrName, value) {
+    if (value) {
+      this.context.attr(attrName, value);
+      return this;
+    } else return this.context.attr(attrName);
+  }
+
+  /**
    * Creates the completely independent DOM tree from the 
    * current node.  The returned instance points the currently
    * selected node as the root node.
@@ -83,23 +100,6 @@ class Node {
   }
 
   /**
-   * Gets or sets the attribute of this node.
-   * Only the first element of the attribute in the
-   * current node set is returned.
-   * 
-   * @param {*} attrName 
-   * @param {*} value 
-   * @returns {string | Node} the attribute name for getter, and this Node
-   *  instance if setter for method chain.
-   */
-  attr(attrName, value) {
-    if (value) {
-      this.context.attr(attrName, value);
-      return this;
-    } else return this.context.attr(attrName);
-  }
-
-  /**
    * Query the selectorAll under the current node and 
    * returns the selections encapsulated in a Node instance.
    * The returned Node instance shares the root node and DOM
@@ -115,6 +115,15 @@ class Node {
     return node; // returns new Node instance that holds the selections as context
   }
 
+  html() {
+    return this.$(this.context).html();
+  }
+
+  root() {
+    const node = new Node(this.$, this.rootNode, this.rootNode);
+    return node;
+  }
+
   /**
    * Gets or sets the text node of current node.
    * If current node consists of multiple nodes, all the texts are joined without
@@ -128,15 +137,6 @@ class Node {
       this.$(this.context).text(str);
       return this;
     } else return this.$(this.context).text();
-  }
-
-  html() {
-    return this.$(this.context).html();
-  }
-
-  root() {
-    const node = new Node(this.$, this.rootNode, this.rootNode);
-    return node;
   }
 
 }
