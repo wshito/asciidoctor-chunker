@@ -19,6 +19,27 @@ const html = `
     </body>
   </html>`;
 
+test('tests attr()', t => {
+  const node = Node._getInstance(html);
+  const div = node.find('div');
+  t.is(div.attr('id'), 'content');
+  t.is(div.attr('id', 'modified').attr('id'), 'modified');
+});
+
+test("tests clone()", t => {
+  const orig = Node._getInstance(html);
+  const copy = orig.clone();
+  const origText = orig.find('#content').text();
+  const copyText = copy.find('#content').text();
+  t.is(origText, copyText);
+  copy.find('#content').text('replaced');
+
+  t.not(orig.find('#content').text(), copy.find('#content').text());
+
+  // make sure copy's current node is root even after text('replaced') invocation
+  t.is(copy.find('p:first').text(), 'first paragraph');
+});
+
 test("tests find(selector)", t => {
   const node = Node._getInstance(html);
 
@@ -53,18 +74,4 @@ test("test text()", t => {
   copy.find('#content').text('replaced2');
   // console.log(copy.html()); // HTML output from the root
   t.is(copy.find('h1').text(), 'Hello World'); // search <h1> from the root
-});
-
-test("tests clone()", t => {
-  const orig = Node._getInstance(html);
-  const copy = orig.clone();
-  const origText = orig.find('#content').text();
-  const copyText = copy.find('#content').text();
-  t.is(origText, copyText);
-  copy.find('#content').text('replaced');
-
-  t.not(orig.find('#content').text(), copy.find('#content').text());
-
-  // make sure copy's current node is root even after text('replaced') invocation
-  t.is(copy.find('p:first').text(), 'first paragraph');
 });
