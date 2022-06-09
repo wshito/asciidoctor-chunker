@@ -26,6 +26,21 @@ test('tests attr()', t => {
   t.is(div.attr('id', 'modified').attr('id'), 'modified');
 });
 
+test('tests append()', t => {
+  const node = Node._getInstance(html);
+  const content = node.find('#content');
+  t.is(content.children().length, 2); // before append()
+  const ret = content.append('<p>Appended</p>');
+  t.is(content.children().length, 3); // after append()
+  t.is(ret.children().length, 3); // check if returned node is content
+});
+
+test('tests children()', t => {
+  const node = Node._getInstance(html);
+  t.is(node.find('body').children().length, 3);
+  t.is(node.find('#content').children().length, 2);
+});
+
 test("tests clone()", t => {
   const orig = Node._getInstance(html);
   const copy = orig.clone();

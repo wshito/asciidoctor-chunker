@@ -31,6 +31,10 @@ class Node {
    */
   context;
 
+  get length() {
+    return this.context.length;
+  }
+
   /**
    * Instantiates the new DOM from the filename.
    * 
@@ -47,8 +51,8 @@ class Node {
    * @param {String} htmlText
    * @returns {Node} the newly constructed Node instance.
    */
-  static _getInstance(htmlText) {
-    const $ = cheerio.load(htmlText, null, false);
+  static _getInstance(htmlText, options, isDocument) {
+    const $ = cheerio.load(htmlText, options = null, isDocument = true);
     return new Node($, $.root(), $.root());
   }
 
@@ -74,6 +78,25 @@ class Node {
       this.context.attr(attrName, value);
       return this;
     } else return this.context.attr(attrName);
+  }
+
+  /**
+   * Inserts content as the last child of each of the current node
+   * and returns this node for the method chain.
+   * 
+   * @param {string | Node} elem 
+   * @returns {this} for method chain
+   */
+  append(elem) {
+    this.$(this.context).append(elem);
+    return this;
+  }
+
+  /**
+   * @returns {Node} the node instance pointing the children.
+   */
+  children() {
+    return new Node(this.$, this.root, this.context.children());
   }
 
   /**
