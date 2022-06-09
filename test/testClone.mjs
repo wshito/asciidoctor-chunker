@@ -77,6 +77,19 @@ test('tests append to the clone', t => {
   });
 });
 
+// Inserts content as the last child of each of the selected elements
+// and returns this element
+test("tests append's returned value", t => {
+  const $ = cheerio.load(html);
+  // console.log($.html());
+  t.is($.root().find('#content').children().length, 2); // before
+  const ret = $.root().find('#content').append('<p>Appended</p>');
+  t.is($.root().find('#content').children().length, 3); // after appended
+  // console.log($.html());
+  // append() returns the same context, so `ret` points to `#content`
+  t.is(ret.children().length, 3);
+});
+
 test('tests append to the cloned non-root element', t => {
   const $ = cheerio.load(html, null, false);
   const copy = $.root().clone(); // need to keep the root node to output html or access the whole DOM tree
