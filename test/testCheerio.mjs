@@ -136,6 +136,22 @@ test('tests append to the cloned non-root element', t => {
   });
 });
 
+test("tests insertAfter()", t => {
+  const $ = cheerio.load(html, null, true);
+  t.true($.html().startsWith('<html>'));
+
+  // this works
+  $('<p class="num2">2</p>').insertAfter('p.num');
+  // console.log($.html());
+
+  // element-wise insertion does not work
+  const p = $.root().find('.num2');
+  const p3 = cheerio.load('<p class="num">3</p>', null, false);
+  $().insertAfter(p3, p);
+  // console.log('--------');
+  // console.log($.html());
+});
+
 test('tests remove from the clone', t => {
   const $ = cheerio.load(html, null, false);
   const copy = $.root().clone();
