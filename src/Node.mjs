@@ -162,6 +162,32 @@ class Node {
     return this.$(this.context).html();
   }
 
+  /**
+   * Inserts the copy of this node after the given node and returns
+   * the target node where this node is inserted after.  This method
+   * will modify the DOM tree where the target node belongs to.
+   * 
+   * @param {Node} targetNode The target node where this node is inserted to after.
+   * @returns {Node} the target node where this node is inserted to after.
+   */
+  insertMeAfter(targetNode) {
+    this.$(this.html()).insertAfter(targetNode.context);
+    return targetNode;
+  }
+
+  /**
+   * Inserts the copy of this node before the given node and returns
+   * the target node where this node is inserted before.  This method
+   * will modify the DOM tree where the target node belongs to.
+   * 
+   * @param {Node} targetNode The target node where this node is inserted to before.
+   * @returns {Node} the target node where this node is inserted to before.
+   */
+  insertMeBefore(targetNode) {
+    this.$(this.html()).insertBefore(targetNode.context);
+    return targetNode;
+  }
+
   root() {
     const node = new Node(this.$, this.rootNode, this.rootNode);
     return node;

@@ -94,6 +94,31 @@ test("tests find(selector)", t => {
   t.is('ORIGINAL1', contentP.text());
 });
 
+test('test insertMeAfter()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const p = node.find('p.num');
+  t.is(p.text(), '1');
+  const p2 = Node.getInstanceFromHTML('<p class="num">2</p>');
+  p2.insertMeAfter(p);
+  t.is(node.find('.num').length, 2);
+  t.is(node.find('#content').length, 1);
+  t.is(node.find('#content').children().length, 3);
+  // console.log(node.root().html());
+});
+
+test('test insertMeBefore()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  t.is(node.find('.num').length, 1);
+
+  const p = node.find('p.num');
+  t.is(p.text(), '1');
+
+  const p0 = Node.getInstanceFromHTML('<p class="num">0</p>');
+  p0.insertMeBefore(p);
+  t.is(node.find('.num').length, 2);
+  // console.log(node.html());
+});
+
 test("test text()", t => {
   const node = Node.getInstanceFromHTML(html);
 
