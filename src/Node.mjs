@@ -40,19 +40,22 @@ class Node {
    * 
    * @param {String} filename 
    */
-  static getInstance(filename) {
+  static getInstanceFromFile(filename) {
     const $ = cheerio.load(fs.readFileSync(filename));
     return new Node($, $.root(), $.root());
   };
 
   /**
-   * [For Internal use] Instantiates the new DOM node from the the html text.
+   * Instantiates the new DOM node from the the html text.
    * 
    * @param {String} htmlText
+   * @param {Option} options object of Cheerio, default is `null`.
+   * @param {boolean} isDocument true to have a DOM with html element as a root
+   *  `false` to make DOM as given in `htmlText`.  Default is `false`.
    * @returns {Node} the newly constructed Node instance.
    */
-  static _getInstance(htmlText, options, isDocument) {
-    const $ = cheerio.load(htmlText, options = null, isDocument = true);
+  static getInstanceFromHTML(htmlText, options = null, isDocument = false) {
+    const $ = cheerio.load(htmlText, options, isDocument);
     return new Node($, $.root(), $.root());
   }
 

@@ -20,7 +20,7 @@ const html = `
   </html>`;
 
 test('tests attr()', t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html);
   const div = node.find('div');
   t.is(div.attr('id'), 'content');
   div.attr('id', 'modified');
@@ -28,7 +28,7 @@ test('tests attr()', t => {
 });
 
 test('tests appendHTML()', t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html);
   const content = node.find('#content');
   t.is(content.children().length, 2); // before append()
   const ret = content.appendHTML('<p>Appended</p>');
@@ -37,7 +37,7 @@ test('tests appendHTML()', t => {
 });
 
 test('tests appendNode()', t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html, null, true);
   const copy = node.clone();
   const content = node.find('#content');
   content.attr('id', 'content2'); // modify original content
@@ -59,13 +59,13 @@ test('tests appendNode()', t => {
 });
 
 test('tests children()', t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html, null, true);
   t.is(node.find('body').children().length, 3);
   t.is(node.find('#content').children().length, 2);
 });
 
 test("tests clone()", t => {
-  const orig = Node._getInstance(html);
+  const orig = Node.getInstanceFromHTML(html);
   const copy = orig.clone();
   const origText = orig.find('#content').text();
   const copyText = copy.find('#content').text();
@@ -79,7 +79,7 @@ test("tests clone()", t => {
 });
 
 test("tests find(selector)", t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html);
 
   // content points <div id="content">
   const content = node.find('#content');
@@ -95,7 +95,7 @@ test("tests find(selector)", t => {
 });
 
 test("test text()", t => {
-  const node = Node._getInstance(html);
+  const node = Node.getInstanceFromHTML(html);
 
   // clones #content as a root
   const content = node.find('#content').clone();
