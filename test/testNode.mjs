@@ -23,16 +23,39 @@ test('tests attr()', t => {
   const node = Node._getInstance(html);
   const div = node.find('div');
   t.is(div.attr('id'), 'content');
-  t.is(div.attr('id', 'modified').attr('id'), 'modified');
+  div.attr('id', 'modified');
+  t.is(node.find('div').attr('id'), 'modified');
 });
 
-test('tests append()', t => {
+test('tests appendHTML()', t => {
   const node = Node._getInstance(html);
   const content = node.find('#content');
   t.is(content.children().length, 2); // before append()
-  const ret = content.append('<p>Appended</p>');
+  const ret = content.appendHTML('<p>Appended</p>');
   t.is(content.children().length, 3); // after append()
   t.is(ret.children().length, 3); // check if returned node is content
+});
+
+test('tests appendNode()', t => {
+  const node = Node._getInstance(html);
+  const copy = node.clone();
+  const content = node.find('#content');
+  content.attr('id', 'content2'); // modify original content
+
+  copy.find('body').appendNode(content); // append modified content
+
+  const content2 = copy.find('#content2');
+  t.is(content2.attr('id'), 'content2');
+
+  t.is(copy.find('#content').length, 1);
+  t.is(copy.find('#content2').length, 1);
+
+  t.is(node.find('#content').length, 0); // since original content is modified
+  t.is(node.find('#content2').length, 1);
+
+  // console.log('ORIG\n', node.root().html());
+  // console.log();
+  // console.log('COPY\n', copy.root().html());
 });
 
 test('tests children()', t => {

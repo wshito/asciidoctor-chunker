@@ -81,14 +81,31 @@ class Node {
   }
 
   /**
-   * Inserts content as the last child of each of the current node
-   * and returns this node for the method chain.
+   * Inserts content in HTML string as the last child of each
+   * of the current node and returns this node for the method chain.
    * 
-   * @param {string | Node} elem 
+   * @param {string} htmlStr
    * @returns {this} for method chain
    */
-  append(elem) {
-    this.$(this.context).append(elem);
+  appendHTML(htmlStr) {
+    this.$(this.context).append(htmlStr);
+    return this;
+  }
+
+  /**
+   * Inserts clone of the given node as the last child of each
+   * of the current node and returns this node for the method chain.
+   * 
+   * Note that  the appending node is cloned for safety because the
+   * node cannot be beloged mutlple DOM trees.  Thus, it is redundant
+   * to clone by the caller although it is not harmful.
+   * 
+   * @param {Node} node Appending node which is cloned before appending.
+   * @returns {this} for method chain
+   */
+  appendNode(node) {
+    const copy = node.clone();
+    this.$(this.context).append(copy.context);
     return this;
   }
 
