@@ -152,6 +152,15 @@ test("tests insertAfter()", t => {
   // console.log($.html());
 });
 
+test('tests prev', t => {
+  const $ = cheerio.load(html, null, false);
+  const pNum = $.root().find('p.num');
+  t.is(pNum.text(), "1");
+  t.is(pNum.prev().text(), "ORIGINAL");
+  // see if prev() changes this object's current selection
+  t.is(pNum.text(), "1");
+});
+
 test('tests remove from the clone', t => {
   const $ = cheerio.load(html, null, false);
   const copy = $.root().clone();
