@@ -59,6 +59,32 @@ class Node {
     return new Node($, $.root(), $.root());
   }
 
+  /**
+   * Inserts the given html string before the target node and returns the
+   * modified target node.
+   *
+   * @param {String} html
+   * @param {Node} targetNode 
+   * @returns {Node} the modified target node
+   */
+  static insertHtmlBefore(html, targetNode) {
+    targetNode.$(html).insertBefore(targetNode.context);
+    return targetNode;
+  }
+
+  /**
+   * Inserts the given html string after the target node and returns the
+   * modified target node.
+   *
+   * @param {String} html
+   * @param {Node} targetNode 
+   * @returns {Node} the modified target node
+   */
+  static insertHtmlAfter(html, targetNode) {
+    targetNode.$(html).insertAfter(targetNode.context);
+    return targetNode;
+  }
+
   /** [FOR INTERNAL USE] */
   constructor($, root, context) {
     this.$ = $;
@@ -149,7 +175,9 @@ class Node {
    * tree from this one.
    * 
    * @param {*} selector 
-   * @returns {Node} the selected nodes encapsulated in a single Node instance.
+   * @returns {Node} returns the new Node instance encapsulating
+   *  the selected nodes.
+   *
    */
   find(selector) {
     const matched = this.$(this.context).find(selector);
@@ -171,7 +199,7 @@ class Node {
    * @returns {Node} the target node where this node is inserted to after.
    */
   insertMeAfter(targetNode) {
-    this.$(this.html()).insertAfter(targetNode.context);
+    targetNode.$(this.html()).insertAfter(targetNode.context);
     return targetNode;
   }
 
@@ -184,8 +212,46 @@ class Node {
    * @returns {Node} the target node where this node is inserted to before.
    */
   insertMeBefore(targetNode) {
-    this.$(this.html()).insertBefore(targetNode.context);
+    targetNode.$(this.html()).insertBefore(targetNode.context);
     return targetNode;
+  }
+
+  /**
+   * Returns the new Node instance with the current context
+   * (or the selection)set to the next node within the siblings.
+   * If there is not more next siblings, the current context
+   * is the cheerio object with zero selection.
+   * 
+   * The new Node instance shares the root node with `this` object.
+   * The `this` object's context (or the selection) is unchanged.
+   * 
+   * @returns {Node} returns the new Node instance with the current
+   *  context set to the next sibling node.
+   */
+  next() {
+    // this.context.next() does not change the current selection
+    // this.context.next() returns the new cheerio instance with
+    // next node selected
+    return new Node(this.$, this.rootNode, this.context.next());
+  }
+
+  /**
+   * Returns the new Node instance with the current context
+   * (or the selection)set to the previous node within the siblings.
+   * If there is not more previous siblings, the current context
+   * is the cheerio object with zero selection.
+   * 
+   * The new Node instance shares the root node with `this` object.
+   * The `this` object's context (or the selection) is unchanged.
+   * 
+   * @returns {Node} returns the new Node instance with the current
+   *  context set to the previous sibling node.
+   */
+  prev() {
+    // this.context.prev() does not change the current selection
+    // this.context.prev() returns the new cheerio instance with
+    // the previous node selected
+    return new Node(this.$, this.rootNode, this.context.prev());
   }
 
   root() {

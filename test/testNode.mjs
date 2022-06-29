@@ -94,15 +94,49 @@ test("tests find(selector)", t => {
   t.is('ORIGINAL1', contentP.text());
 });
 
+test('test insertHtmlBefore()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const pNum = node.find('p.num');
+  t.is(node.find('p').length, 3);
+  const target = Node.insertHtmlBefore('<p><span>INSERTED</span></p>', pNum);
+  // target's context is pNum, so you have to go back to root node
+  // to search <p> globally
+  t.is(target.root().find('p').length, 4);
+  t.is(target.root().find('p span').text(), 'INSERTED');
+  // target and node shares the same root
+  t.is(node.find('p').length, 4);
+  t.is(node.find('p span').text(), 'INSERTED');
+  t.is(pNum.prev().text(), "INSERTED");
+});
+
+test('test insertHtmlAfter()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const pNum = node.find('p.num');
+  t.is(node.find('p').length, 3);
+  const target = Node.insertHtmlAfter('<p><span>INSERTED</span></p>', pNum);
+  // target's context is pNum, so you have to go back to root node
+  // to search <p> globally
+  t.is(target.root().find('p').length, 4);
+  t.is(target.root().find('p span').text(), 'INSERTED');
+  // target and node shares the same root
+  t.is(node.find('p').length, 4);
+  t.is(node.find('p span').text(), 'INSERTED');
+  t.is(pNum.next().text(), "INSERTED");
+});
+
+
 test('test insertMeAfter()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const p = node.find('p.num');
   t.is(p.text(), '1');
-  const p2 = Node.getInstanceFromHTML('<p class="num">2</p>');
-  p2.insertMeAfter(p);
+  const p2 = Node.getInstanceFromHTML('<p class="num">2</p>', null, false);
+  const mod = p2.insertMeAfter(p);
   t.is(node.find('.num').length, 2);
   t.is(node.find('#content').length, 1);
   t.is(node.find('#content').children().length, 3);
+  t.is(mod.root().find('.num').length, 2);
+  t.is(mod.root().find('#content').length, 1);
+  t.is(mod.root().find('#content').children().length, 3);
   // console.log(node.root().html());
 });
 
@@ -117,6 +151,28 @@ test('test insertMeBefore()', t => {
   p0.insertMeBefore(p);
   t.is(node.find('.num').length, 2);
   // console.log(node.html());
+});
+
+test('test next()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const pNum = node.find('p.num');
+  t.is(pNum.next().text(), ''); // p.num is the end
+  t.is(pNum.text(), "1"); // test if the next() does not change `this` context
+  const h1 = node.find('h1');
+  t.is(h1.text(), 'Hello World');
+  t.is(h1.next().text(), 'first paragraph');
+  t.is(h1.text(), 'Hello World');
+});
+
+test('test prev()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const pNum = node.find('p.num');
+  t.is(pNum.text(), "1");
+  t.is(pNum.prev().text(), 'ORIGINAL');
+  t.is(pNum.text(), "1"); // test if the next() does not change `this` context
+  t.is(pNum.prev().length, 1);
+  // two-times prev() does not go up the parent content
+  t.is(pNum.prev().prev().length, 0);
 });
 
 test("test text()", t => {
