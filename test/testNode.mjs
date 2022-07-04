@@ -31,7 +31,7 @@ test('tests appendHTML()', t => {
   const node = Node.getInstanceFromHTML(html);
   const content = node.find('#content');
   t.is(content.children().length, 2); // before append()
-  const ret = content.appendHTML('<p>Appended</p>');
+  const ret = content.appendHTML$('<p>Appended</p>');
   t.is(content.children().length, 3); // after append()
   t.is(ret.children().length, 3); // check if returned node is content
 });
@@ -42,7 +42,7 @@ test('tests appendNode()', t => {
   const content = node.find('#content');
   content.attr('id', 'content2'); // modify original content
 
-  copy.find('body').appendNode(content); // append modified content
+  copy.find('body').appendNode$(content); // append modified content
 
   const content2 = copy.find('#content2');
   t.is(content2.attr('id'), 'content2');
@@ -132,7 +132,7 @@ test('test insertMeAfter()', t => {
   const p = node.find('p.num');
   t.is(p.text(), '1');
   const p2 = Node.getInstanceFromHTML('<p class="num">2</p>', null, false);
-  const mod = p2.insertMeAfter(p);
+  const mod = p2.insertMeAfter$(p);
   t.is(node.find('.num').length, 2);
   t.is(node.find('#content').length, 1);
   t.is(node.find('#content').children().length, 3);
@@ -150,7 +150,7 @@ test('test insertMeBefore()', t => {
   t.is(p.text(), '1');
 
   const p0 = Node.getInstanceFromHTML('<p class="num">0</p>');
-  p0.insertMeBefore(p);
+  p0.insertMeBefore$(p);
   t.is(node.find('.num').length, 2);
   // console.log(node.html());
 });

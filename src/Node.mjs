@@ -13,8 +13,9 @@ import * as cheerio from 'cheerio';
  * while providing the various DOM manipulation interfaces.
  *
  * Basically all the instance methods return a new Node instance without
- * changing the selection of the Node instance passed in the argument,
- * unless stated otherwise.
+ * changing the selection of the Node instance passed in the argument.
+ * The methods with `$` suffix returns the original Node instance without
+ * creating new one.
  *
  * However, the returned Node instance may share the DOM tree with
  * the one in the argument.  Please refer to the method documentation
@@ -128,28 +129,30 @@ class Node {
 
   /**
    * Inserts content in HTML string as the last child of each
-   * of the current node and returns this node for the method chain.
-   * 
+   * of the current node and returns `this` node instance
+   * for the method chain.
+   *
    * @param {string} htmlStr
    * @returns {this} for method chain
    */
-  appendHTML(htmlStr) {
+  appendHTML$(htmlStr) {
     this.$(this.context).append(htmlStr);
     return this;
   }
 
   /**
    * Inserts clone of the given node as the last child of each
-   * of the current node and returns this node for the method chain.
-   * 
+   * of the current node and returns `this` node instance for
+   * the method chain.
+   *
    * Note that  the appending node is cloned for safety because the
    * node cannot be beloged mutlple DOM trees.  Thus, it is redundant
    * to clone by the caller although it is not harmful.
-   * 
+   *
    * @param {Node} node Appending node which is cloned before appending.
    * @returns {this} for method chain
    */
-  appendNode(node) {
+  appendNode$(node) {
     const copy = node.clone();
     this.$(this.context).append(copy.context);
     return this;
@@ -163,13 +166,13 @@ class Node {
   }
 
   /**
-   * Creates the completely independent DOM tree from the 
+   * Creates the completely independent DOM tree from the
    * current node.  The returned instance points the currently
    * selected node as the root node.
-   * 
+   *
    * If you want to clone the whole DOM tree, `node.root().clone()`
    * will make one.
-   * 
+   *
    * @returns {Node} the cloned node.
    */
   clone() {
@@ -185,13 +188,18 @@ class Node {
     return node;
   }
 
+  // TODO
+  empty$() {
+
+  }
+
   /**
-   * Query the selectorAll under the current node and 
-   * returns the selections encapsulated in a Node instance.
+   * Query the selectorAll under the current node and
+   * returns the selections encapsulated in a new Node instance.
    * The returned Node instance shares the root node and DOM
    * tree from this one.
-   * 
-   * @param {*} selector 
+   *
+   * @param {*} selector
    * @returns {Node} returns the new Node instance encapsulating
    *  the selected nodes.
    *
@@ -212,27 +220,35 @@ class Node {
    * the target node where this node is inserted after.  This method
    * will modify the DOM tree where the target node belongs to.
    * 
+   * Note that this method returns the target node.  If you want
+   * the inserted node to be returned, use the corresponding static
+   * method: `insertHtmlAfter(html, targetNode)`
+   *
    * @param {Node} targetNode The target node where `this` node is
    *  inserted to after.  The `this` node's context is unmodified.
    * @returns {Node} the target node, i.e. the passed argument,
    *  where `this` node is inserted after the target.
    */
-  insertMeAfter(targetNode) {
+  insertMeAfter$(targetNode) {
     targetNode.$(this.html()).insertAfter(targetNode.context);
     return targetNode;
   }
 
   /**
    * Inserts the copy of this node before the given node and returns
-   * the target node where this node is inserted before.  This method
+   * the target node where `this` node is inserted before.  This method
    * will modify the DOM tree where the target node belongs to.
-   * 
+   *
+   * Note that this method returns the target node.  If you want
+   * the inserted node to be returned, use the corresponding static
+   * method: `insertHtmlBefore(html, targetNode)`.
+   *
    * @param {Node} targetNode The target node where `this` node is
    *  inserted to before.  The `this` node's context is unmodified.
    * @returns {Node} the target node, i.e. the given parameter,
    *  where `this` node is inserted before the target.
    */
-  insertMeBefore(targetNode) {
+  insertMeBefore$(targetNode) {
     targetNode.$(this.html()).insertBefore(targetNode.context);
     return targetNode;
   }
@@ -242,10 +258,10 @@ class Node {
    * (or the selection)set to the next node within the siblings.
    * If there is not more next siblings, the current context
    * is the cheerio object with zero selection.
-   * 
+   *
    * The new Node instance shares the root node with `this` object.
    * The `this` object's context (or the selection) is unchanged.
-   * 
+   *
    * @returns {Node} returns the new Node instance with the current
    *  context set to the next sibling node.
    */
