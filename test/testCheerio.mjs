@@ -136,6 +136,14 @@ test('tests append to the cloned non-root element', t => {
   });
 });
 
+test("tests the usage of empty()", t => {
+  const $ = cheerio.load(html, null, true);
+  const content = $.root().find('#content');
+  t.is(2, content.children().length);
+  content.empty();
+  t.is(0, content.children().length);
+});
+
 test("tests insertAfter()", t => {
   const $ = cheerio.load(html, null, true);
   t.true($.html().startsWith('<html>'));

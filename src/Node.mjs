@@ -1,4 +1,4 @@
-// TODO empty(), remove(), each(), first(), hasClass()
+// TODO remove(), each(), first(), hasClass()
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
@@ -188,9 +188,14 @@ class Node {
     return node;
   }
 
-  // TODO
+  /**
+   * Removes all the children and returns `this` Node instance.
+   *
+   * @returns {Node} `this` object of which children are removed.
+   */
   empty$() {
-
+    this.context.empty();
+    return this;
   }
 
   /**

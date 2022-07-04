@@ -78,6 +78,16 @@ test("tests clone()", t => {
   t.is(copy.find('p:first').text(), 'first paragraph');
 });
 
+test("tests empty()", t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const content = node.find('#content');
+  t.is(2, content.children().length);
+  const content2 = content.empty$();
+  t.is(0, content.children().length); // 0
+  t.is(0, content2.children().length); // 0
+  t.true(content === content2);
+});
+
 test("tests find(selector)", t => {
   const node = Node.getInstanceFromHTML(html);
 
