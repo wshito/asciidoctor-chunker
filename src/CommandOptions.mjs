@@ -4,7 +4,8 @@
  */
 'use strict';
 
-import commander from 'commander';
+import { Command } from 'commander';
+const commander = new Command();
 
 // __VERSION__ is replaced by webpack DefinePlugin
 const version = (typeof __VERSION__) !== 'undefined' ? __VERSION__ : 'dev';

@@ -1,3 +1,4 @@
+// TODO empty(), remove(), each(), first(), hasClass()
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
@@ -8,9 +9,16 @@ import fs from 'fs';
 import * as cheerio from 'cheerio';
 
 /**
- * Class to hold a DOM node or multiple DOM nodes while
- * providing the various DOM manipulation interfaces.
- * 
+ * Class to hold a currently selected DOM node or multiple DOM nodes
+ * while providing the various DOM manipulation interfaces.
+ *
+ * Basically all the instance methods return a new Node instance without
+ * changing the selection of the Node instance passed in the argument,
+ * unless stated otherwise.
+ *
+ * However, the returned Node instance may share the DOM tree with
+ * the one in the argument.  Please refer to the method documentation
+ * for details.
  */
 class Node {
   /**
@@ -27,16 +35,19 @@ class Node {
   rootNode;
   /**
    * Cheerio<Document | Element>
-   * The current target context.
+   * The current selections in the DOM.
    */
   context;
 
+  /**
+   * Returns the length of current selections.
+   */
   get length() {
     return this.context.length;
   }
 
   /**
-   * Instantiates the new DOM from the filename.
+   * Static method thaat instantiates the new DOM from the filename.
    * 
    * @param {String} filename 
    */
@@ -46,7 +57,7 @@ class Node {
   };
 
   /**
-   * Instantiates the new DOM node from the the html text.
+   * Static method that instantiates the new DOM node from the the html text.
    * 
    * @param {String} htmlText
    * @param {Option} options object of Cheerio, default is `null`.
@@ -60,29 +71,35 @@ class Node {
   }
 
   /**
-   * Inserts the given html string before the target node and returns the
-   * modified target node.
+   * Static method that inserts the given html string before the target node
+   * and returns the new Node instance that selects the inserted node within
+   * the DOM tree where target node belongs.  This does not change the `targetNode`
+   * selections.
    *
    * @param {String} html
    * @param {Node} targetNode 
-   * @returns {Node} the modified target node
+   * @returns {Node} the new Node instance of which selection is the inserted node.
+   *  The returned Node instance shares the DOM and the root with that of `targetNode`.
    */
   static insertHtmlBefore(html, targetNode) {
     targetNode.$(html).insertBefore(targetNode.context);
-    return targetNode;
+    return new Node(targetNode.$, targetNode.rootNode, targetNode.context.prev());
   }
 
   /**
-   * Inserts the given html string after the target node and returns the
-   * modified target node.
+   * Static method that inserts the given html string after the target node
+   * and returns the new Node instance that selects the inserted node within
+   * the DOM tree where target node belongs.  This does not change the `targetNode`
+   * selections.
    *
    * @param {String} html
    * @param {Node} targetNode 
-   * @returns {Node} the modified target node
+   * @returns {Node} the new Node instance of which selection is the inserted node.
+   *  The returned Node instance shares the DOM and the root with that of `targetNode`.
    */
   static insertHtmlAfter(html, targetNode) {
     targetNode.$(html).insertAfter(targetNode.context);
-    return targetNode;
+    return new Node(targetNode.$, targetNode.rootNode, targetNode.context.next());
   }
 
   /** [FOR INTERNAL USE] */
@@ -195,8 +212,10 @@ class Node {
    * the target node where this node is inserted after.  This method
    * will modify the DOM tree where the target node belongs to.
    * 
-   * @param {Node} targetNode The target node where this node is inserted to after.
-   * @returns {Node} the target node where this node is inserted to after.
+   * @param {Node} targetNode The target node where `this` node is
+   *  inserted to after.  The `this` node's context is unmodified.
+   * @returns {Node} the target node, i.e. the passed argument,
+   *  where `this` node is inserted after the target.
    */
   insertMeAfter(targetNode) {
     targetNode.$(this.html()).insertAfter(targetNode.context);
@@ -208,8 +227,10 @@ class Node {
    * the target node where this node is inserted before.  This method
    * will modify the DOM tree where the target node belongs to.
    * 
-   * @param {Node} targetNode The target node where this node is inserted to before.
-   * @returns {Node} the target node where this node is inserted to before.
+   * @param {Node} targetNode The target node where `this` node is
+   *  inserted to before.  The `this` node's context is unmodified.
+   * @returns {Node} the target node, i.e. the given parameter,
+   *  where `this` node is inserted before the target.
    */
   insertMeBefore(targetNode) {
     targetNode.$(this.html()).insertBefore(targetNode.context);
@@ -255,8 +276,7 @@ class Node {
   }
 
   root() {
-    const node = new Node(this.$, this.rootNode, this.rootNode);
-    return node;
+    return new Node(this.$, this.rootNode, this.rootNode);
   }
 
   /**

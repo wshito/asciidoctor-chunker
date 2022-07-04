@@ -38,9 +38,9 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   const { outdir } = config;
   if (!await exists(outdir)) await mkdirs(outdir);
   const writer = printer(outdir);
-  const dom = newDOM(adocHtmlFile);
-  copyRelativeFiles(adocHtmlFile, outdir)(dom.root());
-  makeChunks(writer, dom, config);
+  const $ = newDOM(adocHtmlFile);
+  copyRelativeFiles(adocHtmlFile, outdir)($.root());
+  makeChunks(writer, $, config);
   console.log(`Successfully chunked! => ${path.join(outdir, 'index.html')}\n`);
 }
 

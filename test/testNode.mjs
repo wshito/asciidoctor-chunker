@@ -98,30 +98,32 @@ test('test insertHtmlBefore()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const pNum = node.find('p.num');
   t.is(node.find('p').length, 3);
-  const target = Node.insertHtmlBefore('<p><span>INSERTED</span></p>', pNum);
-  // target's context is pNum, so you have to go back to root node
-  // to search <p> globally
-  t.is(target.root().find('p').length, 4);
-  t.is(target.root().find('p span').text(), 'INSERTED');
-  // target and node shares the same root
+  const inserted = Node.insertHtmlBefore('<p><span>INSERTED</span></p>', pNum);
+  // test if the returned node points the inserted node
+  t.is(inserted.text(), 'INSERTED');
+  // test if the arugment's selection has not changed
+  t.is(pNum.text(), '1');
+  // test insertion. node, pNum, inserted all shares the same DOM
   t.is(node.find('p').length, 4);
   t.is(node.find('p span').text(), 'INSERTED');
   t.is(pNum.prev().text(), "INSERTED");
+  t.is(inserted.root().find('p').length, 4);
 });
 
 test('test insertHtmlAfter()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const pNum = node.find('p.num');
   t.is(node.find('p').length, 3);
-  const target = Node.insertHtmlAfter('<p><span>INSERTED</span></p>', pNum);
-  // target's context is pNum, so you have to go back to root node
-  // to search <p> globally
-  t.is(target.root().find('p').length, 4);
-  t.is(target.root().find('p span').text(), 'INSERTED');
-  // target and node shares the same root
+  const inserted = Node.insertHtmlAfter('<p><span>INSERTED</span></p>', pNum);
+  // test if the returned node points the inserted node
+  t.is(inserted.text(), 'INSERTED');
+  // test if the argument's selection has not changed
+  t.is(pNum.text(), '1');
+  // test insertion: node, pNum, inserted, all shares the same DOM
   t.is(node.find('p').length, 4);
   t.is(node.find('p span').text(), 'INSERTED');
   t.is(pNum.next().text(), "INSERTED");
+  t.is(inserted.root().find('p').length, 4);
 });
 
 

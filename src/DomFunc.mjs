@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 /*
  * Module to provide the functional utils to manipulate DOM
  * with CheerioJS.  The name of function that causes
@@ -28,7 +28,7 @@ export const find$ = selector => node => node.find(selector);
 /**
  * Makes a clone and returns it.
  * 
- * @param {Cheerio} node 
+ * @param {CheerioAPI} node 
  */
 export const clone = node => node.clone();
 
@@ -37,11 +37,11 @@ export const clone = node => node.clone();
  * This causes side effects that change the state of the target node.  The appending nodes are cloned and untouched.
  * 
  * @param {Cheerio} target The target node where nodes are appended to.
- * @param {[Cheerio]} nodes The array of appending nodes.
+ * @param {[Cheerio<Element>]} nodes The array of appending nodes.
  *  These nodes are cloned before appending.
  */
 export const append$ = (...appendingNodes) => target => {
-  appendingNodes.forEach(ele => target.append(ele.clone()));
+  appendingNodes.forEach(ele => target.append(ele.cloneNode()));
   return target.end();
 }
 

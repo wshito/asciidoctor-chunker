@@ -37,17 +37,18 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  *  the section information.
  */
 const processContents = (
-  preambleProcessor, partProcessor, chapterProcessor, rootNode, config, basenameMaker) => {
-  const root = rootNode.clone();
+  preambleProcessor, partProcessor, chapterProcessor, $, config, basenameMaker) => {
+  const root = $.root().clone(); // root: Cheerio<Document>
   let chap = 0;
   let part = 0;
   let firstPageProcessed = false;
   let isFirstPage = false;
   root.find('#content').children().each((i, ele) => {
-    const node = new Cheerio(ele);
-    if (node.hasClass('partintro'))
+    // const node = new Cheerio(ele);
+    if ($(this).hasClass('partintro'))
       return; // ignore. this is taken care by part extraction
-    if (node.hasClass('sect1')) {
+    console.log("HERE");
+    if (root(this).hasClass('sect1')) {
       if (!firstPageProcessed && !isFirstPage) {
         isFirstPage = true;
         firstPageProcessed = true;
@@ -56,7 +57,7 @@ const processContents = (
       return chapterProcessor(config, root, node, 1, 'chap',
         basenameMaker, ++chap, isFirstPage); // recursive extraction of chapters
     }
-    if (node.hasClass('sect0')) {
+    if (root(this).hasClass('sect0')) {
       if (!firstPageProcessed && !isFirstPage) {
         isFirstPage = true;
         firstPageProcessed = true;
@@ -65,7 +66,7 @@ const processContents = (
       // part extraction
       return partProcessor(config, root, node, ++part, isFirstPage);
     }
-    if (node.attr('id') === 'preamble') {
+    if (ele.attribs.id === 'preamble') {
       isFirstPage = true;
       firstPageProcessed = true;
       return preambleProcessor(config, root, node, isFirstPage);

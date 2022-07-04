@@ -188,7 +188,7 @@ export const printer = outDir => (fnamePrefix, dom) => {
  *  ```
  */
 export const makeChunks = (printer, $, config) => {
-  const ht = makeHashTable($.root(), config); // Map<id, filename>
+  const ht = makeHashTable($, config); // Map<id, filename>
   const linkRewriter = updateLinks(ht);
   const container = pipe(
     makeContainer(config),
@@ -210,7 +210,7 @@ export const makeChunks = (printer, $, config) => {
       makeDocument(footnotesKeeper$, ht)),
     getChapterExtractor(printer, container, basenameMaker,
       makeDocument(footnotesKeeper$, ht)),
-    $.root(),
+    $,
     config,
     basenameMaker);
 }

@@ -15,10 +15,10 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  * hashtable with the key 'navigation'.  You can use this array
  * to obtain previous and next page filename.
  *
- * @param {Cheerio} rootNode The root dom
+ * @param {Cheerio} $ The root dom
  * @param {object} config The config object for extraction settings.
  */
-const makeHashTable = (rootNode, config) => {
+const makeHashTable = ($, config) => {
   const ht = new Map();
   const filename2pageNum = {};
   const filenameList = [];
@@ -33,7 +33,7 @@ const makeHashTable = (rootNode, config) => {
     pageNum++;
     // Set id and URL
     node.find('*[id]').each((i, e) => {
-      const id = new Cheerio(e).attr('id');
+      const id = e.attribs.id;
       if (id.startsWith('_footnotedef_')) return;
       ht.set(id, `${filename}#${id}`);
     });
@@ -57,7 +57,7 @@ const makeHashTable = (rootNode, config) => {
     recordPreambleIds,
     recordPartIds,
     recordChapterIds,
-    rootNode,
+    $,
     config,
     getFilenameMaker() // pass the filename maker to create a filename
   );
