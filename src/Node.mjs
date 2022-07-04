@@ -11,6 +11,8 @@ import * as cheerio from 'cheerio';
 /**
  * Class to hold a currently selected DOM node or multiple DOM nodes
  * while providing the various DOM manipulation interfaces.
+ * Use the static method `getInstanceFrom[File|HTML]()` to constuct
+ * an instance.
  *
  * Basically all the instance methods return a new Node instance without
  * changing the selection of the Node instance passed in the argument.
