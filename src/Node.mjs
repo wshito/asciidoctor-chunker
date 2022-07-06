@@ -1,4 +1,4 @@
-// TODO each(), first(), hasClass()
+// TODO each()
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
@@ -217,6 +217,26 @@ class Node {
     const node = new Node(this.$, this.rootNode, matched);
     this.context = matched.end(); // keep the original contex for the current node
     return node; // returns new Node instance that holds the selections as context
+  }
+
+  /**
+   * Returns the new Node instance that selects the first element
+   * of current selections (or context).
+   *
+   * @returns {Node} the new Node instance with the first element
+   *  selected as the context.
+   */
+  first() {
+    return new Node(this.$, this.rootNode, this.context.first());
+  }
+
+  /**
+   * Check to see if `this` node has the given className.
+   * @param {String} className 
+   * @returns {boolean}
+   */
+  hasClass(className) {
+    return this.context.hasClass(className);
   }
 
   html() {

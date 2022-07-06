@@ -53,7 +53,7 @@ test('tests appendNode()', t => {
   t.is(node.find('#content2').length, 0);
 
   // check if the copy of content2 is appended
-  content2.attr('id', 'content3');
+  content2.attr$('id', 'content3');
   t.is(copy.find('#content').length, 1);
   t.is(copy.find('#content2').length, 1);
   t.is(copy.find('#content3').length, 0); // should not be there
@@ -110,6 +110,22 @@ test("tests find(selector)", t => {
   // should find only <p> under #content
   const contentP = content.find('p');
   t.is('ORIGINAL1', contentP.text());
+});
+
+test("tests first()", t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const children = node.find('body').children();
+  const h1 = children.first();
+  // children instance has no side-effect after the invocation of first()
+  t.is(3, children.length);
+  t.is(0, h1.children().length); // text is not a child element
+  t.is("Hello World", h1.text());
+});
+
+test('test hasClass()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const p = node.find('#content').children().first().next();
+  t.true(p.hasClass('num'));
 });
 
 test('test insertHtmlBefore()', t => {
