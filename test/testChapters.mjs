@@ -11,6 +11,10 @@ import getFilenameMaker from '../src/FilenameMaker.mjs';
 import Node from '../src/Node.mjs';
 import { _makeContainer } from '../src/Page.mjs';
 
+/**
+ * Use this DOM by cloning.  Do not modify this during the test!
+ * We keep it here globally to minimize the disk access.
+ */
 const SAMPLE = Node.getInstanceFromFile('test/resources/output/single/sample.html');
 /*
   Asciidoctor single HTML layout under the div#content
