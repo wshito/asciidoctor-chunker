@@ -93,7 +93,7 @@ const _processContents = (config, root, chapterProcessor, basenameMaker) => {
         isFirstPage = false;
       // part extraction
     }
-    if (ele.attr$('id') === 'preamble') {
+    if (ele.getAttr('id') === 'preamble') {
       isFirstPage = true;
       firstPageProcessed = true;
       // process preamble
@@ -127,6 +127,6 @@ test('getChapterExtractor() and getChapterProcessor()', t => {
     const cld = node.find('#content').children();
     t.is(1, cld.length); // each #content contains one chapter or section
     // the chap or sections should be sect1 -- sect4
-    t.true(regExSectNum.test(cld.first().attr$('class')));
+    t.true(regExSectNum.test(cld.first().getAttr('class')));
   });
 });

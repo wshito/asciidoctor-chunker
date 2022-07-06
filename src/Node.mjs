@@ -122,23 +122,6 @@ class Node {
   }
 
   /**
-   * Gets or sets the attribute of this node.
-   * Only the first element of the attribute in the
-   * current node set is returned.
-   * 
-   * @param {*} attrName 
-   * @param {*} value 
-   * @returns {string | Node} the attribute name for the getter, and 
-   *  returns this Node instance for the setter for method chain.
-   */
-  attr$(attrName, value) {
-    if (value) {
-      this.context.attr(attrName, value);
-      return this;
-    } else return this.context.attr(attrName);
-  }
-
-  /**
    * Inserts content in HTML string as the last child of each
    * of the current node and returns `this` node instance
    * for the method chain.
@@ -253,6 +236,19 @@ class Node {
   }
 
   /**
+   * Gets the attribute of this node.
+   * Only the first element of the attribute in the
+   * current node set is returned.
+   * 
+   * @param {string} attrName 
+   * @returns {string} the attribute name
+   */
+  getAttr(attrName) {
+    return this.context.attr(attrName);
+  }
+
+
+  /**
    * Check to see if `this` node has the given className.
    * @param {String} className 
    * @returns {boolean}
@@ -358,6 +354,18 @@ class Node {
 
   root() {
     return new Node(this.$, this.rootNode, this.rootNode);
+  }
+
+  /**
+   * Sets the attribute of this node and returns `this` node.
+   *
+   * @param {string} attrName 
+   * @param {string} value 
+   * @returns {Node} returns `this` Node instance for the method chain.
+   */
+  setAttr$(attrName, value) {
+    this.context.attr(attrName, value);
+    return this;
   }
 
   /**
