@@ -201,3 +201,28 @@ test('tests remove from the clone', t => {
     }
   });
 });
+
+/**
+ * Cheerio remove() has two behavior.
+ * If the current selection is equal to the removing
+ * selections, it returns the removed nodes.
+ * If the current selection is not within the removing
+ * selections, it returns the enclosing node with
+ * selections removed.
+ */
+test('tests remove().end()', t => {
+  const $ = cheerio.load(html, null, false);
+  const content = $.root().find('#content');
+  const content2 = content.clone();
+  const ret1 = content.remove();
+  const ret2 = content2.remove().end();
+  // remove() returns the removed nodes
+  t.is(ret1.html(), ret2.html());
+  // removed
+  t.is(0, $.root().find('#content').length);
+
+  const $$ = cheerio.load(html, null, false);
+  const ret3 = $$.root().clone().find('#content').remove();
+  t.is(ret3.html(), ret1.html());
+  t.is(1, $$.root().find('#content').length);
+});
