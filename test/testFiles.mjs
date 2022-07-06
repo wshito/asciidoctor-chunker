@@ -11,10 +11,14 @@ import {
   mkdirs,
   sourceIsNewerThan,
   copyIfNewer,
+  getLocalFiles,
   relative2absolute,
 } from '../src/Files.mjs';
+import Node from '../src/Node.mjs';
 import fs from 'fs';
 const fsp = fs.promises;
+
+const sampleHTML = 'test/resources/output/single/sample.html';
 
 test('mkdirs()', async t => {
   const path = await mkdirs('test/tmp/a/b/c')
@@ -50,4 +54,13 @@ test('relative2absolute()', t => {
   t.is(relative2absolute('a/b/c/index.html')('./d/e/f/g.html'), 'a/b/c/d/e/f/g.html');
   t.is(relative2absolute('a/b/c/index.html')('../d/e/f/g.html'), 'a/b/d/e/f/g.html');
   t.is(relative2absolute('a/b/c/index.html')('../../g.html'), 'a/g.html');
+});
+
+test('getLocalFiles()', t => {
+  // link href = 1
+  // script src = 1
+  // img src = 0
+  const node = Node.getInstanceFromFile(sampleHTML);
+  const localFiles = getLocalFiles(node);
+  t.is(2, localFiles.length);
 });

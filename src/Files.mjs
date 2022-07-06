@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
+import Node from './Node.mjs';
 import path, { relative } from 'path';
 import fs from 'fs';
 const fsp = fs.promises;
@@ -122,12 +122,12 @@ const notRelative = /^#|^https:|^http:|^file:|^data:/;
  * Extracts relative paths from tagName[attrName] elements
  * under the given dom node.
  *
- * @param {Cheerio<Document>} $ The Cheerio instance of DOM.
+ * @param {Node} node The instance of DOM node.
  */
-const getLocalFiles = ($) => {
+export const getLocalFiles = (node) => {
   const localFiles = [];
-  $.find(`link[href], script[src], img[src]`).each((i, ele) => {
-    const url = ele.attribs.href || ele.attribs.src;
+  node.find(`link[href], script[src], img[src]`).each((ele, i) => {
+    const url = ele.attr$('href') || ele.attr$('src');
     if (!url.match(notRelative) && !path.isAbsolute(url)) {
       localFiles.push(removeParameters(url));
     }
@@ -135,11 +135,11 @@ const getLocalFiles = ($) => {
   return localFiles;
 };
 
-export const copyRelativeFiles = (basefile, outDir) => ($) => {
+export const copyRelativeFiles = (basefile, outDir) => (node) => {
   const toAbsoluteInOutDir = (relativeFile) => path.join(outDir, relativeFile);
   const toAbsoluteInSrcDir = relative2absolute(basefile);
 
-  getLocalFiles($).forEach(file =>
+  getLocalFiles(node).forEach(file =>
     copyIfNewer(toAbsoluteInSrcDir(file))
     (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
 };
