@@ -35,7 +35,7 @@ export const _makeContainer = (config) => (node) => {
 }
 
 const _showStrictModeMessage = (contentNode) => {
-  // const getNodeInfo = node => `tag=${node.tagName} id=${node.attr('id')}, class=${node.attr('class')}`;
+  // const getNodeInfo = node => `tag=${node.tagName} id=${node.getAttr('id')}, class=${node.getAttr('class')}`;
 
   console.log(`INFO: Non-Asciidoc contents encountered under <div id='#content'>.
 INFO: They are ignored and not included in chunked html by default.
