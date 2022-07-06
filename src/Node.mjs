@@ -122,7 +122,7 @@ class Node {
    * @returns {string | Node} the attribute name for the getter, and 
    *  returns this Node instance for the setter for method chain.
    */
-  attr(attrName, value) {
+  attr$(attrName, value) {
     if (value) {
       this.context.attr(attrName, value);
       return this;

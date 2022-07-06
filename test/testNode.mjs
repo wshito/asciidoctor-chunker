@@ -22,9 +22,9 @@ const html = `
 test('tests attr()', t => {
   const node = Node.getInstanceFromHTML(html);
   const div = node.find('div');
-  t.is(div.attr('id'), 'content');
-  div.attr('id', 'modified');
-  t.is(node.find('div').attr('id'), 'modified');
+  t.is(div.attr$('id'), 'content');
+  div.attr$('id', 'modified');
+  t.is(node.find('div').attr$('id'), 'modified');
 });
 
 test('tests appendHTML()', t => {
@@ -40,7 +40,7 @@ test('tests appendNode()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const copy = node.clone();
   const content = node.find('#content');
-  const content2 = content.clone().attr('id', 'content2');
+  const content2 = content.clone().attr$('id', 'content2');
 
   const body = copy.find('body');
   t.is(3, body.children().length); // 3 children orignally <h1>, <p>, <div>
