@@ -117,6 +117,8 @@ test('test each()', t => {
     }
   });
   t.is(1, cnt);
+
+  // node.find('body').children().each((ele) => console.log(ele.tagName));
 });
 
 test("tests empty()", t => {
