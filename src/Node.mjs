@@ -1,4 +1,4 @@
-// TODO remove(), each(), first(), hasClass()
+// TODO each(), first(), hasClass()
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
@@ -147,16 +147,17 @@ class Node {
    * of the current node and returns `this` node instance for
    * the method chain.
    *
-   * Note that  the appending node is cloned for safety because the
-   * node cannot be beloged mutlple DOM trees.  Thus, it is redundant
+   * Note that the appending node is cloned for safety because the
+   * node cannot be belonged mutlple DOM trees.  Thus, it is redundant
    * to clone by the caller although it is not harmful.
    *
    * @param {Node} node Appending node which is cloned before appending.
    * @returns {this} for method chain
    */
   appendNode$(node) {
-    const copy = node.clone();
-    this.$(this.context).append(copy.context);
+    node.clone().context.appendTo(this.context);
+    // const copy = node.clone();
+    // this.$(this.context).append(copy.context);
     return this;
   }
 
@@ -296,6 +297,21 @@ class Node {
     // this.context.prev() returns the new cheerio instance with
     // the previous node selected
     return new Node(this.$, this.rootNode, this.context.prev());
+  }
+
+  /**
+   * Removes the selections given in the parameter under the current
+   * node and returns `this` Node instance.
+   * 
+   * Note that if given `selector` points itself, the returned Node
+   * instance holds removed elements.
+   *
+   * @param {String} selector CSS selector to match the removing nodes.
+   * @returns {this} `this` Node instance.
+   */
+  remove$(selector) {
+    this.context.find(selector).remove().end();
+    return this;
   }
 
   root() {
