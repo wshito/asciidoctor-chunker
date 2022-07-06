@@ -121,6 +121,7 @@ const basenameMaker = getFilenameMaker();
 
 
 /**
+ * @deprecated
  * Creates new DOM with empty content.
  *
  * @param {Cheerio} $ The instance of Cheerio.
@@ -144,6 +145,7 @@ export const makeContainer = (config) => ($) => {
   return root;
 }
 
+/** @deprecated */
 const showStrictModeMessage = (contentNode) => {
   const getNodeInfo = node => `tag=${node[0].name} id=${node.attr('id')}, class=${node.attr('class')}`;
 
