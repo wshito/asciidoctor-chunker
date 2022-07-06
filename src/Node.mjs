@@ -49,6 +49,16 @@ class Node {
   }
 
   /**
+   * Returns the name of the tag currenlty selected.
+   * If there are multiple emelements are selected
+   * this returns the name of the first selection.
+   */
+  get tagName() {
+    return this.context[0].name;
+  }
+
+
+  /**
    * Static method thaat instantiates the new DOM from the filename.
    * 
    * @param {String} filename 

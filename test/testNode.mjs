@@ -252,6 +252,14 @@ test('test remove()', t => {
   t.is(0, node.find('#content').length); // side-effect
 });
 
+test('test tagName', t => {
+  const node = Node.getInstanceFromHTML(html);
+  const content = node.find('#content');
+  t.is(content.tagName, 'div');
+  const p = content.children();
+  t.is('p', p.tagName);
+});
+
 test("test text()", t => {
   const node = Node.getInstanceFromHTML(html);
 
