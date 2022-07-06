@@ -86,6 +86,39 @@ test("tests clone()", t => {
   t.is(copy.find('p:first').text(), 'first paragraph');
 });
 
+test('test each()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const content = node.find('#content').children();
+  t.is(content.length, 2);
+  let cnt = 0;
+  content.each((node, idx) => {
+    if (idx === 0) {
+      t.is(node.text().trim(), 'ORIGINAL');
+      cnt++;
+    } else {
+      t.is(node.text().trim(), '1');
+      t.true(node.hasClass('num'));
+      cnt++;
+    }
+  });
+  t.is(2, cnt);
+
+  // check break out the loop
+  cnt = 0;
+  content.each((node, idx) => {
+    if (idx === 0) {
+      t.is(node.text().trim(), 'ORIGINAL');
+      cnt++;
+      return false; // break out!
+    } else {
+      t.is(node.text().trim(), '1');
+      t.true(node.hasClass('num'));
+      cnt++;
+    }
+  });
+  t.is(1, cnt);
+});
+
 test("tests empty()", t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const content = node.find('#content');

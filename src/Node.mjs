@@ -1,4 +1,3 @@
-// TODO each()
 /*
  * This file is a part of Asciidoctor Chunker project.
  * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
@@ -189,6 +188,19 @@ class Node {
     node.rootNode = copy;
     node.context = copy;
     return node;
+  }
+
+  /**
+   * Iterates the current selections with the callback.  To break
+   * out the `each` loop, return `false` from the callback.
+   *
+   * @param {(Node, Number) => boolean} callback The callback
+   *  function to be invoked to each node.
+   */
+  each(callback) {
+    this.context.each((i, ele) => {
+      return callback(new Node(this.$, this.context, this.$(ele)), i);
+    });
   }
 
   /**
