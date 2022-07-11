@@ -153,15 +153,15 @@ const getChapterProcessor = (processor) => {
  *  fnamePrefix: string,
  *  thisSecLevel: number,
  *  sectionNumber: number
- *  ) => string} basenameMaker The function that generates the
+ *  ) => string} basenameMaker `NOT IMPLEMENTED` The function that generates the
  *  basename for output html.
  * @param {(
  *  config: object,
  *  basename: string,
  *  container: Node,
  *  contents: Node*
- * ) => {Node}} documentMaker This function should clone the
- *  given container to append nodes to div#content.
+ * ) => {Node}} documentMaker The function that clones the
+ *  given container and appends nodes under div#content.
  */
 const getChapterExtractor = (printer, container, documentMaker) =>
   // Pass the processor function that is invoked by _processChapters().
