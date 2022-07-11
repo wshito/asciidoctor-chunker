@@ -60,7 +60,7 @@ import Node from './Node.mjs';
  * hashtable as well as extracting and writing out the chapters
  * to the html file.
  *
- * The returned function from this factory can be used as
+ * The returned function from this factory is to be used as
  * a callback function for the content processor, i.e.
  * the `processContents()` defined in `ContentProcessor.mjs`.
  *
@@ -146,9 +146,9 @@ const getChapterProcessor = (processor) => {
  *  of the output file and the Node instance of the html to
  *  print out to the file.
  * @param {Node} container The dom of the root which has
- *  empty `div#content`.  Use this as a skelton.
- * The `printer` uses the clone of this DOM to write out the
- * chunker html.
+ *  empty `div#content` and is used as a skelton.
+ *  The `printer` uses the cloned DOM to write out the
+ *  chunked html.
  * @param {(
  *  fnamePrefix: string,
  *  thisSecLevel: number,
