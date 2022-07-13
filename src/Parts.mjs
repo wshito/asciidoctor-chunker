@@ -61,7 +61,7 @@ const makePartDocument = (config, basename, container, partTitleNode, documentMa
  *
  * This factory takes the following parameters:
  *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} printer
+ * @param {(fnamePrefix: string, dom: Node) => void} printer
  *  The callback function that actually handles the extracted
  *  part contents.  The printer function takes the basename
  *  of the output file and the Node instance of the html to
@@ -80,9 +80,9 @@ const makePartDocument = (config, basename, container, partTitleNode, documentMa
  * @param {(
  *  config: object,
  *  basename: string,
- *  container: Cheerio,
- *  contents: Cheerio*
- * ) => {Cheerio}} documentMaker The function that clones the
+ *  container: Node,
+ *  contents: Node*
+ * ) => {Node}} documentMaker The function that clones the
  *  given container and appends nodes under div#content.
  */
 const getPartExtractor = (printer, container, documentMaker) =>
