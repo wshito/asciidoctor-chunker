@@ -1,3 +1,8 @@
+/*
+ * This file is a part of Asciidoctor Chunker project.
+ * Copyright (c) 2021 Wataru Shito (@waterloo_jp)
+ */
+
 'use strict';
 
 /*
@@ -33,43 +38,40 @@
  * @param {object} config: The configuration object which has
  *  `depth` property to specify the maximum sectLevel to extract.
  *  Currently `confi` is not used by the part extractor.
- * @param {Cheerio} containerRoot The dom holding `div#content` as
- *  the attaching point for extracted preamble.
- *  This container will be written out to a chunked html by the
- *  `printer`.
- * @param {Cheerio} preambleNode The preamble node that is
+ * @param {Node} docRoot The root Node instance of the asciidoctor's
+ *  single HTML source.
+ * @param {Node} preambleNode The preamble node that is
  *  'div#preamble'.
  * @param {boolean} isFirstPage true if this is the index.html page.
  *
  * This factory takes the following parameters:
  *
- * @param {(fnamePrefix: string, dom: Cheerio) => void} printer
+ * @param {(fnamePrefix: string, dom: Node) => void} printer
  *  The callback function that actually handles the extracted
- *  chapter contents.  The printer function takes the basename
- *  of the output file and the Cheerio instance of the html to
+ *  part contents.  The printer function takes the basename
+ *  of the output file and the Node instance of the html to
  *  print out to the file.
- * @param {Cheerio} container The dom holding `div#content` as
- *  the attaching point for extracted part sections.sections.
- *  This container will be written out to a chunked html by the
- *  `printer`.  This is passed and kept in closure beforehand
- *  to be used as a template repeatedly.
- * CURRENTLY UNUSED: @param {(
+ * @param {Node} container The dom of the root which has empty
+ *  `div#content` and is used as a skelton.  The `printer` uses
+ *  the cloned DOM to write out the chunked html.
+ *  This is passed and kept in closure beforehand to be used
+ *  as a template repeatedly.
+ * @param {(
  *  fnamePrefix: string,
  *  thisSecLevel: number,
  *  sectionNumber: number
- *  ) => string} basenameMaker The function that generates the
- *  basename for output html.
+ *  ) => string} basenameMaker `NOT IMPLEMENTED` The function
+ *  that generates the basename for output html.
  * @param {(
  *  config: object,
  *  basename: string,
- *  container: Cheerio,
- *  contents: Cheerio*
- * ) => {Cheerio}} documentMaker The function that creates a new
- *  container with contents (variable args) appended to the
- *  `#content` element.
+ *  container: Node,
+ *  contents: Node*
+ * ) => {Node}} documentMaker The function that clones the
+ *  given container and appends nodes under div#content.
  */
 const getPreambleExtractor = (printer, container, documentMaker) =>
-  (config, containerRoot, preambleNode, isFirstPage) => {
+  (config, docRoot, preambleNode, isFirstPage) => {
     const basename = isFirstPage ? 'index' : 'preamble';
     printer(basename, documentMaker(config, basename, container, preambleNode));
   }
