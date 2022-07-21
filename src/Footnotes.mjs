@@ -59,7 +59,7 @@ const makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.las
  * @returns {Cheerio} the Cheerio instance of selections of footnote
  *   referers anchor elements.
  */
-const findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
+const _findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
 
 /**
  * Removes the unreferred footnotes from the page and returns
@@ -115,7 +115,7 @@ const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
   pipe(
     getContentNode$,
     // (a) => { console.log("here1"); return a },
-    findFootnoteReferers,
+    _findFootnoteReferers,
     referredFootnotesKeeper$,
     updateRefererId$,
   )(rootNode);
@@ -126,7 +126,7 @@ export {
   getFootnoteDefIds,
   updateRefererId$, // TODO exporting only for the unit test
   makeFootnoteRefId, // TODO exporting only for the unit test
-  findFootnoteReferers, // TODO exporting only for the unit test
+  _findFootnoteReferers,
   keepReferredFootnotes$,
   updateFootnotes
 };

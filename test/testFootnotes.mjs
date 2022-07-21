@@ -6,7 +6,7 @@
 
 import test from 'ava';
 import Node from '../src/Node.mjs';
-import { getFootnoteDefIds } from '../src/Footnotes.mjs';
+import { getFootnoteDefIds, _findFootnoteReferers } from '../src/Footnotes.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 
@@ -23,6 +23,19 @@ test('getFootnoteDefIds()', t => {
     t.true(ids.has(`_footnotedef_${val}`));
   });
   t.is(root.find('#content').children().first().getAttr('id'),
+    'preamble',
+    'test if find() works on rootNode after invoking getFootnoteDefIds');
+});
+
+test('_findFootnoteReferers()', t => {
+  const rootNode = SAMPLE.clone();
+  const contentNode = rootNode.find('#content');
+  const referers = _findFootnoteReferers(contentNode);
+  t.is(6, referers.length, 'sample.doc has 6 referers');
+  referers.each((ele, i) => {
+    t.true(ele.getAttr('href').startsWith('#_footnotedef_'));
+  });
+  t.is(rootNode.find('#content').children().first().getAttr('id'),
     'preamble',
     'test if find() works on rootNode after invoking getFootnoteDefIds');
 });

@@ -312,19 +312,6 @@ test('No hash to the link of first element in each page', async t => {
   t.false(await exists(outdir));
 });
 
-test('findFootnoteReferers()', t => {
-  const $ = newDOM(sampleHTML);
-  const rootNode = $.root();
-  const referers = findFootnoteReferers(getContentNode$(rootNode));
-  t.is(6, referers.length, 'sample.doc has 6 referers');
-  referers.each((i, ele) => {
-    t.true(new Cheerio(ele).attr('href').startsWith('#_footnotedef_'));
-  });
-  t.is(rootNode.find('#content').children().first().attr('id'),
-    'preamble',
-    'test if find() works on rootNode after invoking getFootnoteDefIds');
-});
-
 test('keepReferredFootnotes$()()()', t => {
   const $ = newDOM(sampleHTML);
   const ids = getFootnoteDefIds($('#footnotes'));
