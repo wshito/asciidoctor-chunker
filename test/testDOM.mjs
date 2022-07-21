@@ -347,10 +347,6 @@ test('updateRefererId$()', t => {
   t.is(second.attr('href'), '#_footnotedef_4');
 });
 
-test('makeFootnoteRefId()', t => {
-  t.is(makeFootnoteRefId('_footnotedef_15'), '_footnoteref_15');
-});
-
 test('updateFootnotes()()', t => {
   const $ = newDOM(sampleHTML);
   const ids = getFootnoteDefIds($('#footnotes'));

@@ -6,7 +6,11 @@
 
 import test from 'ava';
 import Node from '../src/Node.mjs';
-import { getFootnoteDefIds, _findFootnoteReferers } from '../src/Footnotes.mjs';
+import {
+  getFootnoteDefIds,
+  _findFootnoteReferers,
+  _makeFootnoteRefId
+} from '../src/Footnotes.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 
@@ -38,4 +42,8 @@ test('_findFootnoteReferers()', t => {
   t.is(rootNode.find('#content').children().first().getAttr('id'),
     'preamble',
     'test if find() works on rootNode after invoking getFootnoteDefIds');
+});
+
+test('_makeFootnoteRefId()', t => {
+  t.is(_makeFootnoteRefId('_footnotedef_15'), '_footnoteref_15');
 });

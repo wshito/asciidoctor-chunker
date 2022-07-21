@@ -36,21 +36,11 @@ const updateRefererId$ = (referers) => {
     const url = a.attr('href')
     if (added.has(url)) return;
     added.add(url);
-    const refID = makeFootnoteRefId(url);
+    const refID = _makeFootnoteRefId(url);
     a.attr('id', refID);
   });
   return referers;
 };
-
-
-/**
- * Converts the url `#_footnotedef_4` to `_footnoteref_4`.
- *
- * @param {string} defURL The hash link to the footnote definition as
- *   `_footnotedef_4`.
- * @returns corresponding referer's ID such as `_footnoteref_4`
- */
-const makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
 
 /**
  * Returns Cheerio instance of selections of footnote referers anchor elements.
@@ -60,6 +50,17 @@ const makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.las
  *   referers anchor elements.
  */
 const _findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
+
+/**
+ * Converts the url `_footnotedef_4` to `_footnoteref_4`
+ * where `#_footnotedef_4` is the hash link of the footnote
+ * and `#_footnoteref_4` is the corresponding refererer.
+ *
+ * @param {string} defURL The hash link to the footnote definition as
+ *   `_footnotedef_4`.
+ * @returns corresponding referer's ID such as `_footnoteref_4`
+ */
+const _makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
 
 /**
  * Removes the unreferred footnotes from the page and returns
@@ -125,8 +126,8 @@ const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
 export {
   getFootnoteDefIds,
   updateRefererId$, // TODO exporting only for the unit test
-  makeFootnoteRefId, // TODO exporting only for the unit test
   _findFootnoteReferers,
+  _makeFootnoteRefId,
   keepReferredFootnotes$,
   updateFootnotes
 };
