@@ -312,19 +312,6 @@ test('No hash to the link of first element in each page', async t => {
   t.false(await exists(outdir));
 });
 
-test('getFootnoteDefIds()', t => {
-  const $ = newDOM(sampleHTML);
-  const rootNode = $.root();
-  const ids = getFootnoteDefIds(rootNode.find('#footnotes'));
-  t.is(ids.size, 4);
-  [1, 2, 3, 4].map((val) => {
-    t.true(ids.has(`_footnotedef_${val}`));
-  });
-  t.is(rootNode.find('#content').children().first().attr('id'),
-    'preamble',
-    'test if find() works on rootNode after invoking getFootnoteDefIds');
-});
-
 test('findFootnoteReferers()', t => {
   const $ = newDOM(sampleHTML);
   const rootNode = $.root();

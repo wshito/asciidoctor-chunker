@@ -4,15 +4,18 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { getContentNode$ } from './DOM.mjs';
 
 /**
- * Returns set of footnote ids in String.
+ * Returns the Set instance which contains all the footnote
+ * ids defined in the page.
  *
- * @param footnotesNode Cheerio instance of `div#footnotes`
+ * @param {Node} footnotesNode the node of `div#footnotes`
+ *  which is the container of all the footnotes defined in
+ *  the page.
  * @returns {Set<string>} The Set instance with footnote ids.
  */
 const getFootnoteDefIds = (footnotesNode) => {
   const fnoteDefIds = new Set();
-  footnotesNode.find('div.footnote').each((i, ele) => {
-    fnoteDefIds.add(new Cheerio(ele).attr('id'));
+  footnotesNode.find('div.footnote').each((ele, i) => {
+    fnoteDefIds.add(ele.getAttr('id'));
   });
   return fnoteDefIds;
 };
