@@ -12,7 +12,7 @@ const html = `
     <body>
      <h1>Hello World</h1>
      <p>first paragraph</p>
-     <div id="content">
+     <div id="content">// inside content
        <p>ORIGINAL</p>
        <p class="num">1</p>
      </div>
@@ -98,6 +98,12 @@ test("tests clone()", t => {
 
   // make sure copy's current node is root even after text('replaced') invocation
   t.is(copy.find('p:first').text(), 'first paragraph');
+});
+
+test("tests contents()", t => {
+  const contents = Node.getInstanceFromHTML(html).find('#content').contents();
+  t.is(contents.length, 5);
+  // contents.each((e, i) => console.log(i, e.text()));
 });
 
 test('test each()', t => {

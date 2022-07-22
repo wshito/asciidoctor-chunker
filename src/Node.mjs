@@ -199,6 +199,15 @@ class Node {
   }
 
   /**
+   * Returns the children of this node's context, including text and comment nodes.
+   * 
+   * @returns {Node} the new instance of contents nodes.
+   */
+  contents() {
+    return new Node(this.$, this.rootNode, this.context.contents());
+  }
+
+  /**
    * Iterates the current selections with the callback.  To break
    * out the `each` loop, return `false` from the callback.
    *
