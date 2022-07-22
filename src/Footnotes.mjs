@@ -1,3 +1,8 @@
+/*
+ * This file is a part of Asciidoctor Chunker project.
+ * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
+ */
+
 'use strict';
 import { pipe } from './FP.mjs';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
@@ -23,8 +28,8 @@ const getFootnoteDefIds = (footnotesNode) => {
 /**
  * Returns Cheerio instance of selections of footnote referers anchor elements.
  *
- * @param {Cheerio} contentNode The `div#content` node.
- * @returns {Cheerio} the Cheerio instance of selections of footnote
+ * @param {Node} contentNode The `div#content` node.
+ * @returns {Node} the Node instance of selections of footnote
  *   referers anchor elements.
  */
 const _findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
@@ -34,8 +39,8 @@ const _findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
  * where `#_footnotedef_4` is the hash link of the footnote
  * and `#_footnoteref_4` is the corresponding refererer.
  *
- * @param {string} defURL The hash link to the footnote definition as
- *   `_footnotedef_4`.
+ * @param {string} defURL The hash link to the footnote
+ *  definition as `_footnotedef_4`.
  * @returns corresponding referer's ID such as `_footnoteref_4`
  */
 const _makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
