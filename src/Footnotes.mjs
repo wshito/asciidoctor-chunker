@@ -21,28 +21,6 @@ const getFootnoteDefIds = (footnotesNode) => {
 };
 
 /**
- * Adds referer id to anchor which refers to the multiply used footnote.
- * This has side effect that modifies some of referers anchor's id attribute.
- *
- * @param {cheerio} referers The Cheerio instance with the selection of
- *  nodes that refer to multiply used footnotes.
- */
-const updateRefererId$ = (referers) => {
-  if (referers.length === 0) return referers;
-  const added = new Set();
-  referers.each((i, ele) => {
-    const a = new Cheerio(ele);
-    if (a.attr('id')) return;
-    const url = a.attr('href')
-    if (added.has(url)) return;
-    added.add(url);
-    const refID = _makeFootnoteRefId(url);
-    a.attr('id', refID);
-  });
-  return referers;
-};
-
-/**
  * Returns Cheerio instance of selections of footnote referers anchor elements.
  *
  * @param {Cheerio} contentNode The `div#content` node.
@@ -61,6 +39,41 @@ const _findFootnoteReferers = (contentNode) => contentNode.find('a.footnote');
  * @returns corresponding referer's ID such as `_footnoteref_4`
  */
 const _makeFootnoteRefId = (defURL) => `_footnoteref${defURL.substring(defURL.lastIndexOf('_'))}`;
+
+/**
+ * Each footnote has an anchor that links back to its refererer.
+ * When a footnote is multiply referred, the footnote links back
+ * to only its first referer.  Other referers should not have
+ * referer ID.  This function appropriately sets the
+ * first referer's ID URL to the footnote's anchor.
+ *
+ * This has side effect that modifies some of referers anchor's
+ * id attribute.
+ *
+ * @param {Node} referers The Node instance with the selection of
+ *  referer nodes in the current page.  The selection possibly
+ *  contains nodes referring different footnotes as well as
+ *  nodes referring the same footnote.
+ */
+const _updateRefererId$ = (referers) => {
+  if (referers.length === 0) return referers;
+  const linkedBackReferers = new Set();
+  referers.each((a, i) => {
+    // if already has an id, this is the first referer
+    // in the original single html page
+    const id = a.getAttr('id');
+    const url = a.getAttr('href')
+    if (id) {
+      linkedBackReferers.add(url);
+      return;
+    }
+    if (linkedBackReferers.has(url)) return;
+    linkedBackReferers.add(url);
+    const refID = _makeFootnoteRefId(url);
+    a.setAttr$('id', refID);
+  });
+  return referers;
+};
 
 /**
  * Removes the unreferred footnotes from the page and returns
@@ -118,16 +131,16 @@ const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
     // (a) => { console.log("here1"); return a },
     _findFootnoteReferers,
     referredFootnotesKeeper$,
-    updateRefererId$,
+    _updateRefererId$,
   )(rootNode);
   return rootNode;
 }
 
 export {
   getFootnoteDefIds,
-  updateRefererId$, // TODO exporting only for the unit test
   _findFootnoteReferers,
   _makeFootnoteRefId,
+  _updateRefererId$,
   keepReferredFootnotes$,
   updateFootnotes
 };

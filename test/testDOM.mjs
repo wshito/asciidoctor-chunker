@@ -328,25 +328,6 @@ test('keepReferredFootnotes$()()()', t => {
   // ---------------------------------
 });
 
-test('updateRefererId$()', t => {
-  const $ = newDOM(sampleHTML);
-  const ids = getFootnoteDefIds($('#footnotes'));
-  const keepFootnotesFn$ = keepReferredFootnotes$(ids);
-  // --------------------------------
-  // extract referers anchors in Chap2. Sec 2-1-2
-  // there are two referers and both pointing _footnotedef_4
-  const doc1 = makeDoc($, '_chap2_sec_2_1_2');
-  const referers1 = findFootnoteReferers(getContentNode$(doc1));
-  updateRefererId$(referers1);
-  t.is(referers1.length, 2);
-  const first = referers1.first();
-  t.is(first.attr('id'), '_footnoteref_4');
-  t.is(first.attr('href'), '#_footnotedef_4');
-  const second = new Cheerio(referers1.get(1));
-  t.is(second.attr('id'), undefined);
-  t.is(second.attr('href'), '#_footnotedef_4');
-});
-
 test('updateFootnotes()()', t => {
   const $ = newDOM(sampleHTML);
   const ids = getFootnoteDefIds($('#footnotes'));

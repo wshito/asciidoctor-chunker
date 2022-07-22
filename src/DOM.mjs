@@ -19,7 +19,6 @@ import {
   checkTocLinks,
   setCurrentToToc
 } from './TOC.mjs';
-import getFilenameMaker from './FilenameMaker.mjs';
 import makeHashTable from './MakeHashTable.mjs';
 import { insertCSS, extractCSS } from './CSS.mjs';
 import {
@@ -97,8 +96,6 @@ export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
       insertScript,
     )(newContainer);
   };
-
-const basenameMaker = getFilenameMaker();
 
 /*
   extract inside the bracket:
@@ -189,10 +186,10 @@ export const printer = outDir => (fnamePrefix, dom) => {
  *  }
  *  ```
  */
-export const makeChunks = (printer, $, config) => {
+export const makeChunks = (printer, $, config, basenameMaker) => {
   const ht = makeHashTable($, config); // Map<id, filename>
   const linkRewriter = updateLinks(ht);
-  const container = pipe(
+  const container = pipe( // runs from the top
     makeContainer(config),
     checkTocLinks,
     linkRewriter,
@@ -213,8 +210,7 @@ export const makeChunks = (printer, $, config) => {
     getChapterExtractor(printer, container, basenameMaker,
       makeDocument(footnotesKeeper$, ht)),
     $,
-    config,
-    basenameMaker);
+    config);
 }
 
 /**
