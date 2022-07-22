@@ -7,6 +7,12 @@
 
 import Node from './Node.mjs';
 
+/**
+ * Returns the Node instance of `div#content`.
+ *
+ * @param {Node} rootNode
+ * @returns {Node} the `div#content` node.
+ */
 export const getContentNode = (rootNode) => rootNode.find('#content');
 
 /**
