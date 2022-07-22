@@ -235,6 +235,14 @@ test('test next()', t => {
   t.is(h1.text(), 'Hello World');
 });
 
+test('test parent()', t => {
+  const node = Node.getInstanceFromHTML(html, null, true);
+  const pNum = node.find('p.num');
+  const parent = pNum.parent();
+  t.is(parent.getAttr('id'), 'content');
+  t.is(parent.tagName, 'div');
+});
+
 test('test prev()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const pNum = node.find('p.num');

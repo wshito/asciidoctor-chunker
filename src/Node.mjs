@@ -319,6 +319,13 @@ class Node {
   }
 
   /**
+   * Returns the new Node instance of this parent.
+   */
+  parent() {
+    return new Node(this.$, this.rootNode, this.context.parent());
+  }
+
+  /**
    * Returns the new Node instance with the current context
    * (or the selection)set to the previous node within the siblings.
    * If there is not more previous siblings, the current context
