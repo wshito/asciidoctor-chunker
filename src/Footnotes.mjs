@@ -5,8 +5,7 @@
 
 'use strict';
 import { pipe } from './FP.mjs';
-import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
-import { getContentNode$ } from './DOM.mjs';
+import { getContentNode } from './Page.mjs';
 
 /**
  * Returns the Set instance which contains all the footnote
@@ -24,6 +23,78 @@ const getFootnoteDefIds = (footnotesNode) => {
   });
   return fnoteDefIds;
 };
+
+/**
+ * Removes the unreferred footnotes from the page and returns
+ * only the referer nodes, i.e. the anchor a.footnote, validly
+ * referring the footnotes within the page.  The returned valid
+ * referer nodes are encapsulated in the Node instance as the
+ * selections.
+ *
+ * @param {Set<string>} footnoteDefIds The set of all the
+ *  footnote def ids within the page.  This Set is not
+ *  modified in this function.
+ * @param {Node} footnotesNode The Node instance of current
+ *  page's #footnotes nodes of which un-referred nodes will
+ *  be removed as a side effect.
+ * @param {Node} referers The Node intance which holds all
+ *  the referer anchors in the page.  The node is modified
+ *  in this function by removing referers which do not belong
+ *  this page.
+ * @return {Node} the instance of valid referers that belongs
+ *  this page which means they refer the footnotes defined
+ *  in this page.
+ */
+const keepReferredFootnotes$ = (footnoteDefIds) =>
+  (footnotesNode) => (referers) => {
+    if (referers.length === 0) {
+      footnotesNode.empty$();
+      return referers;
+    }
+    const removingFootnotes = new Set([...footnoteDefIds]);
+    // console.log("before removing", removingFootnotes.size);
+    // console.log("Referers length", referers.length);
+    referers.each((ele, i) => {
+      removingFootnotes.delete(ele.getAttr('href').substring(1));
+    });
+    // console.log("after removing", removingFootnotes.size);
+    removingFootnotes.forEach(id => {
+      // console.log("removing", id);
+      footnotesNode.remove$(`#${id}`);
+    });
+    return referers;
+  };
+
+/**
+ * The main function which handles the footnotes and their
+ * referers that belong the given page.
+ *
+ * @param {Function} referredFootnotesKeeper$ the curried
+ *  functon of `keepReferredFootnotes$(footnoteDefIds: Map<string>)`.
+ * @param {Node} rootNode The root node of the chunked page.
+ */
+const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
+  // each footnote definition has `<div id='_footnotedef_4' class='footnote'>`
+  // the referer has
+  // `<a id='_footnoteref_4' href='#_footnotedef_4' class='footnote'>
+  // multiply used footnote's referer does not have id as
+  // `<a href='#_footnotedef_4' class='footnote'>
+  //
+  // if a[href='#_footnotedef_4'] is whithin the page,
+  // div#_footnotedef_4 should be kept, and
+  // and id='_footnoteref_4' should be added to the first
+  // a[href='#_footnotedef_4'] in the page
+
+  // see if there are referers]
+  pipe(
+    getContentNode,
+    // (a) => { console.log("here1"); return a },
+    _findFootnoteReferers,
+    referredFootnotesKeeper$,
+    _updateRefererId$,
+  )(rootNode);
+  return rootNode;
+}
 
 /**
  * Returns Cheerio instance of selections of footnote referers anchor elements.
@@ -80,72 +151,11 @@ const _updateRefererId$ = (referers) => {
   return referers;
 };
 
-/**
- * Removes the unreferred footnotes from the page and returns
- * the Cheerio instance with selections of all the footnote referer anchor
- * nodes.
- *
- * @param {Set<string>} footnoteDefIds The set of all the footnote def ids.
- * @param {Cheerio} footnotesNode The Cherrio instance of current page's
- *  #footnotes node.  The footnotes under this node will be modified.
- * @param {Cheerio} referers The Cheerio intance which holds found anchors that
- *  refers to a footnote.
- */
-const keepReferredFootnotes$ = (footnoteDefIds) =>
-  (footnotesNode) => (referers) => {
-    if (referers.length === 0) {
-      footnotesNode.empty().end();
-      return referers;
-    }
-    const removingFootnotes = new Set([...footnoteDefIds]);
-    // console.log("before removing", removingFootnotes.size);
-    // console.log("Referers length", referers.length);
-    referers.each((i, ele) => {
-      // console.log(cheerio(ele).attr('href'));
-      removingFootnotes.delete(new Cheerio(ele).attr('href').substring(1));
-    });
-    // console.log("after removing", removingFootnotes.size);
-    removingFootnotes.forEach(id => {
-      // console.log("removing", id);
-      footnotesNode.find(`#${id}`).remove().end();
-    });
-    return referers;
-  };
-
-/**
- *
- * @param {Function} referredFootnotesKeeper$ the curried functon of
- *  keepReferredFootnotes$(footnoteDefIds:: Map<string>).
- * @param {Cheerio} node The root node of the chunked page.
- */
-const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
-  // each footnote definition has `<div id='_footnotedef_4' class='footnote'>`
-  // the referer has
-  // `<a id='_footnoteref_4' href='#_footnotedef_4' class='footnote'>
-  // multiply used footnote's referer does not have id as
-  // `<a href='#_footnotedef_4' class='footnote'>
-  //
-  // if a[href='#_footnotedef_4'] is whithin the page,
-  // div#_footnotedef_4 should be kept, and
-  // and id='_footnoteref_4' should be added to the first
-  // a[href='#_footnotedef_4'] in the page
-
-  // see if there are referers]
-  pipe(
-    getContentNode$,
-    // (a) => { console.log("here1"); return a },
-    _findFootnoteReferers,
-    referredFootnotesKeeper$,
-    _updateRefererId$,
-  )(rootNode);
-  return rootNode;
-}
-
 export {
   getFootnoteDefIds,
-  _findFootnoteReferers,
-  _makeFootnoteRefId,
-  _updateRefererId$,
   keepReferredFootnotes$,
-  updateFootnotes
+  updateFootnotes,
+  _findFootnoteReferers, // exporting for testing
+  _makeFootnoteRefId, // exporting for testing
+  _updateRefererId$, // exporting for testing
 };

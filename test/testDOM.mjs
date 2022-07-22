@@ -312,49 +312,6 @@ test('No hash to the link of first element in each page', async t => {
   t.false(await exists(outdir));
 });
 
-test('keepReferredFootnotes$()()()', t => {
-  const $ = newDOM(sampleHTML);
-  const ids = getFootnoteDefIds($('#footnotes'));
-  const keepFootnotesFn$ = keepReferredFootnotes$(ids);
-  // --------------------------------
-  // extract referers anchors in Chap2. Sec 2-1-2
-  // there are two referers and both pointing _footnotedef_4
-  const doc1 = makeDoc($, '_chap2_sec_2_1_2');
-  const referers1 = findFootnoteReferers(getContentNode$(doc1));
-  // remove unreferred footnotes here. doc1 is modified
-  keepFootnotesFn$(doc1.find('#footnotes'))(referers1);
-  // now only _footnotedef_4 should be left in the page
-  t.is(doc1.find('div.footnote').length, 1);
-  // ---------------------------------
-});
-
-test('updateFootnotes()()', t => {
-  const $ = newDOM(sampleHTML);
-  const ids = getFootnoteDefIds($('#footnotes'));
-  const doc = makeDoc($, '_chap2_sec_2_1_2');
-  const footnotesKeeper$ = keepReferredFootnotes$(ids)(doc.find('#footnotes'));
-  updateFootnotes(footnotesKeeper$)(doc);
-  // test if only referred footnotes are left
-  const footnotes = doc.find('div.footnote');
-  t.is(footnotes.length, 1);
-  t.is(footnotes.attr('id'), '_footnotedef_4');
-  // test if there are only two anchors
-  // with only the first one having id attribute.
-  const refs = doc.find('a.footnote');
-  t.is(refs.length, 2);
-  const first = refs.first();
-  t.is(first.attr('id'), '_footnoteref_4');
-  t.is(first.attr('href'), '#_footnotedef_4');
-  const second = new Cheerio(refs.get(1));
-  t.is(second.attr('id'), undefined);
-  t.is(second.attr('href'), '#_footnotedef_4');
-  /*
-  console.log(doc.find('#content').html());
-  console.log('-----------');
-  console.log(doc.find('#footnotes').html());
-  */
-});
-
 test('makeHashtable()', t => {
   const $ = newDOM(sampleHTML);
   const config = {
@@ -454,18 +411,6 @@ test('test titlePage option', async t => {
   t.false(await exists(outdir));
 });
 
-// extracts div.sectNUM for the section ID
-function extract ($, secID) {
-  return $(`#${secID}`).parent().clone();
-}
-// manually make a page with secID extracted
-function makeDoc ($, secID) {
-  const container = makeContainer(makeConfigWithDepth(1))($);
-  const node = extract($, secID);
-  const contentNode = getContentNode$(container);
-  return append$(node)(contentNode);
-};
-
 function referredFootnotesKeeperDymmy (_) {
   return (arg) => arg;
 }
@@ -488,10 +433,6 @@ function testChunk (pageDescription, dom, t) {
     const node = new Cheerio(e);
     t.is(node.attr('id'), dsc.footnotes[i]);
   });
-}
-
-function makeConfigWithDepth (num) {
-  return { depth: { default: num }, strictMode: true, css: [] };
 }
 
 /**

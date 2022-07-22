@@ -9,10 +9,16 @@ import test from 'ava';
 import Node from '../src/Node.mjs';
 import {
   getFootnoteDefIds,
+  keepReferredFootnotes$,
+  updateFootnotes,
   _findFootnoteReferers,
   _makeFootnoteRefId,
   _updateRefererId$
 } from '../src/Footnotes.mjs';
+import {
+  getContentNode,
+  _makeContainer
+} from '../src/Page.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 
@@ -31,6 +37,45 @@ test('getFootnoteDefIds()', t => {
   t.is(root.find('#content').children().first().getAttr('id'),
     'preamble',
     'test if find() works on rootNode after invoking getFootnoteDefIds');
+});
+
+test('keepReferredFootnotes$()()()', t => {
+  const rootNode = SAMPLE.clone();
+  const ids = getFootnoteDefIds(rootNode.find('#footnotes'));
+  const keepFootnotesFn$ = keepReferredFootnotes$(ids);
+  // --------------------------------
+  // extract referers anchors in Chap2. Sec 2-1-2
+  // there are two referers and both pointing _footnotedef_4
+  const ref4 = rootNode.find('h2#_second_chapter + div.sectionbody a.footnote[href="#_footnotedef_4"]');
+  // remove unreferred footnotes here
+  keepFootnotesFn$(rootNode.find('#footnotes'))(ref4);
+  // now only _footnotedef_4 should be left in the page
+  t.is(rootNode.find('div.footnote').length, 1);
+  // ---------------------------------
+});
+
+test('updateFootnotes()()', t => {
+  const rootNode = SAMPLE.clone();
+  const idSet = getFootnoteDefIds(rootNode.find('#footnotes'));
+  const doc = _makeDoc(rootNode, '_chap2_sec_2_1_2');
+  const footnotesKeeper$ = keepReferredFootnotes$(idSet)(doc.find('#footnotes'));
+  updateFootnotes(footnotesKeeper$)(doc);
+  // test if only referred footnotes are left
+  const footnotes = doc.find('div.footnote');
+  t.is(footnotes.length, 1);
+  t.is(footnotes.getAttr('id'), '_footnotedef_4');
+  // test if there are only two anchors
+  // with only the first one having id attribute.
+  const refs = doc.find('a.footnote');
+  t.is(refs.length, 2);
+  refs.each((ele, i) => {
+    if (i === 0) {
+      t.is(ele.getAttr('id'), '_footnoteref_4');
+    } else {
+      t.is(ele.getAttr('id'), undefined);
+    }
+    t.is(ele.getAttr('href'), '#_footnotedef_4');
+  });
 });
 
 test('_findFootnoteReferers()', t => {
@@ -89,3 +134,21 @@ test('_updateRefererId$()', t => {
       t.throws();
   });
 });
+
+// manually make a page with secID extracted
+function _makeDoc (rootNode, secID) {
+  const container = _makeContainer(_makeConfigWithDepth(1))(rootNode);
+  const node = _extract(rootNode, secID);
+  const contentNode = getContentNode(container);
+  contentNode.appendNode$(node);
+  return container;
+};
+
+function _makeConfigWithDepth (num) {
+  return { depth: { default: num }, strictMode: true, css: [] };
+}
+
+// extracts div.sectNUM for the section ID
+function _extract (rootNode, secID) {
+  return rootNode.find(`#${secID}`).parent().clone();
+}
