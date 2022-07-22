@@ -88,7 +88,7 @@ export const makeDocument = (referredFootnotesKeeper$, hashtable) =>
     const nodes = contents.map(linkRewriter);
     const newContainer = D.clone(container);
     return pipe(
-      getContentNode$,
+      getContentNode,
       D.append$(...nodes), // dom.append$() clones contents
       updateFootnotes(referredFootnotesKeeper$(newContainer.find('#footnotes'))),
       addPageNavigation(basename, hashtable.get('navigation')),

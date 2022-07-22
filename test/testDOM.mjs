@@ -17,8 +17,10 @@ import {
   makeChunks,
   makeDocument,
   getFirstContentId,
-  getContentNode$,
 } from '../src/DOM.mjs';
+import {
+  getContentNode
+} from '../src/Page.mjs';
 import { append$ } from '../src/DomFunc.mjs';
 import { pipe } from '../src/FP.mjs';
 import cheerio from 'cheerio';
@@ -285,7 +287,7 @@ test('No hash to the link of first element in each page', async t => {
   };
   const printer = (fnamePrefix, dom) => {
     const hash = `#${pipe(
-      getContentNode$,
+      getContentNode,
       getFirstContentId
     )(dom)}`;
     let noHash = true;
@@ -385,7 +387,7 @@ test('test titlePage option', async t => {
   };
   const printer = (fnamePrefix, dom) => {
     const hash = `#${pipe(
-      getContentNode$,
+      getContentNode,
       getFirstContentId
     )(dom)}`;
     let hasWelcome = true;
