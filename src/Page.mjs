@@ -7,6 +7,8 @@
 
 import Node from './Node.mjs';
 
+export const getContentNode = (rootNode) => rootNode.find('#content');
+
 /**
  * Creates a new container page with `div#content` is empty from
  * the given DOM tree.  The created container's DOM is independent
