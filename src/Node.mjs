@@ -122,6 +122,21 @@ class Node {
   }
 
   /**
+   * Adds the class value to this node and returns
+   * `this` node.  If the current node is
+   * `<div class="abc">` and invoking `addClass$("next")`
+   * the node becomes `<div class="abc next">`.
+   *
+   * @param {string} classValue
+   * @returns {Node} returns `this` Node instance for the
+   *  method chain.
+   */
+  addClass$(classValue) {
+    this.context.addClass(classValue);
+    return this;
+  }
+
+  /**
    * Inserts content in HTML string as the last child of each
    * of the current node and returns `this` node instance
    * for the method chain.

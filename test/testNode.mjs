@@ -19,6 +19,20 @@ const html = `
     </body>
   </html>`;
 
+test('tests addClass$()', t => {
+  const node = Node.getInstanceFromHTML(html);
+  const h1 = node.find('h1');
+  h1.addClass$('added');
+  t.is(h1.getAttr('class'), 'added');
+
+  const pNum = node.find('p.num');
+  t.is(pNum.getAttr('class'), 'num');
+  pNum.addClass$('added2');
+  t.is(node.find('p.num').length, 1);
+  const added = node.find('p.num');
+  t.is(added.getAttr('class'), 'num added2');
+});
+
 test('tests getAttr() and setAttr$()', t => {
   const node = Node.getInstanceFromHTML(html);
   const div = node.find('div');
