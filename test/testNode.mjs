@@ -186,7 +186,9 @@ test('tests get()', t => {
   const p = node.find('p');
   t.is(p.get(0).text(), 'first paragraph');
   t.is(p.get(1).text(), 'ORIGINAL');
-  t.is(p.get(2).text(), '1');
+  const p2 = p.get(2);
+  t.is(p2.text(), '1');
+  t.is(p2.getAttr('class'), 'num');
 });
 
 test('test hasClass()', t => {

@@ -267,7 +267,8 @@ class Node {
    *  element set as the context.
    */
   get(ith) {
-    return new Node(this.$, this.rootNode, this.context.get(ith));
+    // Cheerio.get() does not return Cheerio object.  Wrap it with $().
+    return new Node(this.$, this.rootNode, this.$(this.context.get(ith)));
   }
 
   /**
