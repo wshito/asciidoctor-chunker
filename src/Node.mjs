@@ -383,6 +383,21 @@ class Node {
     return this;
   }
 
+  /**
+   * Replaces the current selections with the given HTML
+   * string and returns the replaced node as a current
+   * current selection.
+   *
+   * @param {String} html The replacing HTML string.
+   * @returns {Node} the new Node instance with the root node
+   *  set as a current context.
+   */
+  replaceWithHTML$(html) {
+    const rep = this.$(html);
+    this.context.replaceWith(html);
+    return new Node(this.$, this.rootNode, this.rootNode);
+  }
+
   root() {
     return new Node(this.$, this.rootNode, this.rootNode);
   }

@@ -282,6 +282,17 @@ test('test remove()', t => {
   t.is(0, node.find('#content').length); // side-effect
 });
 
+test('test replaceWithHTML$()', t => {
+  const node = Node.getInstanceFromHTML(html);
+  const content = node.find('#content');
+  content.replaceWithHTML$('<p>second paragraph</p>');
+  const p = node.find('p');
+  t.is(p.length, 2);
+  const txt = ['first paragraph', 'second paragraph'];
+  p.each((ele, i) => t.is(ele.text(), txt[i]));
+  t.is(node.find('#content').length, 0)
+});
+
 test('test tagName', t => {
   const node = Node.getInstanceFromHTML(html);
   const content = node.find('#content');
