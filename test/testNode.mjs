@@ -177,6 +177,18 @@ test("tests first()", t => {
   t.is("Hello World", h1.text());
 });
 
+test('tests get()', t => {
+  const node = Node.getInstanceFromHTML(html);
+  /*      <p>first paragraph</p>
+     <div id="content">// inside content
+       <p>ORIGINAL</p>
+       <p class="num">1</p> */
+  const p = node.find('p');
+  t.is(p.get(0).text(), 'first paragraph');
+  t.is(p.get(1).text(), 'ORIGINAL');
+  t.is(p.get(2).text(), '1');
+});
+
 test('test hasClass()', t => {
   const node = Node.getInstanceFromHTML(html, null, true);
   const p = node.find('#content').children().first().next();

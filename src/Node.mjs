@@ -260,6 +260,17 @@ class Node {
   }
 
   /**
+   * Retrieve the ith element from the current context.
+   * 
+   * @param {number} ith the index of current selections.
+   * @returns {Node} the new Node instance with the retrieved 
+   *  element set as the context.
+   */
+  get(ith) {
+    return new Node(this.$, this.rootNode, this.context.get(ith));
+  }
+
+  /**
    * Gets the attribute of this node.
    * Only the first element of the attribute in the
    * current node set is returned.
@@ -270,7 +281,6 @@ class Node {
   getAttr(attrName) {
     return this.context.attr(attrName);
   }
-
 
   /**
    * Check to see if `this` node has the given className.
