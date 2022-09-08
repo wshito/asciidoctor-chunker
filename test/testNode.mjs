@@ -7,6 +7,7 @@
 import test from 'ava';
 import Node from '../src/Node.mjs';
 
+const sampleHTML = 'test/resources/output/single/sample.html';
 const html = `
   <html>
     <body>
@@ -165,6 +166,21 @@ test("tests find(selector)", t => {
   // should find only <p> under #content
   const contentP = content.find('p');
   t.is('ORIGINAL1', contentP.text());
+});
+
+test("tests find() with sample HTML", t => {
+  const node = Node.getInstanceFromFile(sampleHTML);
+  const content = node.find('#content');
+  t.is(8, content.children().length);
+  t.is('_first_chapter', content.children().get(3).children().first().getAttr('id'));
+  const idNodes = content.find('*[id]');
+  t.is(28, idNodes.length); // 28 ids under #content
+  idNodes.each((e, i) => {
+    if (i === 3) {
+      t.is(e.text(), '1. First Chapter');
+      t.is(e.getAttr('id'), '_first_chapter');
+    }
+  });
 });
 
 test("tests first()", t => {
