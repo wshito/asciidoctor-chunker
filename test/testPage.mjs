@@ -15,6 +15,7 @@ test('_makeContainer() non-strict mode', t => {
   const orig = sample.clone();
   const container = _makeContainer({ strictModel: false })(orig);
   t.is(0, container.find('#content').children().length); // should be empty
+  t.is(1, container.find('head').length);
 
   t.true(orig.find('#content').children().length > 0); // original DOM is untouched
 
