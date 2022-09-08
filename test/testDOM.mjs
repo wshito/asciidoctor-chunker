@@ -314,28 +314,6 @@ test('No hash to the link of first element in each page', async t => {
   t.false(await exists(outdir));
 });
 
-test('makeHashtable()', t => {
-  const $ = newDOM(sampleHTML);
-  const config = {
-    depth: {
-      default: 1, // the default extracton is chapter level
-      2: 4, // extracts subsubsections in chap2
-      3: 2 // extracts sections in chap 3
-    }
-  };
-  const ht = makeHashTable($.root(), config);
-  t.is(ht.get('_first_chapter'), 'chap1.html');
-  t.is(ht.get('_part_i'), 'part1.html');
-
-  // test page structure information in hashtable
-  const pageNav = ht.get('navigation');
-  const { filename2pageNum, filenameList } = pageNav;
-  filenameList.forEach((f, i, arry) =>
-    t.is(arry[filename2pageNum[f]], f));
-  // console.log(filenameList);
-  // console.log(filename2pageNum);
-});
-
 test('makeChunks()', async t => {
   const $ = newDOM(sampleHTML);
   const outdir = 'test/resources/tmp3';
