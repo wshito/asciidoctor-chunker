@@ -10,6 +10,7 @@
 import { makeChunks, printer } from './DOM.mjs';
 import Node from './Node.mjs';
 import { makeConfig } from './CommandOptions.mjs';
+import getFilenameMaker from './FilenameMaker.mjs';
 import { exists, copyRelativeFiles, mkdirs } from './Files.mjs';
 import path from 'path';
 
@@ -34,14 +35,23 @@ const defaultConfig = {
   titlePage: 'Titlepage',
 };
 
+const _printer = outDir => (fnamePrefix, dom) => {
+  const fname = path.format({
+    dir: outDir,
+    base: `${fnamePrefix}.html`
+  });
+  fsp.writeFile(fname, dom.html()).catch(err =>
+    console.log("File write error:", fname));
+}
 
 const main = async (adocHtmlFile, config = defaultConfig) => {
   const { outdir } = config;
   if (!await exists(outdir)) await mkdirs(outdir);
-  const writer = printer(outdir);
+  const writer = _printer(outdir);
   const node = Node.getInstanceFromFile(adocHtmlFile);
   copyRelativeFiles(adocHtmlFile, outdir)(node);
-  makeChunks(writer, node, config);
+  makeChunks(writer, node, config, getFilenameMaker()); // passing the basenameMaker
+
   console.log(`Successfully chunked! => ${path.join(outdir, 'index.html')}\n`);
 }
 

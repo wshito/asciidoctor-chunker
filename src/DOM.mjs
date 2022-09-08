@@ -35,6 +35,7 @@ const fsp = fs.promises;
  */
 
 /**
+ * @deprecated
  * Returns a new DOM wrapped with the jQuery interface.
  *
  * @param {string} filename
@@ -45,6 +46,7 @@ export function newDOM (filename) {
 }
 
 /**
+ * @deprecated
  * Returns the div#content node where all the document
  * contents are appended to.
  *
@@ -152,15 +154,6 @@ INFO: If you want them to be included, use the '--no-strictMode' command option.
   contentNode.html().trim().split(/\n+/).forEach(line => console.log(`INFO: Found content => ${line}`));
   console.log();
 };
-
-export const printer = outDir => (fnamePrefix, dom) => {
-  const fname = path.format({
-    dir: outDir,
-    base: `${fnamePrefix}.html`
-  });
-  fsp.writeFile(fname, dom.html()).catch(err =>
-    console.log("File write error:", fname));
-}
 
 /**
  * Make chunked html.  This is the main function to extract
