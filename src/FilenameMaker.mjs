@@ -1,3 +1,8 @@
+/*
+ * This file is a part of Asciidoctor Chunker project.
+ * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
+ */
+
 'use strict';
 
 /**
