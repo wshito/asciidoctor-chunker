@@ -87,11 +87,6 @@ const sectClass = seclabel => {
  */
 const basenameMaker = getFilenameMaker();
 
-test('test DOM created by cheerio', t => {
-  const cheerioHTML = newDOM(sampleHTML).html();
-  t.truthy(cheerioHTML);
-});
-
 test('extract sections', t => {
   /** definition of printer functon */
   const printer = chap => {
@@ -215,63 +210,6 @@ test('fine tuned extrations', async t => {
   // cleanup for css file extraction side effects in makeChunks()
   await rm(outdir);
   t.false(await exists(outdir));
-});
-
-test('preamble extraction', t => {
-  const $ = newDOM(sampleHTML);
-  const container = makeContainer(makeConfigWithDepth(1))($);
-
-  const printer = (fnamePrefix, dom) => {
-    // console.log(dom.find('body').html());
-    t.is(dom.find('div#preamble').siblings().length, 0);
-    t.true(dom.find('div#preamble').children().first().hasClass('sectionbody'));
-  }
-
-  $('#content').children().each((i, ele) => {
-    if (i !== 0)
-      return;
-    const node = new Cheerio(ele);
-    t.is(node.attr('id'), 'preamble');
-    // we don't have to rewrite the links in the
-    // extraction test so pass the empty hashtabel
-    // to makeDocument()
-    getPreambleExtractor(printer, container,
-        createDocumentMaker($)(1))
-      (makeConfigWithDepth(1), $.root(), node, false);
-  });
-});
-
-test('Part extraction', t => {
-  const $ = newDOM(sampleHTML);
-  const container = makeContainer(makeConfigWithDepth(1))($);
-  let partNum = 0;
-  $('#content').children().each((i, ele) => {
-    const node = new Cheerio(ele);
-    if (node.hasClass('partintro'))
-      return; // ignore
-    if (node.hasClass('sect1'))
-      return; // process chapters here
-    if (!node.hasClass('sect0'))
-      return;
-
-    // node is h1.sect0
-
-    const printer = (fnamePrefix, dom) => {
-      /* DEBUG
-      console.log('Part', fnamePrefix);
-      if (fnamePrefix === '1') console.log(dom.find('body').html());
-      */
-      t.true(dom.find('#content').children().first().hasClass('sect0'));
-      // t.true(cheerio(dom.find('#content').children().get(1)).hasClass('partintro')); // TODO enable this line later
-    }
-    // we don't have to rewrite the links in the
-    // extraction test so pass the empty hashtabel
-    // to makeDocument()
-    getPartExtractor(printer, container,
-        createDocumentMaker($)(1))
-      (makeConfigWithDepth(1), $.root(),
-        node, ++partNum, false);
-  });
 });
 
 test('No hash to the link of first element in each page', async t => {
