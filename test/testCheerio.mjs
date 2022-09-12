@@ -10,6 +10,7 @@
  * 
  * src/Node.mjs is implemented based on this study.
  */
+import fs from 'fs';
 import test from 'ava';
 import * as cheerio from 'cheerio';
 
@@ -220,9 +221,22 @@ test('tests remove().end()', t => {
   t.is(ret1.html(), ret2.html());
   // removed
   t.is(0, $.root().find('#content').length);
-
+  console.log(ret1.html());
   const $$ = cheerio.load(html, null, false);
   const ret3 = $$.root().clone().find('#content').remove();
-  t.is(ret3.html(), ret1.html());
+  t.is(ret3.html(), ret2.html());
   t.is(1, $$.root().find('#content').length);
+});
+
+test('Testing sample doc Chap2. Sec2-2-2 extraction', t => {
+  const $ = cheerio.load(fs.readFileSync('test/resources/output/single/sample.html'));
+  const container = $.root().clone();
+  container.find('#content > #preamble, #content > .partintro, #content > .sect1, #content > .sect0').remove();
+  // check if content is empty
+  t.is(container.find('#content').length, 1);
+  t.is(container.find('#content').children().length, 0);
+  // extract <h5 id="_chap2_sec_2_2_2">
+  const extracted = $.root().find('#_chap2_sec_2_2_2').parent().clone();
+  container.find('#content').append(extracted);
+  // console.log(container.html());
 });
