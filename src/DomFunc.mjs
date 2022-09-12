@@ -13,6 +13,7 @@ import * as cheerio from 'cheerio';
 
 
 /**
+ * @deprecated
  * Invokes find() method on `node` and returns the same `node`
  * with the current context is set with the selected nodes.
  * Note this function changes the state of `node` argument, thus
@@ -26,6 +27,7 @@ import * as cheerio from 'cheerio';
 export const find$ = selector => node => node.find(selector);
 
 /**
+ * @deprecated
  * Makes a clone and returns it.
  * 
  * @param {CheerioAPI} node 
@@ -33,6 +35,7 @@ export const find$ = selector => node => node.find(selector);
 export const clone = node => node.clone();
 
 /**
+ * @deprecated
  * Appends nodes sequently to the target node.
  * This causes side effects that change the state of the target node.  The appending nodes are cloned and untouched.
  * 
@@ -46,6 +49,7 @@ export const append$ = (...appendingNodes) => target => {
 }
 
 /**
+ * @deprecated
  * Returns a newly created DOM which all the matched
  * nodes are removed.
  *
@@ -60,6 +64,7 @@ export const remove = selector => node =>
   node.clone().find(selector).remove().end();
 
 /**
+ * @deprecated
  * Returns a newly created DOM of which the children
  * of the matched node are removed.
  *
