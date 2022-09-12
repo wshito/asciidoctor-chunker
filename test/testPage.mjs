@@ -18,7 +18,7 @@ test('_makeContainer() non-strict mode', t => {
   t.is(1, container.find('head').length);
 
   t.true(orig.find('#content').children().length > 0); // original DOM is untouched
-
+  console.log(orig.html());
 });
 
 test('_makeContainer() strict mode', t => {

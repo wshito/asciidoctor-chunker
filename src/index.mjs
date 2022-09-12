@@ -7,7 +7,8 @@
 
 'use strict';
 
-import { makeChunks, printer } from './DOM.mjs';
+import fsp from 'node:fs/promises';
+import { makeChunks } from './Page.mjs';
 import Node from './Node.mjs';
 import { makeConfig } from './CommandOptions.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
@@ -40,7 +41,7 @@ const _printer = outDir => (fnamePrefix, dom) => {
     dir: outDir,
     base: `${fnamePrefix}.html`
   });
-  fsp.writeFile(fname, dom.html()).catch(err =>
+  fsp.writeFile(fname, dom.root().html()).catch(err =>
     console.log("File write error:", fname));
 }
 
@@ -48,7 +49,7 @@ const main = async (adocHtmlFile, config = defaultConfig) => {
   const { outdir } = config;
   if (!await exists(outdir)) await mkdirs(outdir);
   const writer = _printer(outdir);
-  const node = Node.getInstanceFromFile(adocHtmlFile);
+  const node = Node.getInstanceFromFile(adocHtmlFile, null, true);
   copyRelativeFiles(adocHtmlFile, outdir)(node);
   makeChunks(writer, node, config, getFilenameMaker()); // passing the basenameMaker
 

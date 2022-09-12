@@ -6,8 +6,10 @@
 
 import Node from './Node.mjs';
 import path, { relative } from 'path';
-import fs from 'fs';
-const fsp = fs.promises;
+import fsp from 'node:fs/promises';
+import fs from 'node:fs';
+// import { access, copyFile, mkdir, rm, stat } from 'node:fs/promises';
+
 /**
  * Asynchronously make directory recursively as `mkdir -p`
  * and returns the given path string for the use of
@@ -127,7 +129,7 @@ const notRelative = /^#|^https:|^http:|^file:|^data:/;
 export const getLocalFiles = (node) => {
   const localFiles = [];
   node.find(`link[href], script[src], img[src]`).each((ele, i) => {
-    const url = ele.attr$('href') || ele.attr$('src');
+    const url = ele.getAttr('href') || ele.getAttr('src');
     if (!url.match(notRelative) && !path.isAbsolute(url)) {
       localFiles.push(removeParameters(url));
     }

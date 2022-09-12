@@ -51,34 +51,44 @@ test('tests appendHTML()', t => {
   t.is(ret.children().length, 3); // check if returned node is content
 });
 
-test('tests appendNode()', t => {
-  const node = Node.getInstanceFromHTML(html, null, true);
-  const copy = node.clone();
-  const content = node.find('#content');
-  const content2 = content.clone().setAttr$('id', 'content2');
+test('tests appendNode$()', t => {
+  const root = Node.getInstanceFromHTML(html);
+  const content = root.find('#content');
+  t.is(content.children().length, 2); // before appending
+  const p1 = content.children().first();
+  content.appendNode$(p1); // this should clone p1
+  t.is(content.children().length, 3); // after appending
 
-  const body = copy.find('body');
-  t.is(3, body.children().length); // 3 children orignally <h1>, <p>, <div>
-  body.appendNode$(content2); // append to the copy
+  // loading will create another DOM
+  // the <p> element that belongs another DOM cannot be
+  // added to this DOM.  Use appendHTML() instead
+  // rather than loading the fragment of HTML
+  /*
+  const ps = [0, 1, 2].map(n => Node.getInstanceFromHTML(`<p>Added${n}</p>`, null, false));
+  ps.forEach(e => content.appendNode$(e));
+  t.is(content.children.length, 6);
+  */
+});
 
-  t.is(copy.find('#content').length, 1);
-  t.is(copy.find('#content2').length, 1);
-
-  t.is(node.find('#content').length, 1);
-  t.is(node.find('#content2').length, 0);
-
-  // check if the copy of content2 is appended
-  content2.setAttr$('id', 'content3');
-  t.is(copy.find('#content').length, 1);
-  t.is(copy.find('#content2').length, 1);
-  t.is(copy.find('#content3').length, 0); // should not be there
-
-  body.appendNode$(content2); // this is actually the '#content3'
-  t.is(copy.find('#content3').length, 1);
-
-  // if appendNode$() does not change the context, the children()
-  // should return 3 + added 2 = 5
-  t.is(5, body.children().length);
+test('tests Node.appendNodesToTarget$()', t => {
+  const root = Node.getInstanceFromHTML(html);
+  const content = root.find('#content');
+  t.is(content.children().length, 2);
+  /* this does not work with append$() 
+  const nodes = [
+    Node.getInstanceFromHTML('<p id="appended1">One</p>', null, false),
+    Node.getInstanceFromHTML('<p id="appended2">Two</p>', null, false),
+    Node.getInstanceFromHTML('<p id="appended3">Three</p>', null, false)
+  ];
+  */
+  const nodes2 = [
+    '<p id="appended1">One</p>',
+    '<p id="appended2">Two</p>',
+    '<p id="appended3">Three</p>'
+  ];
+  Node.appendNodesToTarget$(...nodes2)(content);
+  const res = content.children();
+  t.is(res.length, 5);
 });
 
 test('tests children()', t => {
