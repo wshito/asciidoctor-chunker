@@ -71,9 +71,9 @@ const keepReferredFootnotes$ = (footnoteDefIds) =>
  *
  * @param {Function} referredFootnotesKeeper$ the curried
  *  functon of `keepReferredFootnotes$(footnoteDefIds: Map<string>)`.
- * @param {Node} rootNode The root node of the chunked page.
+ * @param {Node} node The node of the chunked page.
  */
-const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
+const updateFootnotes = (referredFootnotesKeeper$) => (node) => {
   // each footnote definition has `<div id='_footnotedef_4' class='footnote'>`
   // the referer has
   // `<a id='_footnoteref_4' href='#_footnotedef_4' class='footnote'>
@@ -86,6 +86,7 @@ const updateFootnotes = (referredFootnotesKeeper$) => (rootNode) => {
   // a[href='#_footnotedef_4'] in the page
 
   // see if there are referers]
+  const rootNode = node.root();
   pipe(
     getContentNode,
     // (a) => { console.log("here1"); return a },
