@@ -57,6 +57,19 @@ class Node {
     return this.context[0].name;
   }
 
+  /**
+   * Appends multiple nodes sequently to the target node.
+   * This causes side effects that change the state of the target node.
+   * The appending nodes are cloned and untouched.
+   *
+   * @param {[Node]} appendingNodes The array of appending nodes.
+   *  These nodes are cloned before appending in `appendNode$()` method.
+   * @param {Node} target The target node where nodes are appended to.
+   */
+  static appendNodesToTarget$ = (...appendingNodes) => target => {
+    appendingNodes.forEach(ele => target.appendNode$(ele));
+    return target;
+  }
 
   /**
    * Static method thaat instantiates the new DOM from the filename.
@@ -158,13 +171,18 @@ class Node {
    * node cannot be belonged mutlple DOM trees.  Thus, it is redundant
    * to clone by the caller although it is not harmful.
    *
-   * @param {Node} node Appending node which is cloned before appending.
+   * @param {Node | string} node Appending node which is cloned
+   *  before appending.
    * @returns {this} for method chain
    */
   appendNode$(node) {
-    node.clone().context.appendTo(this.context);
-    // const copy = node.clone();
-    // this.$(this.context).append(copy.context);
+    if (typeof node === 'string')
+      this.context.append(node); // node is HTML string
+    else {
+      const copy = node.context.clone();
+      // this.$(this.context).append(copy);
+      this.context.append(copy);
+    }
     return this;
   }
 
@@ -191,9 +209,8 @@ class Node {
     // CheerioAPI cannot be instantiated other than from load() so
     // we reuse the $ instance.
     node.$ = this.$;
-    // node.rootNode = this.$.root().clone();
     const copy = this.$(this.context).clone();
-    node.rootNode = copy;
+    node.rootNode = copy; // the cloned node is now the new root!
     node.context = copy;
     return node;
   }
