@@ -65,6 +65,7 @@ export const getFirstContentId = (contentNode) =>
   contentNode.children().first().children().first().attr('id');
 
 /**
+ * @deprecated
  * This function creates a new container with contents
  * appended at #content element.  The contents is also cloned
  * internally before appended.
@@ -156,6 +157,7 @@ INFO: If you want them to be included, use the '--no-strictMode' command option.
 };
 
 /**
+ * @deprecated
  * Make chunked html.  This is the main function to extract
  * whole book of adoc html file.
  * This function does not return anything.  This takes
@@ -207,6 +209,7 @@ export const makeChunks = (printer, $, config, basenameMaker) => {
 }
 
 /**
+ * @deprecated
  * @param {Map<id, url>} ht the Hashtable of <id, url>.  If id is 'foo' then
  *  url is 'filename.html#foo' where the filename is where the id is defined.
  */
