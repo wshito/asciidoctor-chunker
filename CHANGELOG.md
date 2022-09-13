@@ -8,9 +8,11 @@ All notable changes to this project will be documented in this file.
 - The `target-missing` class attribute is added to the anchor whose target is missing. (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
 
 ### Changed
-- Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
-- Refactored by splitting a `DOM.mjs` into separate files.
 - All the changes are now kept in `CHANGELOG.md` file.
+- Major refactoring on entire codebase.
+- Updated to the latest version of all the dependencies.
+- Supports Node.js v16.17.0.
+- Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
 
 ### Fixed
 - `npm` installs the shebang script instead of `src/index.mjs`. (Issue [#25](https://github.com/wshito/asciidoctor-chunker/issues/25))
