@@ -30,9 +30,11 @@ const fsp = fs.promises;
 const extractCSS = (outDir) => (rootNode) => {
   rootNode.find('style').each((node, i) => {
     const basename = `style${i}.css`;
-    fsp.writeFile(
-      path.join(outDir, basename),
-      node.contents().text());
+    if (outDir) { // in test mode outDir is undefined
+      fsp.writeFile(
+        path.join(outDir, basename),
+        node.contents().text());
+    }
     node.replaceWithHTML$(`<link rel='stylesheet' href='${basename}' type='text/css' />`);
   });
   return rootNode; // returns the root node for the method chain
@@ -54,7 +56,9 @@ const insertCSS = (config) => (rootNode) => {
   const head = rootNode.find('head');
   css.forEach(cssFile => {
     _appendCSSLink(head, cssFile);
-    _copyCSS(outdir, cssFile);
+    if (outdir) { // in test mode outdir is undefined
+      _copyCSS(outdir, cssFile);
+    }
   });
   return rootNode;
 };

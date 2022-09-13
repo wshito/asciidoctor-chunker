@@ -41,7 +41,7 @@ const _printer = outDir => (fnamePrefix, dom) => {
     dir: outDir,
     base: `${fnamePrefix}.html`
   });
-  fsp.writeFile(fname, dom.root().html()).catch(err =>
+  fsp.writeFile(fname, dom.html()).catch(err =>
     console.log("File write error:", fname));
 }
 

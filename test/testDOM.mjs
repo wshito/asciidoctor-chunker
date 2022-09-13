@@ -6,9 +6,6 @@
 'use strict';
 
 import test from 'ava';
-import { getChapterExtractor } from '../src/Chapters.mjs';
-import getPartExtractor from '../src/Parts.mjs';
-import getPreambleExtractor from '../src/Preamble.mjs';
 import getFilenameMaker from '../src/FilenameMaker.mjs';
 import makeHashTable from '../src/MakeHashTable.mjs';
 import {
@@ -21,21 +18,10 @@ import {
 import {
   getContentNode
 } from '../src/Page.mjs';
-import { append$ } from '../src/DomFunc.mjs';
 import { pipe } from '../src/FP.mjs';
-import cheerio from 'cheerio';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { rm, exists, removeParameters } from '../src/Files.mjs';
 import { mkdirs } from '../src/Files.mjs';
-import {
-  getFootnoteDefIds,
-  makeFootnoteRefId,
-  updateRefererId$,
-  findFootnoteReferers,
-  keepReferredFootnotes$,
-  updateFootnotes,
-} from '../src/Footnotes.mjs';
-import { makeConfig } from '../src/CommandOptions.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
 const sampleHTMLstructure = { // part-chap-sec-subsec-subsubsec-
@@ -87,132 +73,7 @@ const sectClass = seclabel => {
  */
 const basenameMaker = getFilenameMaker();
 
-test('extract sections', t => {
-  /** definition of printer functon */
-  const printer = chap => {
-    let counter = 0; // closure
-    return (fnamePrefix, dom) => {
-      /* For DEBUG
-      if (fnamePrefix === 'chap2_sec2-2-3')
-        console.log(dom.find('body').html());
-      */
-      const html = dom.find('#content').html().trim();
-      // console.log(html);
-      const actual = `${fnamePrefix}: ${html.split('\n')[0]}`;
-      const label = sampleHTMLstructure[chap][counter++];
-      const expected = `${label}: <div class="${sectClass(label)}">`;
-      console.log(actual);
-      t.is(actual, expected);
-    };
-  };
-  const $ = newDOM(sampleHTML);
-  const container = makeContainer(makeConfigWithDepth(1))($);
-
-  /* Test is done inside the printer() function */
-  // for Chapter 1
-  let chap = 1;
-  console.log("Chapter 1");
-  console.log("1st round");
-  getChapterExtractor(printer('chap1'), container, basenameMaker,
-      createDocumentMaker($)(1))
-    (makeConfigWithDepth(1), container,
-      $('div.sect1').first(), 1, 'chap', basenameMaker,
-      chap, false);
-  console.log("2nd round");
-  getChapterExtractor(printer('chap1'), container, basenameMaker,
-      createDocumentMaker($)(2))
-    (makeConfigWithDepth(2), container,
-      $('div.sect1').first(), 1, 'chap', basenameMaker,
-      chap, false);
-  console.log("3rd round");
-  getChapterExtractor(printer('chap1'), container, basenameMaker,
-      createDocumentMaker($)(3))
-    (makeConfigWithDepth(3), container,
-      $('div.sect1').first(), 1, 'chap', basenameMaker,
-      chap, false);
-  // for Chapter 2
-  console.log("Chapter 2");
-  chap = 2;
-  console.log("1st round");
-  // get() returns a Node so wrap with Cheerio object
-  getChapterExtractor(printer('chap2:depth1'), container, basenameMaker, createDocumentMaker($)(1))
-    (makeConfigWithDepth(1), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
-      chap, false);
-  console.log("2nd round");
-  getChapterExtractor(printer('chap2:depth2'), container, basenameMaker,
-      createDocumentMaker($)(2))
-    (makeConfigWithDepth(2), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
-      chap, false);
-  console.log("3rd round");
-  getChapterExtractor(printer('chap2:depth3'), container, basenameMaker,
-      createDocumentMaker($)(3))
-    (makeConfigWithDepth(3), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
-      chap, false);
-  console.log("4th round");
-  getChapterExtractor(printer('chap2:depth4'), container, basenameMaker,
-      createDocumentMaker($)(6))
-    (makeConfigWithDepth(6), container,
-      new Cheerio($('div.sect1').get(1)), 1, 'chap', basenameMaker,
-      chap, false);
-});
-
-test('fine tuned extrations', async t => {
-  const outdir = 'test/resources/tmp';
-  const config = {
-    outdir,
-    depth: {
-      default: 1, // the default extracton is chapter level
-      2: 4, // extracts subsubsections in chap2
-      3: 2 // extracts sections in chap 3
-    }
-  };
-  const results = { part: [], chap: [] };
-  const printer = (res) => (fnamePrefix, dom) => {
-    if (fnamePrefix === 'index') {
-      results.part.push({ filename: fnamePrefix, id: 'preamble' });
-      return;
-    }
-    let div = fnamePrefix.startsWith('part') ?
-      dom.find('#content > h1') : dom.find('#content > div');
-    const id = div.children().first().attr('id') ||
-      div.attr('id');
-    if (fnamePrefix.startsWith('chap'))
-      results.chap.push({ filename: fnamePrefix, id });
-    else
-      results.part.push({ filename: fnamePrefix, id });
-    // console.log("Here", fnamePrefix);
-  };
-
-  await mkdirs(outdir);
-  // TODO
-  makeChunks(printer(results), newDOM(sampleHTML), config, basenameMaker);
-
-  // test preamble and part extraction
-  t.is(results.part.length, 3);
-  t.deepEqual(results.part[0], { filename: 'index', id: 'preamble' });
-  t.deepEqual(results.part[1], { filename: 'part1', id: '_part_i' });
-  t.deepEqual(results.part[2], { filename: 'part2', id: '_part_ii' });
-  // test chapter extraction
-  t.is(results.chap.length,
-    1 + sampleHTMLstructure['chap2:depth4'].length +
-    sampleHTMLstructure['chap3:depth2'].length);
-  // make list of expected filenames
-  const filenames = ['chap1'].concat(sampleHTMLstructure['chap2:depth4']).concat(sampleHTMLstructure['chap3:depth2']);
-  // check actual filenames obtained
-  t.deepEqual(results.chap.map(ele => ele.filename),
-    filenames);
-  // check actual ids obtained
-  t.is(results.chap[5].id, '_chap2_sec_2_1_1');
-
-  // cleanup for css file extraction side effects in makeChunks()
-  await rm(outdir);
-  t.false(await exists(outdir));
-});
-
-test('No hash to the link of first element in each page', async t => {
+test.skip('No hash to the link of first element in each page', async t => {
   const $ = newDOM(sampleHTML);
   const outdir = 'test/resources/tmp2';
   const config = {
@@ -252,44 +113,13 @@ test('No hash to the link of first element in each page', async t => {
   t.false(await exists(outdir));
 });
 
-test('makeChunks()', async t => {
-  const $ = newDOM(sampleHTML);
-  const outdir = 'test/resources/tmp3';
-  const config = {
-    outdir,
-    depth: {
-      default: 1, // the default extracton is chapter level
-      2: 4, // extracts subsubsections in chap2
-      3: 2 // extracts sections in chap 3
-    }
-  };
-  const preambleDescription = {
-    footnotes: ['_footnotedef_3'],
-    footnoteRefsTotal: 1
-  }
-  const printer = (fnamePrefix, dom) => {
-    if (fnamePrefix === 'index') {
-      // preamble
-      testChunk(preambleDescription, dom, t);
-    }
-    // console.log(fnamePrefix);
-  };
-  await mkdirs(outdir);
-  // TODO
-  makeChunks(printer, $, config, basenameMaker);
-
-  // cleanup for css file extraction side effects in makeChunks()
-  await rm(outdir);
-  t.false(await exists(outdir));
-});
-
-test('removeParameters(url)', t => {
+test.skip('removeParameters(url)', t => {
 
   t.is(removeParameters('chunked.js?4'), 'chunked.js');
   t.is(removeParameters('a/b/cde?fg/chunked.js?4'), 'a/b/cde?fg/chunked.js');
 });
 
-test('test titlePage option', async t => {
+test.skip('test titlePage option', async t => {
   const $ = newDOM(sampleHTML);
   const outdir = 'test/resources/tmp4';
   const config = {

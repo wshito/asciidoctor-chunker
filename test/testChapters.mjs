@@ -60,6 +60,7 @@ const _documentMaker = (config, basename, container, ...nodes) => {
  *  has fileds of basename and node.
  */
 const _printer4test = (results) => (basename, node) => {
+  // console.log(node.html());
   results.push({ basename, node });
 };
 
