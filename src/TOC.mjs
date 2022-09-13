@@ -1,10 +1,18 @@
 'use strict';
 
-import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 import { pipe } from './FP.mjs';
+import Node from './Node.mjs';
 
+/**
+ * Adds a link to the top page based on the string
+ * set in `config.titlePage`.
+ *
+ * @param {object} config that has `titlePage` field.
+ * @returns {Node} the root node passed in the second
+ *  argument.
+ */
 const addTitlepageToc$ = (config) => (rootNode) => {
-  new Cheerio(`<li><a href="index.html">${config.titlePage}</a></li>`).insertBefore(rootNode.find('div#toc > ul > li:first-child'));
+  Node.insertHtmlBefore(`<li><a href="index.html">${config.titlePage}</a></li>`, rootNode.find('div#toc > ul > li:first-child'));
   return rootNode;
 }
 
@@ -14,25 +22,32 @@ const checkTocLinks = (rootNode) => {
   return rootNode;
 };
 
-const findCurrentPageTocAnchor = (fnamePrefix) => (rootNode) =>
-  rootNode.find(`#toc a[href^="${fnamePrefix}.html"]`).parent();
-
-const markCurrent$ = node => node.addClass('current');
-('class');
-
 /**
  * Sets `current` classname on the crrent page's <li> element.
  *
  * @param {string} fnamePrefix file's basename
- * @param {Cheerio} rootNode the Cheerio instance of root node
- * @returns the Cheerio instance of root node.
+ * @param {Node} rootNode the Node instance of root node
+ * @returns the Node instance of root node.
  */
 const setCurrentToToc = (fnamePrefix) => (rootNode) => {
   pipe(
-    findCurrentPageTocAnchor(fnamePrefix),
-    markCurrent$,
+    _findCurrentPageTocAnchor(fnamePrefix),
+    _markCurrent$,
   )(rootNode);
   return rootNode;
 }
+
+/**
+ * Returns the `<li>` element that holds the anchor to the
+ * given chunked page (fnamePrefix) in the TOC.
+ *
+ * @param {*} fnamePrefix 
+ * @returns {Node} the `<li>` element in the TOC that
+ *  surrounds the anchor to the given chunked page.
+ */
+const _findCurrentPageTocAnchor = (fnamePrefix) => (rootNode) =>
+  rootNode.find(`#toc a[href^="${fnamePrefix}.html"]`).parent();
+
+const _markCurrent$ = node => node.addClass$('current');
 
 export { addTitlepageToc$, checkTocLinks, setCurrentToToc };

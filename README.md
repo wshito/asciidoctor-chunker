@@ -10,6 +10,7 @@ Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history
 
+- 2022/9/14 [Ver 1.0.5](https://github.com/wshito/asciidoctor-chunker/releases) Node.js v18.x is supported.  The `npm` installs the shebang script so you can invoke asciidoctor-chunker with `npx`.  When the target link within the document is missing, the anchor is still created with `target-missing` class attribute.
 - 2021/8/3 [Ver 1.0.4](https://github.com/wshito/asciidoctor-chunker/releases) Added the keyboard shotcuts for the page navigation with arrow keys.  Added the accessibility labels on the page navigation for screen readers.
 - 2021/6/25 [Ver 1.0.3](https://github.com/wshito/asciidoctor-chunker/releases) Fixed the security vulnerabilities in the dependencies.
 - 2021/5/9 [Ver 1.0.2](https://github.com/wshito/asciidoctor-chunker/releases) The toc item for the titlepage can be configured with `--titlePage` option (thanks to [@johnthad](https://github.com/johnthad)).
@@ -117,3 +118,4 @@ MIT
 - Unit test uses `test/resources/output/single/sample.html` generated from `test/resources/sample.adoc`.
 - `npm install cheerio commander`
 - `npm install --save-dev ava webpack webpack-cli webpack-shebang-plugin`
+- Filename related modules: Toc.mjs

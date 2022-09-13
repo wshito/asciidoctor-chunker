@@ -1,9 +1,13 @@
+/*
+ * This file is a part of Asciidoctor Chunker project.
+ * Copyright (c) 2022 Wataru Shito (@waterloo_jp)
+ */
+
 'use strict';
 
 import { getChapterProcessor } from './Chapters.mjs';
 import processContents from './ContentProcessor.mjs';
 import getFilenameMaker from './FilenameMaker.mjs';
-import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
 
 /**
  * Returns the hashtable (Map instance) of (id, url).
@@ -15,7 +19,7 @@ import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
  * hashtable with the key 'navigation'.  You can use this array
  * to obtain previous and next page filename.
  *
- * @param {Cheerio} rootNode The root dom
+ * @param {Node} rootNode The root node
  * @param {object} config The config object for extraction settings.
  */
 const makeHashTable = (rootNode, config) => {
@@ -32,16 +36,16 @@ const makeHashTable = (rootNode, config) => {
     filenameList[pageNum] = filename;
     pageNum++;
     // Set id and URL
-    node.find('*[id]').each((i, e) => {
-      const id = new Cheerio(e).attr('id');
+    node.find('*[id]').each((e, i) => {
+      const id = e.getAttr('id');
       if (id.startsWith('_footnotedef_')) return;
       ht.set(id, `${filename}#${id}`);
     });
     // remove the hash from the URL
-    if (node.attr('id')) // for preamble and part
-      ht.set(node.attr('id'), filename);
+    if (node.getAttr('id')) // for preamble and part
+      ht.set(node.getAttr('id'), filename);
     else // for chapters and sections
-      ht.set(node.children().first().attr('id'), filename);
+      ht.set(node.children().first().getAttr('id'), filename);
   };
   const recordPreambleIds = (config, container, preambleNode, isFirstPage) => {
     recordIds(preambleNode, isFirstPage ? 'index.html' : 'preamble.html');

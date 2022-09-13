@@ -4,10 +4,12 @@
  */
 'use strict';
 
-import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
+import Node from './Node.mjs';
 import path, { relative } from 'path';
-import fs from 'fs';
-const fsp = fs.promises;
+import fsp from 'node:fs/promises';
+import fs from 'node:fs';
+// import { access, copyFile, mkdir, rm, stat } from 'node:fs/promises';
+
 /**
  * Asynchronously make directory recursively as `mkdir -p`
  * and returns the given path string for the use of
@@ -108,8 +110,8 @@ export const rm = (path) => fsp.rm(path, { force: true, recursive: true }).then(
   onfulfilled => path,
   onrejected => onrejected);
 
-// TODO exporting only for unit testing
-export const removeParameters = (url) => {
+// exporting only for unit testing
+export const _removeParameters = (url) => {
   const base = path.basename(url);
   const i = base.indexOf('?');
   return i === -1 ? url :
@@ -122,25 +124,24 @@ const notRelative = /^#|^https:|^http:|^file:|^data:/;
  * Extracts relative paths from tagName[attrName] elements
  * under the given dom node.
  *
- * @param {Cheerio} dom The Cheerio instance of DOM.
+ * @param {Node} node The instance of DOM node.
  */
-const getLocalFiles = (dom) => {
+export const getLocalFiles = (node) => {
   const localFiles = [];
-  dom.find(`link[href], script[src], img[src]`).each((i, ele) => {
-    const node = new Cheerio(ele);
-    const url = node.attr('href') || node.attr('src');
+  node.find(`link[href], script[src], img[src]`).each((ele, i) => {
+    const url = ele.getAttr('href') || ele.getAttr('src');
     if (!url.match(notRelative) && !path.isAbsolute(url)) {
-      localFiles.push(removeParameters(url));
+      localFiles.push(_removeParameters(url));
     }
   });
   return localFiles;
 };
 
-export const copyRelativeFiles = (basefile, outDir) => (dom) => {
+export const copyRelativeFiles = (basefile, outDir) => (node) => {
   const toAbsoluteInOutDir = (relativeFile) => path.join(outDir, relativeFile);
   const toAbsoluteInSrcDir = relative2absolute(basefile);
 
-  getLocalFiles(dom).forEach(file =>
+  getLocalFiles(node).forEach(file =>
     copyIfNewer(toAbsoluteInSrcDir(file))
     (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
 };

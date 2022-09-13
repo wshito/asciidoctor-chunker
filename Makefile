@@ -38,4 +38,4 @@ $(DIR)/%: % $(DIR)
 	cp -f $< $@
 
 clean:
-	rm -rf $(DIR) $(DIR).zip
+	rm -rf $(DIR) $(DIR).zip test/resources/output
