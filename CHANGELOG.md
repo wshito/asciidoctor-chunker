@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 - All the changes are now kept in `CHANGELOG.md` file.
 - Major refactoring on entire codebase.
 - Updated to the latest version of all the dependencies.
-- Supports Node.js v16.17.0.
+- Supports Node.js v18.x (Issue [#38](https://github.com/wshito/asciidoctor-chunker/issues/38))
 - Improved help text (PR [#24](https://github.com/wshito/asciidoctor-chunker/pull/24) from @tajmone).
 
 ### Fixed
