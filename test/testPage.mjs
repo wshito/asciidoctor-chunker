@@ -75,9 +75,10 @@ test('test makeChunks() depth 1 (chapters)', t => {
   // tests if the current page is properly marked in the toc
   // this is used in _runTest()
   function _testToc (rootNode, basename, title) {
-    const a = rootNode.find('#toc li.current a');
+    const a = rootNode.find('#toc li.current a').first();
     t.is(a.getAttr('href'), `${basename}.html`);
     t.is(a.html(), title);
+
   }
   // custom tests on each page
   function _runTest (index, basename, html) {
@@ -387,6 +388,9 @@ test('_makeContainer() strict mode', t => {
   t.is(0, containerStrict.find('#content').children().length);
   t.true(orig.find('#content').children().length > 0); // original DOM is untouched
 });
+
+// TODO currently unused.  this is to test for ID based filenames
+const _getFirstContentID = (rootNode) => rootNode.find('#content [id]').first().getAttr('id');
 
 /**
  * Keeps the result of content processing in results.
