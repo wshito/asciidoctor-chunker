@@ -13,6 +13,7 @@ import {
   copyIfNewer,
   getLocalFiles,
   relative2absolute,
+  _removeParameters,
 } from '../src/Files.mjs';
 import Node from '../src/Node.mjs';
 import fs from 'fs';
@@ -63,4 +64,9 @@ test('getLocalFiles()', t => {
   const node = Node.getInstanceFromFile(sampleHTML);
   const localFiles = getLocalFiles(node);
   t.is(2, localFiles.length);
+});
+
+test('_removeParameters(url)', t => {
+  t.is(_removeParameters('chunked.js?4'), 'chunked.js');
+  t.is(_removeParameters('a/b/cde?fg/chunked.js?4'), 'a/b/cde?fg/chunked.js');
 });

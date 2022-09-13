@@ -110,8 +110,8 @@ export const rm = (path) => fsp.rm(path, { force: true, recursive: true }).then(
   onfulfilled => path,
   onrejected => onrejected);
 
-// TODO exporting only for unit testing
-export const removeParameters = (url) => {
+// exporting only for unit testing
+export const _removeParameters = (url) => {
   const base = path.basename(url);
   const i = base.indexOf('?');
   return i === -1 ? url :
@@ -131,7 +131,7 @@ export const getLocalFiles = (node) => {
   node.find(`link[href], script[src], img[src]`).each((ele, i) => {
     const url = ele.getAttr('href') || ele.getAttr('src');
     if (!url.match(notRelative) && !path.isAbsolute(url)) {
-      localFiles.push(removeParameters(url));
+      localFiles.push(_removeParameters(url));
     }
   });
   return localFiles;
