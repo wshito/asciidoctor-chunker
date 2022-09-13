@@ -20,7 +20,7 @@ import {
 } from '../src/Page.mjs';
 import { pipe } from '../src/FP.mjs';
 import { Cheerio } from '../node_modules/cheerio/lib/cheerio.js';
-import { rm, exists, removeParameters } from '../src/Files.mjs';
+import { rm, exists, _removeParameters } from '../src/Files.mjs';
 import { mkdirs } from '../src/Files.mjs';
 
 const sampleHTML = 'test/resources/output/single/sample.html';
@@ -103,52 +103,6 @@ test.skip('No hash to the link of first element in each page', async t => {
       return noHash; // if false, each() will exit loop early
     });
     t.true(noHash);
-  };
-  await mkdirs(outdir);
-  // TODO
-  makeChunks(printer, $, config, basenameMaker); // test is inside the printer()
-
-  // cleanup for css file extraction side effects in makeChunks()
-  await rm(outdir);
-  t.false(await exists(outdir));
-});
-
-test.skip('removeParameters(url)', t => {
-
-  t.is(removeParameters('chunked.js?4'), 'chunked.js');
-  t.is(removeParameters('a/b/cde?fg/chunked.js?4'), 'a/b/cde?fg/chunked.js');
-});
-
-test.skip('test titlePage option', async t => {
-  const $ = newDOM(sampleHTML);
-  const outdir = 'test/resources/tmp4';
-  const config = {
-    outdir,
-    depth: {
-      default: 1, // the default extracton is chapter level
-      2: 4, // extracts subsubsections in chap2
-      3: 2 // extracts sections in chap 3
-    },
-    titlePage: 'Welcome',
-  };
-  const printer = (fnamePrefix, dom) => {
-    const hash = `#${pipe(
-      getContentNode,
-      getFirstContentId
-    )(dom)}`;
-    let hasWelcome = true;
-    // Where an anchor points to index.html and
-    // appears in a list, its text should match
-    // our titlePage.
-    dom.find('li a[href="index.html"]').each((i, ele) => {
-      hasWelcome = hasWelcome && new Cheerio(ele).text() === 'Welcome';
-      if (!hasWelcome)
-        console.log(new Cheerio(ele).text(),
-          " incorrect");
-
-      return hasWelcome; // if false, each() will exit loop early
-    });
-    t.true(hasWelcome);
   };
   await mkdirs(outdir);
   // TODO
