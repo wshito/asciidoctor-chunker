@@ -148,6 +148,8 @@ const _insertScript = (rootNode) => {
       window.location.href = button.href;
   }
   document.addEventListener('keydown', e => {
+    if (e.shiftKey)
+      return;
     switch (e.key) {
       case 'ArrowRight':
         e.preventDefault();
