@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 
 ## Unreleased
+
+## v1.0.6 (2023-02-20)
+### Fixed
+- Prevents page navigation with Shift+[Right/Left] arrow key.  (PR [#42] (https://github.com/wshito/asciidoctor-chunker/pull/42) from @chloekek)
+
+## v1.0.5 (2022-09-14)
 ### Added
 - The `target-missing` class attribute is added to the anchor whose target is missing. (Issue [#22](https://github.com/wshito/asciidoctor-chunker/issues/22))
 
