@@ -10,6 +10,7 @@ Generates chunked (multi-page) HTML from Asciidoctor's single HTML file with the
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history
 
+- 2025/1/7 [Ver 1.0.7](https://github.com/wshito/asciidoctor-chunker/releases) Updated all the dependencies and Node.js v22.x is supported.
 - 2023/2/20 [Ver 1.0.6](https://github.com/wshito/asciidoctor-chunker/releases) Page navigation is disabled with shift+arrow (thanks to [@chloekek](https://github.com/chloekek)).
 - 2022/9/14 [Ver 1.0.5](https://github.com/wshito/asciidoctor-chunker/releases) Node.js v18.x is supported.  The `npm` installs the shebang script so you can invoke asciidoctor-chunker with `npx`.  When the target link within the document is missing, the anchor is still created with `target-missing` class attribute.
 - 2021/8/3 [Ver 1.0.4](https://github.com/wshito/asciidoctor-chunker/releases) Added the keyboard shotcuts for the page navigation with arrow keys.  Added the accessibility labels on the page navigation for screen readers.

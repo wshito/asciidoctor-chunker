@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## v1.0.7 (2025-01-07)
+### Fixed
+- The command line parsing error with the commander.js v13.0.0 is fixed.
+
+### Security
+- Updated all the dependencies and fixed the vulnerabilities.
+
 ## v1.0.6 (2023-02-20)
 ### Fixed
 - Prevents page navigation with Shift+[Right/Left] arrow key.  (PR [#42] (https://github.com/wshito/asciidoctor-chunker/pull/42) from @chloekek)
