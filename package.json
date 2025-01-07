@@ -1,6 +1,6 @@
 {
   "name": "asciidoctor-chunker",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Creates chunked (multi-page) HTML from Asciidoctor's single HTML file with supporting the fine-tuned splits in chapters, sections and any depth of subsections.",
   "author": "Wataru Shito (https://github.com/wshito)",
   "bin": {
@@ -33,13 +33,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "commander": "^9.4.0"
+    "cheerio": "^1.0.0",
+    "commander": "^13.0.0"
   },
   "devDependencies": {
-    "ava": "^4.3.3",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
+    "ava": "^6.2.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
     "webpack-shebang-plugin": "^1.1.8"
   },
   "ava": {

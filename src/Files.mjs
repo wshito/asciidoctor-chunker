@@ -24,7 +24,7 @@ export const mkdirs = (path) =>
 
 /**
  * Returns true if source is newer (modified) than
- * source.
+ * target.
  *
  * @param {string} source path to the source file
  * @param {string} target path to the tage file
@@ -32,11 +32,11 @@ export const mkdirs = (path) =>
 export const sourceIsNewerThan = (source) =>
   (target) => {
     return Promise.allSettled(
-        [fsp.stat(source), fsp.stat(target)])
+      [fsp.stat(source), fsp.stat(target)])
       // .then(res => { console.log(res); return res })
       .then(([src, targ]) =>
         targ.status === 'rejected' || // targ not existed
-        src.value.atimeMs > targ.value.atimeMs
+        src.value.mtimeMs > targ.value.mtimeMs
       );
   };
 
@@ -143,5 +143,5 @@ export const copyRelativeFiles = (basefile, outDir) => (node) => {
 
   getLocalFiles(node).forEach(file =>
     copyIfNewer(toAbsoluteInSrcDir(file))
-    (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
+      (toAbsoluteInOutDir(file)).catch(e => console.log(`    Local file linked from the document is missing: ${toAbsoluteInSrcDir(file)}`)));
 };

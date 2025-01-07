@@ -42,13 +42,17 @@ test('sourceIsNewerThan()', async t => {
 
 test('copyIfNewer()', async t => {
   const target = 'test/tmp3/a/b/c/README.md';
-  t.is(await copyIfNewer('README.md')(target), target); // must be copied
-  t.is(await copyIfNewer('README.md')(target), false); // not be copied
+  await rm('test/tmp3');
+  await t.false(await exists('test/tmp3'));
+  await t.false(await exists(target));
+  await t.is(await copyIfNewer('README.md')(target), target); // must be copied
+  await t.true(await exists(target));
+  await t.true(await sourceIsNewerThan(target)('README.md'));
+  await t.is(await copyIfNewer('README.md')(target), false); // not be copied
 
   // cleanup
   await rm('test/tmp3');
   t.false(await exists('test/tmp3'));
-
 });
 
 test('relative2absolute()', t => {
