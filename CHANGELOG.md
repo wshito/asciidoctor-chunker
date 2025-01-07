@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ## v1.0.7 (2025-01-07)
+### Changed
+- Node.js v22.x is supported now.  Requires Node.js v18.x or higher.
+
 ### Fixed
 - The command line parsing error with the commander.js v13.0.0 is fixed.
 
