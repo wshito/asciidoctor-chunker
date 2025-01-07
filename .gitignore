@@ -10,3 +10,4 @@ tmp*
 asciidoctor-chunker_v*
 dist/*.asciidoctor-chunker.js
 asciidoctor-chunker.js.LICENSE.txt
+.DS_Store

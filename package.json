@@ -33,13 +33,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "commander": "^9.4.0"
+    "cheerio": "^1.0.0",
+    "commander": "^13.0.0"
   },
   "devDependencies": {
-    "ava": "^4.3.3",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
+    "ava": "^6.2.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
     "webpack-shebang-plugin": "^1.1.8"
   },
   "ava": {

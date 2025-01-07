@@ -18,6 +18,9 @@ const commaSeparatedList = (value, dummyPrevious) => value.split(',');
  */
 export const makeConfig = (argv) => {
 
+  const [nodejs, script, singleHTML, ...rest] = argv;
+  const toBeParsed = [nodejs, script, ...rest];
+
   const args = commander.version(version)
     .name('node asciidoctor-chunker.js')
     .usage('<single.html> [options]')
@@ -77,19 +80,14 @@ Example:
   --depth 1,3-8:2    Sets default level 1, and level 2 for Chs. 3 to 8.
   --depth 3-8:3      No default is set so default level is 1, and
                      level 3 for Chs. 3 to 8.`)
-    .parse(argv);
+    .parse(toBeParsed);
 
-  // console.log(args.opts());
   const { depth, outdir, strictMode, titlePage, css = ['asciidoctor-chunker.css'] } = args.opts();
-  const inputfile = args.args;
-  if (inputfile.length !== 1) {
-    args.help();
-  }
 
   const d = parseDepth(depth);
 
   return {
-    singleHTML: inputfile[0],
+    singleHTML,
     config: {
       depth: d,
       outdir,
@@ -120,11 +118,11 @@ Example:
  */
 export const parseDepth = (depth) =>
   depth.split(',')
-  .map(e => {
-    const [chap, level] = e.split(':');
-    return level ? parseSpecifierTerm(chap, level) : { default: +chap };
-  })
-  .reduce((accum, e) => accum = { ...accum, ...e }, { default: 1 });
+    .map(e => {
+      const [chap, level] = e.split(':');
+      return level ? parseSpecifierTerm(chap, level) : { default: +chap };
+    })
+    .reduce((accum, e) => accum = { ...accum, ...e }, { default: 1 });
 
 /**
  * Parses each term (the comma-separated term) of depth
@@ -152,10 +150,10 @@ const parseSpecifierTerm = (chap, level) => {
   return to ?
     // case with chap='3-6'
     new Array(to - from + 1)
-    .fill(0).reduce((accum, e, i) => ({
-      ...accum,
-      [i + from]: +level
-    }), {}) : // case with no hyphen
+      .fill(0).reduce((accum, e, i) => ({
+        ...accum,
+        [i + from]: +level
+      }), {}) : // case with no hyphen
     {
       [from]: +level
     };
