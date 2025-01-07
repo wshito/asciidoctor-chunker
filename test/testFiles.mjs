@@ -44,6 +44,7 @@ test('copyIfNewer()', async t => {
   const target = 'test/tmp3/a/b/c/README.md';
   await t.is(await copyIfNewer('README.md')(target), target); // must be copied
   await t.true(await exists(target));
+  await t.true(await sourceIsNewerThan(target)('README.md'));
   await t.is(await copyIfNewer('README.md')(target), false); // not be copied
 
   // cleanup
